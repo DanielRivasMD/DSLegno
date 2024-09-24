@@ -14,14 +14,22 @@ fn main() {
 	launch(App);
 }
 
-pub fn App() -> Element {
+fn StoryListing() -> Element {
 	let title = "title";
 	let by = "author";
 	let score = 0;
 	let time = chrono::Utc::now();
 	let comments = "comments";
 
-	rsx! {"{title} by {by} ({score}) {time} {comments}"}
+	rsx! {
+		div { padding: "0.5rem", position: "relative",
+			"{title} by {by} ({score}) {time} {comments}"
+		}
+	}
+}
+
+pub fn App() -> Element {
+	rsx! { StoryListing {} }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
