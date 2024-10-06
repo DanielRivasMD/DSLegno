@@ -71,22 +71,49 @@ INSERT INTO tabella_vendite
   ( 4, 0104, 'cliente1', 'via xxx', 'lavoro4' ),
   ( 5, 0105, 'cliente3', 'via xxx', 'lavoro5' );
 
-INSERT INTO tabella_principale
-  ( numero_operazione, numero_acquisto, numero_vendita, fattura_acquisto, fattura_vendita ) VALUES
-  ( 1, 1, 1, 0001, 0101 ),
-  ( 2, 2, 2, 0002, 0102 ),
-  ( 2, 3, 2, 0003, 0102 ),
-  ( 3, 4, 3, 0014, 0103 ),
-  ( 4, 5, 4, 0035, 0104 ),
-  ( 5, 6, 5, 0006, 0105 ),
-  ( 5, 7, 5, 0307, 0105 );
 
-INSERT INTO tabella_operazione
-  ( numero ) VALUES
-  ( 1 ),
-  ( 2 ),
-  ( 3 ),
-  ( 4 ),
-  ( 5 );
+----------------------------------------------------------------------------------------------------
+
+CREATE TRIGGER update_acquisti
+  AFTER UPDATE ON tabella_acquisti
+  WHEN ( NEW.operazione IS NOT NULL )
+BEGIN
+  INSERT INTO tabella_principale (
+    operazione,
+    numero,
+    fattura,
+    typo
+  )
+VALUES
+  (
+    new.operazione,
+    new.numero,
+    new.fattura,
+    'ACQUISTO'
+  );
+END;
+
+
+CREATE TRIGGER update_vendite
+  AFTER UPDATE ON tabella_vendite
+  WHEN ( NEW.operazione IS NOT NULL )
+BEGIN
+  INSERT INTO tabella_principale (
+    operazione,
+    numero,
+    fattura,
+    typo
+  )
+VALUES
+  (
+    new.operazione,
+    new.numero,
+    new.fattura,
+    'VENDITA'
+  );
+END;
+
+
+----------------------------------------------------------------------------------------------------
 
 ----------------------------------------------------------------------------------------------------
