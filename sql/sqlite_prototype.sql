@@ -6,34 +6,38 @@
 
 CREATE TABLE IF NOT EXISTS tabella_principale
   ( id_numero INTEGER PRIMARY KEY AUTOINCREMENT,
-    numero_operazione INTEGER,
-    numero_acquisto INTEGER,
-    numero_vendita INTEGER,
-    fattura_acquisto INTEGER,
-    fattura_vendita INTEGER
+    operazione INTEGER,
+    numero INTEGER,
+    fattura INTEGER,
+    typo TEXT
    );
+
 
 CREATE TABLE IF NOT EXISTS tabella_acquisti
   (
     numero INTEGER PRIMARY KEY,
+    operazione INTEGER,
     fattura INTEGER,
+    mc REAL,
+    eur REAL,
     ditta TEXT,
     indirizzo TEXT,
-    specie_legnosa TEXT,
-    FOREIGN KEY ( numero ) REFERENCES tabella_principale ( numero_acquisitione ),
-    FOREIGN KEY ( fattura ) REFERENCES tabella_principale ( fattura_acquisitione )
+    specie_legnosa TEXT
   );
+
 
 CREATE TABLE IF NOT EXISTS tabella_vendite
   (
     numero INTEGER PRIMARY KEY,
+    operazione INTEGER,
     fattura INTEGER,
+    mc REAL,
+    eur REAL,
     cliente TEXT,
     indirizzo TEXT,
-    denominazione_commerciale TEXT,
-    FOREIGN KEY ( numero ) REFERENCES tabella_principale ( numero_vendita ),
-    FOREIGN KEY ( fattura ) REFERENCES tabella_principale ( fattura_vendita )
+    denominazione_commerciale TEXT
   );
+
 
 CREATE TABLE IF NOT EXISTS tabella_operazione
   (
@@ -42,9 +46,9 @@ CREATE TABLE IF NOT EXISTS tabella_operazione
     somma_eur_acquisto REAL,
     somma_mc_vendita REAL,
     somma_eur_vendita REAL,
-    pagamento INTEGER,
-    FOREIGN KEY ( numero ) REFERENCES tabella_principale ( numero_operazione )
+    pagamento INTEGER
   );
+
 
 ----------------------------------------------------------------------------------------------------
 
