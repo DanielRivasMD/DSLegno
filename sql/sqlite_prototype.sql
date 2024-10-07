@@ -53,23 +53,23 @@ CREATE TABLE IF NOT EXISTS tabella_operazione
 ----------------------------------------------------------------------------------------------------
 
 INSERT INTO tabella_acquisti
-  ( numero, fattura, ditta, indirizzo, specie_legnosa ) VALUES
-  ( 1, 0001, 'commune', 'via xxx', 'legna1' ),
-  ( 2, 0002, 'commune', 'via xxx', 'legna1' ),
-  ( 3, 0003, 'commune', 'via xxx', 'legna1' ),
-  ( 4, 0014, 'altro', 'via xxx', 'legna5' ),
-  ( 5, 0035, 'commune', 'via xxx', 'legna1' ),
-  ( 6, 0006, 'commune', 'via xxx', 'legna5' ),
-  ( 7, 0307, 'commune', 'via xxx', 'legna7' );
+  ( numero, fattura, mc, eur, ditta, indirizzo, specie_legnosa ) VALUES
+  ( 1, 0001, 7868, 3566, 'commune', 'via xxx', 'legna1' ),
+  ( 2, 0002, 7868, 3566, 'commune', 'via xxx', 'legna1' ),
+  ( 3, 0003, 7868, 3566, 'commune', 'via xxx', 'legna1' ),
+  ( 4, 0014, 7868, 3566, 'altro', 'via xxx', 'legna5' ),
+  ( 5, 0035, 7868, 3566, 'commune', 'via xxx', 'legna1' ),
+  ( 6, 0006, 7868, 3566, 'commune', 'via xxx', 'legna5' ),
+  ( 7, 0307, 7868, 3566, 'commune', 'via xxx', 'legna7' );
 
 
 INSERT INTO tabella_vendite
-  ( numero, fattura, cliente, indirizzo, denominazione_commerciale ) VALUES
-  ( 1, 0101, 'cliente1', 'via xxx', 'lavoro1' ),
-  ( 2, 0102, 'cliente2', 'via xxx', 'lavoro2' ),
-  ( 3, 0103, 'cliente3', 'via xxx', 'lavoro3' ),
-  ( 4, 0104, 'cliente1', 'via xxx', 'lavoro4' ),
-  ( 5, 0105, 'cliente3', 'via xxx', 'lavoro5' );
+  ( numero, fattura, mc, eur, cliente, indirizzo, denominazione_commerciale ) VALUES
+  ( 1, 0101, 685, 657474, 'cliente1', 'via xxx', 'lavoro1' ),
+  ( 2, 0102, 685, 657474, 'cliente2', 'via xxx', 'lavoro2' ),
+  ( 3, 0103, 685, 657474, 'cliente3', 'via xxx', 'lavoro3' ),
+  ( 4, 0104, 685, 657474, 'cliente1', 'via xxx', 'lavoro4' ),
+  ( 5, 0105, 685, 657474, 'cliente3', 'via xxx', 'lavoro5' );
 
 
 ----------------------------------------------------------------------------------------------------
@@ -86,11 +86,19 @@ BEGIN
   )
 VALUES
   (
-    new.operazione,
-    new.numero,
-    new.fattura,
+    NEW.operazione,
+    NEW.numero,
+    NEW.fattura,
     'ACQUISTO'
   );
+
+  INSERT OR REPLACE INTO tabella_operazione ( numero, somma_mc_acquisto, somma_eur_acquisto, somma_mc_vendita, somma_eur_vendita, pagamento ) VALUES (
+    NEW.operazione,
+    ( SELECT SUM(mc) FROM tabella_acquisti WHERE operazione = NEW.operazione ),
+    ( SELECT SUM(eur) FROM tabella_acquisti WHERE operazione = NEW.operazione ),
+    ( SELECT somma_mc_vendita FROM tabella_operazione WHERE numero = NEW.operazione ),
+    ( SELECT somma_eur_vendita FROM tabella_operazione WHERE numero = NEW.operazione ),
+    ( SELECT pagamento FROM tabella_operazione WHERE numero = NEW.operazione ));
 END;
 
 
@@ -111,6 +119,14 @@ VALUES
     new.fattura,
     'VENDITA'
   );
+
+  INSERT OR REPLACE INTO tabella_operazione ( numero, somma_mc_acquisto, somma_eur_acquisto, somma_mc_vendita, somma_eur_vendita, pagamento ) VALUES (
+    NEW.operazione,
+    ( SELECT somma_mc_acquisto FROM tabella_operazione WHERE numero = NEW.operazione ),
+    ( SELECT somma_eur_acquisto FROM tabella_operazione WHERE numero = NEW.operazione ),
+    ( SELECT SUM(mc) FROM tabella_vendite WHERE operazione = NEW.operazione ),
+    ( SELECT SUM(eur) FROM tabella_vendite WHERE operazione = NEW.operazione ),
+    ( SELECT pagamento FROM tabella_operazione WHERE numero = NEW.operazione ));
 END;
 
 
