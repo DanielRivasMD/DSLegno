@@ -310,25 +310,25 @@ fn main() {
 		.ignore_root_level_whitespace(false)
 		.create_reader(BufReader::new(file));
 
+	let mut tag = Tag::new();
+
 	loop {
 		match reader.next() {
 			Ok(e) => {
-				print!("{}\t", reader.position());
+				// print!("{}\t", reader.position());
 
 				match e {
-					XmlEvent::StartDocument { version, encoding, .. } => {
-						println!("StartDocument({version}, {encoding})");
-					},
+
 					XmlEvent::EndDocument => {
 						println!("EndDocument");
 						break;
 					},
-					XmlEvent::ProcessingInstruction { name, data } => {
-						println!("ProcessingInstruction({name}={:?})", data.as_deref().unwrap_or_default());
-					},
+
 					XmlEvent::StartElement { name, attributes, .. } => {
 						if attributes.is_empty() {
-							println!("StartElement({name})");
+
+							tag.up_scroll(name.to_string());
+
 						} else {
 							let attrs: Vec<_> = attributes
 								.iter()
@@ -337,19 +337,34 @@ fn main() {
 							println!("StartElement({name} [{}])", attrs.join(", "));
 						}
 					},
+
 					XmlEvent::EndElement { name } => {
-						println!("EndElement({name})");
+						tag.down_scroll();
 					},
+
 					XmlEvent::Comment(data) => {
 						println!(r#"Comment("{}")"#, data.escape_debug());
 					},
-					XmlEvent::CData(data) => println!(r#"CData("{}")"#, data.escape_debug()),
+
+					XmlEvent::CData(data) => {
+						// if tag.child == "IdPaese" {
+							println!("{}", tag);
+							println!("{}", data.escape_debug());
+						// }
+					}
+
 					XmlEvent::Characters(data) => {
-						println!(r#"Characters("{}")"#, data.escape_debug());
+						println!("{}", tag);
+							println!("{}", data.escape_debug());
+						// println!(r#"Characters("{}")"#, data.escape_debug())
 					},
-					XmlEvent::Whitespace(data) => {
-						println!(r#"Whitespace("{}")"#, data.escape_debug());
+
+					XmlEvent::Whitespace(data) => {  
+						// println!(r#"Whitespace("{}")"#, data.escape_debug())
 					},
+
+					_ => (),
+
 				}
 			},
 			Err(e) => {
