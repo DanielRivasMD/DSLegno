@@ -5,6 +5,12 @@ use std::io::BufReader;
 use xml::common::Position;
 use xml::reader::{ParserConfig, XmlEvent};
 
+use std::fmt::{
+  Display,
+  Formatter,
+  Result,
+};
+
 #[macro_use]
 extern crate derive_new;
 
@@ -246,6 +252,21 @@ struct Tag {
 
   #[new(default)]
  	grandparent: String,
+}
+
+
+/// Implement Display for Ind.
+impl Display for Tag {
+  fn fmt(
+    &self,
+    f: &mut Formatter,
+  ) -> Result {
+    writeln!(
+      f,
+      "\t{:<30}{:?}\n\t{:<30}{:?}\n\t{:<30}{:?}\n",
+      "Child:", self.child, "Parent:", self.parent, "GrandParent: ", self.grandparent,
+    )
+  }
 }
 
 // TODO: parser functional. select desired fields. IMPORTANT: multiple records on one file
