@@ -5,6 +5,249 @@ use std::io::BufReader;
 use xml::common::Position;
 use xml::reader::{ParserConfig, XmlEvent};
 
+#[macro_use]
+extern crate derive_new;
+
+
+#[derive(Default, new)]
+struct FatturaHeader {
+
+	// dati_transmissione: DatiTrasmittente,
+
+	#[new(default)]
+	cedente_prestatore: Participant,
+
+	#[new(default)]
+	cessionario_committente: Participant,
+}
+
+
+// struct DatiTrasmittente {
+
+// 	id_trasmittente: IDTrasmittente,
+
+// }
+
+// struct IDTrasmittente {
+
+// 	id_paese: String,
+
+// 	id_codice: String,
+// }
+
+#[derive(Default, new)]
+struct Participant {
+
+	#[new(default)]
+	dati_anagrafica: DatiAnagrafica,
+
+	#[new(default)]
+	sede: Sede,
+
+	#[new(default)]
+	iscrizione_rea: IscrizioneREA,
+}
+
+#[derive(Default, new)]
+struct DatiAnagrafica {
+
+	#[new(default)]
+	idfiscale: IDFiscale,
+
+	#[new(default)]
+	codice_fiscale: String,
+
+	#[new(default)]
+	anagrafica: Anagrafica,
+
+	#[new(default)]
+	regime_fiscale: String,
+}
+
+#[derive(Default, new)]
+struct IDFiscale {
+
+	#[new(default)]
+	idpaese: String,
+
+	#[new(default)]
+	idcodice: String,
+}
+
+#[derive(Default, new)]
+struct Anagrafica {
+
+	#[new(default)]
+	denominazine: String,
+}
+
+#[derive(Default, new)]
+struct Sede {
+
+	#[new(default)]
+	indirizzo: String,
+
+	#[new(default)]
+	numero_civico: String,
+
+	#[new(default)]
+	cap: String,
+
+	#[new(default)]
+	comune: String,
+
+	#[new(default)]
+	provinzia: String,
+
+	#[new(default)]
+	nazione: String,
+}
+
+#[derive(Default, new)]
+struct IscrizioneREA {
+
+	#[new(default)]
+	ufficio: String,
+
+	#[new(default)]
+	numero_rea: String,
+
+	#[new(default)]
+	capitale_sociale: String,
+
+	#[new(default)]
+	socio_unico: String,
+
+	#[new(default)]
+	stato_liquidazione: String,
+}
+
+#[derive(Default, new)]
+struct FatturaBody {
+
+	#[new(default)]
+	dati_generale: DatiGenerale,
+
+	#[new(default)]
+	dati_beni_servizi: DatiBeniServizi,
+
+	#[new(default)]
+	dati_pagamento: DatiPagamento,
+}
+
+#[derive(Default, new)]
+struct DatiGenerale {
+
+	#[new(default)]
+	tipo_documento: String,
+
+	#[new(default)]
+	divisa: String,
+
+	#[new(default)]
+	data: String,
+
+	#[new(default)]
+	numero: String,
+
+	#[new(default)]
+	importo_totale: f32,
+}
+
+#[derive(Default, new)]
+struct DatiBeniServizi {
+
+	#[new(default)]
+	dettaglio_linee: Vec<DettaglioLinee>,
+
+	#[new(default)]
+	dati_riepilogo: DatiRiepilogo,
+}
+
+#[derive(new)]
+struct DettaglioLinee {
+
+	#[new(default)]
+	numero_linea: u32,
+
+	#[new(default)]
+	descrizione: String,
+
+	#[new(default)]
+	quantita: f32,
+
+	#[new(default)]
+	unita_misura: String,
+
+	#[new(default)]
+	prezzo_unitario: String,
+
+	#[new(default)]
+	preazzo_totale: f32,
+
+	#[new(default)]
+	aliquota_iva: f32,
+}
+
+#[derive(Default, new)]
+struct DatiRiepilogo {
+
+	#[new(default)]
+	aliquota_iva: f32,
+
+	#[new(default)]
+	imponinile_importo: f32,
+
+	#[new(default)]
+	imposta: f32,
+
+	#[new(default)]
+	esigibilita_iva: String,
+}
+
+#[derive(Default, new)]
+struct DatiPagamento {
+
+	#[new(default)]
+	condizioni_pagamento: String,
+
+	#[new(default)]
+	dettaglio_pagamento: DettaglioPagamento,
+}
+
+#[derive(Default, new)]
+struct DettaglioPagamento {
+
+	#[new(default)]
+	modalita_pagamento: String,
+
+	#[new(default)]
+	data_riferimento: String,
+
+	#[new(default)]
+	data_scadenza_pagamento: String,
+
+	#[new(default)]
+	importo_pagamento: f32,
+
+	#[new(default)]
+	iban: u32,
+}
+
+
+#[derive(Clone, new)]
+struct Tag {
+
+  #[new(default)]
+ 	child: String,
+
+  #[new(default)]
+ 	parent: String,
+
+  #[new(default)]
+ 	grandparent: String,
+}
+
 // TODO: parser functional. select desired fields. IMPORTANT: multiple records on one file
 fn main() {
 	let file_path = std::env::args_os().nth(1).expect("Please specify a path to an XML file");
