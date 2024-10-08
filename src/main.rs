@@ -255,6 +255,38 @@ struct Tag {
 }
 
 
+impl Tag {
+	fn check_lineage(
+		&self,
+	) -> (bool, bool) {
+		(self.grandparent != "", self.parent != "")
+	}
+
+	fn identify(
+		&mut self,
+		name: String,
+	) {
+		self.child = name;
+	}
+
+	fn up_scroll(
+		&mut self,
+		name: String,
+	) {
+		self.grandparent = self.parent.clone();
+		self.parent = self.child.clone();
+		self.identify(name);
+	}
+
+	fn down_scroll(
+		&mut self,
+	) {
+		self.child = self.parent.clone();
+		self.parent = self.grandparent.clone();
+		self.grandparent = String::new();
+	}
+}
+
 /// Implement Display for Ind.
 impl Display for Tag {
   fn fmt(
