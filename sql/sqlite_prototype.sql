@@ -4,38 +4,147 @@
 
 ----------------------------------------------------------------------------------------------------
 
+
 CREATE TABLE IF NOT EXISTS tabella_principale
-  ( id_numero INTEGER PRIMARY KEY AUTOINCREMENT,
-    operazione INTEGER,
-    numero INTEGER,
-    fattura INTEGER,
+  (
+    ----------------------------------------
+    id INTEGER PRIMARY KEY AUTOINCREMENT, -- automatic tracker
+    operazione INTEGER,                   -- correlation number
+    ----------------------------------------
+    -----      cedente prestatore      -----
+    ----------------------------------------
+    prestatore_denominazione TEXT,        -- name
+    prestatore_indirizzo TEXT,            -- address
+    prestatore_numero_rea INTEGER,        -- number
+    ----------------------------------------
+    -----   cessionario committente    -----
+    ----------------------------------------
+    committente_denominazione TEXT,       -- name
+    committente_indirizzo TEXT,           -- address
+    ----------------------------------------
+    -----   dati generali documento    -----
+    ----------------------------------------
+    fattura TEXT,                         -- invoice number
+    data TEXT,                            -- invoice date
+    importo_totale REAL,                  -- total amount
+    ----------------------------------------
+    -----       dettaglio linee        -----
+    ----------------------------------------
+    descrizione TEXT,                     -- description
+    numero_linea INTEGER,                 -- number
+    quantita REAL,                        -- amount
+    prezzo_unitario REAL,                 -- unit price
+    prezzo_totale REAL,                   -- total price
+    aliquota_iva REAL,                    -- tax
+    ----------------------------------------
+    -----        dati riepilogo        -----
+    ----------------------------------------
+    imponibile_importo REAL,              -- total
+    imposto REAL,                         -- tax
+    esigibilita_iva CHAR,                 -- tax category
+    ----------------------------------------
+    -----     condizioni pagamento     -----
+    ----------------------------------------
+    dati_riferimento_termini TEXT,        -- date
+    dati_scadenza_pagamento TEXT,         -- date
+    importo_pagamento REAL,               -- total
+    ----------------------------------------
     typo TEXT
+    ----------------------------------------
    );
 
 
 CREATE TABLE IF NOT EXISTS tabella_acquisti
   (
-    numero INTEGER PRIMARY KEY,
-    operazione INTEGER,
-    fattura INTEGER,
-    mc REAL,
-    eur REAL,
-    ditta TEXT,
-    indirizzo TEXT,
-    specie_legnosa TEXT
+    ----------------------------------------
+    id INTEGER PRIMARY KEY AUTOINCREMENT, -- automatic tracker
+    operazione INTEGER,                   -- correlation number
+    ----------------------------------------
+    -----      cedente prestatore      -----
+    ----------------------------------------
+    prestatore_denominazione TEXT,        -- name
+    prestatore_indirizzo TEXT,            -- address
+    prestatore_numero_rea INTEGER,        -- number
+    ----------------------------------------
+    -----   cessionario committente    -----
+    ----------------------------------------
+    committente_denominazione TEXT,       -- name
+    committente_indirizzo TEXT,           -- address
+    ----------------------------------------
+    -----   dati generali documento    -----
+    ----------------------------------------
+    fattura TEXT,                         -- invoice number
+    data TEXT,                            -- invoice date
+    importo_totale REAL,                  -- total amount
+    ----------------------------------------
+    -----       dettaglio linee        -----
+    ----------------------------------------
+    descrizione TEXT,                     -- description
+    numero_linea INTEGER,                 -- number
+    quantita REAL,                        -- amount
+    prezzo_unitario REAL,                 -- unit price
+    prezzo_totale REAL,                   -- total price
+    aliquota_iva REAL,                    -- tax
+    ----------------------------------------
+    -----        dati riepilogo        -----
+    ----------------------------------------
+    imponibile_importo REAL,              -- total
+    imposto REAL,                         -- tax
+    esigibilita_iva CHAR,                 -- tax category
+    ----------------------------------------
+    -----     condizioni pagamento     -----
+    ----------------------------------------
+    dati_riferimento_termini TEXT,        -- date
+    dati_scadenza_pagamento TEXT,         -- date
+    importo_pagamento REAL                -- total
+    ----------------------------------------
   );
 
 
 CREATE TABLE IF NOT EXISTS tabella_vendite
   (
-    numero INTEGER PRIMARY KEY,
-    operazione INTEGER,
-    fattura INTEGER,
-    mc REAL,
-    eur REAL,
-    cliente TEXT,
-    indirizzo TEXT,
-    denominazione_commerciale TEXT
+    ----------------------------------------
+    id INTEGER PRIMARY KEY AUTOINCREMENT, -- automatic tracker
+    operazione INTEGER,                   -- correlation number
+    ----------------------------------------
+    -----      cedente prestatore      -----
+    ----------------------------------------
+    prestatore_denominazione TEXT,        -- name
+    prestatore_indirizzo TEXT,            -- address
+    prestatore_numero_rea INTEGER,        -- number
+    ----------------------------------------
+    -----   cessionario committente    -----
+    ----------------------------------------
+    committente_denominazione TEXT,       -- name
+    committente_indirizzo TEXT,           -- address
+    ----------------------------------------
+    -----   dati generali documento    -----
+    ----------------------------------------
+    fattura TEXT,                         -- invoice number
+    data TEXT,                            -- invoice date
+    importo_totale REAL,                  -- total amount
+    ----------------------------------------
+    -----       dettaglio linee        -----
+    ----------------------------------------
+    descrizione TEXT,                     -- description
+    numero_linea INTEGER,                 -- number
+    quantita REAL,                        -- amount
+    prezzo_unitario REAL,                 -- unit price
+    prezzo_totale REAL,                   -- total price
+    aliquota_iva REAL,                    -- tax
+    ----------------------------------------
+    -----        dati riepilogo        -----
+    ----------------------------------------
+    imponibile_importo REAL,              -- total
+    imposto REAL,                         -- tax
+    esigibilita_iva CHAR,                 -- tax category
+    ----------------------------------------
+    -----     condizioni pagamento     -----
+    ----------------------------------------
+    dati_riferimento_termini TEXT,        -- date
+    dati_scadenza_pagamento TEXT,         -- date
+    importo_pagamento REAL                -- total
+    ----------------------------------------
   );
 
 
