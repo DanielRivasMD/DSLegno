@@ -1,0 +1,22 @@
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+#[derive(Default, new)]
+pub struct IscrizioneREA {
+
+	#[new(default)]
+	ufficio: String,
+
+	#[new(default)]
+	numero_rea: String,
+
+	#[new(default)]
+	capitale_sociale: String,
+
+	#[new(default)]
+	socio_unico: String,
+
+	#[new(default)]
+	stato_liquidazione: String,
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
