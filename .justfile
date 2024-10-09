@@ -96,6 +96,20 @@ import '.just/rs.conf'
 # launch dioxus
 [group('rust')]
 @launch:
-  @dx serve --hot-reload true --platform desktop
+  dx serve --hot-reload true --platform desktop
+
+####################################################################################################
+
+# run acquista
+[group('rust')]
+@acquista:
+  cargo run --bin acquista -- data/acquisto.xml
+
+####################################################################################################
+
+# run vendita
+[group('rust')]
+@vendita:
+  cargo run --bin vendita -- data/vendita.xml
 
 ####################################################################################################
