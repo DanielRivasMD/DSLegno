@@ -1,0 +1,25 @@
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+#[derive(Default, new)]
+pub struct Sede {
+
+	#[new(default)]
+	indirizzo: String,
+
+	#[new(default)]
+	numero_civico: String,
+
+	#[new(default)]
+	cap: String,
+
+	#[new(default)]
+	comune: String,
+
+	#[new(default)]
+	provinzia: String,
+
+	#[new(default)]
+	nazione: String,
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
