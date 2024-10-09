@@ -161,27 +161,6 @@ CREATE TABLE IF NOT EXISTS tabella_operazione
 
 ----------------------------------------------------------------------------------------------------
 
-INSERT INTO tabella_acquisti
-  ( numero, fattura, mc, eur, ditta, indirizzo, specie_legnosa ) VALUES
-  ( 1, 0001, 7868, 3566, 'commune', 'via xxx', 'legna1' ),
-  ( 2, 0002, 7868, 3566, 'commune', 'via xxx', 'legna1' ),
-  ( 3, 0003, 7868, 3566, 'commune', 'via xxx', 'legna1' ),
-  ( 4, 0014, 7868, 3566, 'altro', 'via xxx', 'legna5' ),
-  ( 5, 0035, 7868, 3566, 'commune', 'via xxx', 'legna1' ),
-  ( 6, 0006, 7868, 3566, 'commune', 'via xxx', 'legna5' ),
-  ( 7, 0307, 7868, 3566, 'commune', 'via xxx', 'legna7' );
-
-
-INSERT INTO tabella_vendite
-  ( numero, fattura, mc, eur, cliente, indirizzo, denominazione_commerciale ) VALUES
-  ( 1, 0101, 685, 657474, 'cliente1', 'via xxx', 'lavoro1' ),
-  ( 2, 0102, 685, 657474, 'cliente2', 'via xxx', 'lavoro2' ),
-  ( 3, 0103, 685, 657474, 'cliente3', 'via xxx', 'lavoro3' ),
-  ( 4, 0104, 685, 657474, 'cliente1', 'via xxx', 'lavoro4' ),
-  ( 5, 0105, 685, 657474, 'cliente3', 'via xxx', 'lavoro5' );
-
-
-----------------------------------------------------------------------------------------------------
 
 CREATE TRIGGER update_acquisti
   AFTER UPDATE ON tabella_acquisti
@@ -258,5 +237,61 @@ END;
 
 
 ----------------------------------------------------------------------------------------------------
+
+
+INSERT INTO tabella_acquisti
+  ( 
+    prestatore_denominazione, prestatore_indirizzo, prestatore_numero_rea,
+    committente_denominazione, committente_indirizzo,
+    fattura, data, importo_totale,
+    descrizione, numero_linea, quantita, prezzo_unitario, prezzo_totale, aliquota_iva,
+    imponibile_importo, imposto, esigibilita_iva,
+    dati_riferimento_termini, dati_scadenza_pagamento, importo_pagamento
+   ) VALUES (
+    'COMUNE DI IMER', 'Piazzale del Piazza, 1, 38050, Imer', '',
+    'DALLA SANTA LEGNO SRL', 'VIA S.S. MICHELI, 5, 38050, IMER',
+    '23-31', '2024-09-16', 18422.00,
+    'ACCONTO LEGNAME LOTTO VEDERNA 2023 BOSTRICO LEGNAME CERTIFICATO PEFC ICILA PEFCGFS 002720 AGV', 0001, 500.00, 30.20, 15100.00, 22.00,
+    15100.00, 3322.00, 'I',
+    '', '', 18422.00
+  );
+
+
+INSERT INTO tabella_vendite
+  (
+    prestatore_denominazione, prestatore_indirizzo, prestatore_numero_rea,
+    committente_denominazione, committente_indirizzo,
+    fattura, data, importo_totale,
+    descrizione, numero_linea, quantita, prezzo_unitario, prezzo_totale, aliquota_iva,
+    imponibile_importo, imposto, esigibilita_iva,
+    dati_riferimento_termini, dati_scadenza_pagamento, importo_pagamento
+   ) VALUES (
+    'DALLA SANTA LEGNO SRL', 'VIA SUOR S.MICHELI, 5, 38050, IMER', 161731,
+    'CPA LEGNAMI SRL', 'VIA MORGANA 50, 31036, ISTRANA',
+    '196', '2024-09-20', 9540.40,
+    'VENDITA TRONCHI - A CATASTA PROVENIENTI DA LOTTI PRIVATI VALMESTA COMUNE DI PRIMIERO SMC
+    DICHIARAZIONI N. 37-38-39-40/2024', 10, 45.00, 85.00, 3825.00, 22.00,
+    7820.00, 1720.40, 'I',
+    '2024-09-20', '2024-09-20', 9540.40
+  );
+
+
+INSERT INTO tabella_vendite
+  (
+    prestatore_denominazione, prestatore_indirizzo, prestatore_numero_rea,
+    committente_denominazione, committente_indirizzo,
+    fattura, data, importo_totale,
+    descrizione, numero_linea, quantita, prezzo_unitario, prezzo_totale, aliquota_iva,
+    imponibile_importo, imposto, esigibilita_iva,
+    dati_riferimento_termini, dati_scadenza_pagamento, importo_pagamento
+   ) VALUES (
+    'DALLA SANTA LEGNO SRL', 'VIA SUOR S.MICHELI, 5, 38050, IMER', 161731,
+    'CPA LEGNAMI SRL', 'VIA MORGANA 50, 31036, ISTRANA',
+    '196', '2024-09-20', 9540.40,
+    'VENDITA TRONCHI - A CATASTA PROVENIENTI DA LOTTO BOSTRICO 2023 VEDERNA COMUNE DI IMER', 20, 47.00, 85.00, 3995.00, 22.00,
+    7820.00, 1720.40, 'I',
+    '2024-09-20', '2024-09-20', 9540.40
+  );
+
 
 ----------------------------------------------------------------------------------------------------
