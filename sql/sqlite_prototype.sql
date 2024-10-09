@@ -189,22 +189,32 @@ CREATE TRIGGER update_acquisti
 BEGIN
   INSERT INTO tabella_principale (
     operazione,
-    numero,
-    fattura,
+    prestatore_denominazione, prestatore_indirizzo, prestatore_numero_rea,
+    committente_denominazione, committente_indirizzo,
+    fattura, data, importo_totale,
+    descrizione, numero_linea, quantita, prezzo_unitario, prezzo_totale, aliquota_iva,
+    imponibile_importo, imposto, esigibilita_iva,
+    dati_riferimento_termini, dati_scadenza_pagamento, importo_pagamento,
     typo
   )
 VALUES
   (
     NEW.operazione,
-    NEW.numero,
-    NEW.fattura,
+    NEW.prestatore_denominazione, NEW.prestatore_indirizzo, NEW.prestatore_numero_rea,
+    NEW.committente_denominazione, NEW.committente_indirizzo,
+    NEW.fattura, NEW.data, NEW.importo_totale,
+    NEW.descrizione, NEW.numero_linea, NEW.quantita, NEW.prezzo_unitario, NEW.prezzo_totale, NEW.aliquota_iva,
+    NEW.imponibile_importo, NEW.imposto, NEW.esigibilita_iva,
+    NEW.dati_riferimento_termini, NEW.dati_scadenza_pagamento, NEW.importo_pagamento,
     'ACQUISTO'
   );
 
-  INSERT OR REPLACE INTO tabella_operazione ( numero, somma_mc_acquisto, somma_eur_acquisto, somma_mc_vendita, somma_eur_vendita, pagamento ) VALUES (
+  INSERT OR REPLACE INTO tabella_operazione (
+    numero, somma_mc_acquisto, somma_eur_acquisto, somma_mc_vendita, somma_eur_vendita, pagamento
+  ) VALUES (
     NEW.operazione,
-    ( SELECT SUM(mc) FROM tabella_acquisti WHERE operazione = NEW.operazione ),
-    ( SELECT SUM(eur) FROM tabella_acquisti WHERE operazione = NEW.operazione ),
+    ( SELECT SUM(quantita) FROM tabella_acquisti WHERE operazione = NEW.operazione ),
+    ( SELECT SUM(prezzo_totale) FROM tabella_acquisti WHERE operazione = NEW.operazione ),
     ( SELECT somma_mc_vendita FROM tabella_operazione WHERE numero = NEW.operazione ),
     ( SELECT somma_eur_vendita FROM tabella_operazione WHERE numero = NEW.operazione ),
     ( SELECT pagamento FROM tabella_operazione WHERE numero = NEW.operazione ));
@@ -217,15 +227,23 @@ CREATE TRIGGER update_vendite
 BEGIN
   INSERT INTO tabella_principale (
     operazione,
-    numero,
-    fattura,
+    prestatore_denominazione, prestatore_indirizzo, prestatore_numero_rea,
+    committente_denominazione, committente_indirizzo,
+    fattura, data, importo_totale,
+    descrizione, numero_linea, quantita, prezzo_unitario, prezzo_totale, aliquota_iva,
+    imponibile_importo, imposto, esigibilita_iva,
+    dati_riferimento_termini, dati_scadenza_pagamento, importo_pagamento,
     typo
   )
 VALUES
   (
-    new.operazione,
-    new.numero,
-    new.fattura,
+    NEW.operazione,
+    NEW.prestatore_denominazione, NEW.prestatore_indirizzo, NEW.prestatore_numero_rea,
+    NEW.committente_denominazione, NEW.committente_indirizzo,
+    NEW.fattura, NEW.data, NEW.importo_totale,
+    NEW.descrizione, NEW.numero_linea, NEW.quantita, NEW.prezzo_unitario, NEW.prezzo_totale, NEW.aliquota_iva,
+    NEW.imponibile_importo, NEW.imposto, NEW.esigibilita_iva,
+    NEW.dati_riferimento_termini, NEW.dati_scadenza_pagamento, NEW.importo_pagamento,
     'VENDITA'
   );
 
@@ -233,8 +251,8 @@ VALUES
     NEW.operazione,
     ( SELECT somma_mc_acquisto FROM tabella_operazione WHERE numero = NEW.operazione ),
     ( SELECT somma_eur_acquisto FROM tabella_operazione WHERE numero = NEW.operazione ),
-    ( SELECT SUM(mc) FROM tabella_vendite WHERE operazione = NEW.operazione ),
-    ( SELECT SUM(eur) FROM tabella_vendite WHERE operazione = NEW.operazione ),
+    ( SELECT SUM(quantita) FROM tabella_vendite WHERE operazione = NEW.operazione ),
+    ( SELECT SUM(prezzo_totale) FROM tabella_vendite WHERE operazione = NEW.operazione ),
     ( SELECT pagamento FROM tabella_operazione WHERE numero = NEW.operazione ));
 END;
 
