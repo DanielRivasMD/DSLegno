@@ -1,0 +1,22 @@
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+#[derive(Default, new)]
+pub struct DettaglioPagamento {
+
+	#[new(default)]
+	modalita_pagamento: String,
+
+	#[new(default)]
+	data_riferimento: String,
+
+	#[new(default)]
+	data_scadenza_pagamento: String,
+
+	#[new(default)]
+	importo_pagamento: f32,
+
+	#[new(default)]
+	iban: u32,
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
