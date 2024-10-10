@@ -162,10 +162,13 @@ CREATE TABLE IF NOT EXISTS tabella_operazione
 ----------------------------------------------------------------------------------------------------
 
 
-CREATE TRIGGER update_acquisti
+-- update on insert
+CREATE TRIGGER denovo_acquisti
   AFTER UPDATE ON tabella_acquisti
   WHEN ( NEW.operazione IS NOT NULL )
 BEGIN
+
+  -- update tabella principale
   INSERT INTO tabella_principale (
     operazione,
     prestatore_denominazione, prestatore_indirizzo, prestatore_numero_rea,
@@ -188,6 +191,7 @@ VALUES
     'ACQUISTO'
   );
 
+  -- update tabella principale
   INSERT OR REPLACE INTO tabella_operazione (
     numero, somma_mc_acquisto, somma_eur_acquisto, somma_mc_vendita, somma_eur_vendita, pagamento
   ) VALUES (
@@ -196,14 +200,19 @@ VALUES
     ( SELECT SUM(prezzo_totale) FROM tabella_acquisti WHERE operazione = NEW.operazione ),
     ( SELECT somma_mc_vendita FROM tabella_operazione WHERE numero = NEW.operazione ),
     ( SELECT somma_eur_vendita FROM tabella_operazione WHERE numero = NEW.operazione ),
-    ( SELECT pagamento FROM tabella_operazione WHERE numero = NEW.operazione ));
+    ( SELECT pagamento FROM tabella_operazione WHERE numero = NEW.operazione )
+  );
+
 END;
 
 
-CREATE TRIGGER update_vendite
-  AFTER UPDATE ON tabella_vendite
-  WHEN ( NEW.operazione IS NOT NULL )
+-- update on change
+CREATE TRIGGER update_acquisti
+  AFTER UPDATE ON tabella_acquisti
+  WHEN ( OLD.operazione <> NEW.operazione )
 BEGIN
+
+  -- update tabella principale
   INSERT INTO tabella_principale (
     operazione,
     prestatore_denominazione, prestatore_indirizzo, prestatore_numero_rea,
@@ -223,16 +232,154 @@ VALUES
     NEW.descrizione, NEW.numero_linea, NEW.quantita, NEW.prezzo_unitario, NEW.prezzo_totale, NEW.aliquota_iva,
     NEW.imponibile_importo, NEW.imposto, NEW.esigibilita_iva,
     NEW.dati_riferimento_termini, NEW.dati_scadenza_pagamento, NEW.importo_pagamento,
-    'VENDITA'
+    'ACQUISTO'
   );
 
-  INSERT OR REPLACE INTO tabella_operazione ( numero, somma_mc_acquisto, somma_eur_acquisto, somma_mc_vendita, somma_eur_vendita, pagamento ) VALUES (
+  -- purge records tabella principale
+  DELETE FROM tabella_principale
+  WHERE id NOT IN
+  ( SELECT operazione FROM tabella_acquisti UNION SELECT operazione FROM tabella_vendite );
+
+  -- update tabella operazione new record
+  INSERT OR REPLACE INTO tabella_operazione (
+    numero, somma_mc_acquisto, somma_eur_acquisto, somma_mc_vendita, somma_eur_vendita, pagamento
+  ) VALUES (
+    NEW.operazione,
+    ( SELECT SUM(quantita) FROM tabella_acquisti WHERE operazione = NEW.operazione ),
+    ( SELECT SUM(prezzo_totale) FROM tabella_acquisti WHERE operazione = NEW.operazione ),
+    ( SELECT somma_mc_vendita FROM tabella_operazione WHERE numero = NEW.operazione ),
+    ( SELECT somma_eur_vendita FROM tabella_operazione WHERE numero = NEW.operazione ),
+    ( SELECT pagamento FROM tabella_operazione WHERE numero = NEW.operazione )
+  );
+
+  -- update tabella operazione old record
+  INSERT OR REPLACE INTO tabella_operazione (
+    numero, somma_mc_acquisto, somma_eur_acquisto, somma_mc_vendita, somma_eur_vendita, pagamento
+  ) VALUES (
+    OLD.operazione,
+    ( SELECT SUM(quantita) FROM tabella_acquisti WHERE operazione = OLD.operazione ),
+    ( SELECT SUM(prezzo_totale) FROM tabella_acquisti WHERE operazione = OLD.operazione ),
+    ( SELECT somma_mc_vendita FROM tabella_operazione WHERE numero = OLD.operazione ),
+    ( SELECT somma_eur_vendita FROM tabella_operazione WHERE numero = OLD.operazione ),
+    ( SELECT pagamento FROM tabella_operazione WHERE numero = OLD.operazione )
+  );
+
+  -- purge records tabella operazione
+  DELETE FROM tabella_operazione
+  WHERE numero NOT IN
+  ( SELECT operazione FROM tabella_acquisti UNION SELECT operazione FROM tabella_vendite );
+
+END;
+
+
+-- update on insert
+CREATE TRIGGER denovo_vendite
+  AFTER UPDATE ON tabella_vendite
+  WHEN ( NEW.operazione IS NOT NULL )
+BEGIN
+
+  -- update tabella principale
+  INSERT INTO tabella_principale (
+    operazione,
+    prestatore_denominazione, prestatore_indirizzo, prestatore_numero_rea,
+    committente_denominazione, committente_indirizzo,
+    fattura, data, importo_totale,
+    descrizione, numero_linea, quantita, prezzo_unitario, prezzo_totale, aliquota_iva,
+    imponibile_importo, imposto, esigibilita_iva,
+    dati_riferimento_termini, dati_scadenza_pagamento, importo_pagamento,
+    typo
+  )
+VALUES
+  (
+    NEW.operazione,
+    NEW.prestatore_denominazione, NEW.prestatore_indirizzo, NEW.prestatore_numero_rea,
+    NEW.committente_denominazione, NEW.committente_indirizzo,
+    NEW.fattura, NEW.data, NEW.importo_totale,
+    NEW.descrizione, NEW.numero_linea, NEW.quantita, NEW.prezzo_unitario, NEW.prezzo_totale, NEW.aliquota_iva,
+    NEW.imponibile_importo, NEW.imposto, NEW.esigibilita_iva,
+    NEW.dati_riferimento_termini, NEW.dati_scadenza_pagamento, NEW.importo_pagamento,
+    'ACQUISTO'
+  );
+
+  -- update tabella principale
+  INSERT OR REPLACE INTO tabella_operazione (
+    numero, somma_mc_acquisto, somma_eur_acquisto, somma_mc_vendita, somma_eur_vendita, pagamento
+  ) VALUES (
     NEW.operazione,
     ( SELECT somma_mc_acquisto FROM tabella_operazione WHERE numero = NEW.operazione ),
     ( SELECT somma_eur_acquisto FROM tabella_operazione WHERE numero = NEW.operazione ),
     ( SELECT SUM(quantita) FROM tabella_vendite WHERE operazione = NEW.operazione ),
     ( SELECT SUM(prezzo_totale) FROM tabella_vendite WHERE operazione = NEW.operazione ),
-    ( SELECT pagamento FROM tabella_operazione WHERE numero = NEW.operazione ));
+    ( SELECT pagamento FROM tabella_operazione WHERE numero = NEW.operazione )
+  );
+
+END;
+
+
+-- BUG: verify changes on tabella principale
+-- update on change
+CREATE TRIGGER update_vendite
+  AFTER UPDATE ON tabella_vendite
+  WHEN ( OLD.operazione <> NEW.operazione )
+BEGIN
+
+  -- update tabella principale
+  INSERT INTO tabella_principale (
+    operazione,
+    prestatore_denominazione, prestatore_indirizzo, prestatore_numero_rea,
+    committente_denominazione, committente_indirizzo,
+    fattura, data, importo_totale,
+    descrizione, numero_linea, quantita, prezzo_unitario, prezzo_totale, aliquota_iva,
+    imponibile_importo, imposto, esigibilita_iva,
+    dati_riferimento_termini, dati_scadenza_pagamento, importo_pagamento,
+    typo
+  )
+VALUES
+  (
+    NEW.operazione,
+    NEW.prestatore_denominazione, NEW.prestatore_indirizzo, NEW.prestatore_numero_rea,
+    NEW.committente_denominazione, NEW.committente_indirizzo,
+    NEW.fattura, NEW.data, NEW.importo_totale,
+    NEW.descrizione, NEW.numero_linea, NEW.quantita, NEW.prezzo_unitario, NEW.prezzo_totale, NEW.aliquota_iva,
+    NEW.imponibile_importo, NEW.imposto, NEW.esigibilita_iva,
+    NEW.dati_riferimento_termini, NEW.dati_scadenza_pagamento, NEW.importo_pagamento,
+    'ACQUISTO'
+  );
+
+  -- purge records tabella principale
+  DELETE FROM tabella_principale
+  WHERE id NOT IN
+  ( SELECT operazione FROM tabella_acquisti UNION SELECT operazione FROM tabella_vendite );
+
+  -- update tabella operazione new record
+  INSERT OR REPLACE INTO tabella_operazione (
+    numero, somma_mc_acquisto, somma_eur_acquisto, somma_mc_vendita, somma_eur_vendita, pagamento
+  ) VALUES (
+    NEW.operazione,
+    ( SELECT somma_mc_acquisto FROM tabella_operazione WHERE numero = NEW.operazione ),
+    ( SELECT somma_eur_acquisto FROM tabella_operazione WHERE numero = NEW.operazione ),
+    ( SELECT SUM(quantita) FROM tabella_vendite WHERE operazione = NEW.operazione ),
+    ( SELECT SUM(prezzo_totale) FROM tabella_vendite WHERE operazione = NEW.operazione ),
+    ( SELECT pagamento FROM tabella_operazione WHERE numero = NEW.operazione )
+  );
+
+  -- update tabella operazione old record
+  INSERT OR REPLACE INTO tabella_operazione (
+    numero, somma_mc_acquisto, somma_eur_acquisto, somma_mc_vendita, somma_eur_vendita, pagamento
+  ) VALUES (
+    OLD.operazione,
+    ( SELECT somma_mc_acquisto FROM tabella_operazione WHERE numero = OLD.operazione ),
+    ( SELECT somma_eur_acquisto FROM tabella_operazione WHERE numero = OLD.operazione ),
+    ( SELECT SUM(quantita) FROM tabella_vendite WHERE operazione = OLD.operazione ),
+    ( SELECT SUM(prezzo_totale) FROM tabella_vendite WHERE operazione = OLD.operazione ),
+    ( SELECT pagamento FROM tabella_operazione WHERE numero = OLD.operazione )
+  );
+
+  -- purge records tabella operazione
+  DELETE FROM tabella_operazione
+  WHERE numero NOT IN
+  ( SELECT operazione FROM tabella_acquisti UNION SELECT operazione FROM tabella_vendite );
+
 END;
 
 
