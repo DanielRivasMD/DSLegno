@@ -1,20 +1,18 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // crate utilities
-use crate::custom::participant::Participant;
+use super::participant::Participant;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#[derive(Default, new)]
+#[derive(Debug, Default, new)]
 pub struct FatturaHeader {
 
-	// dati_transmissione: DatiTrasmittente,
+	#[new(default)]
+	pub cedente_prestatore: Participant,
 
 	#[new(default)]
-	cedente_prestatore: Participant,
-
-	#[new(default)]
-	cessionario_committente: Participant,
+	pub cessionario_committente: Participant,
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
