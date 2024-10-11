@@ -115,4 +115,87 @@ fn data_tagger(tag: &Tag) -> Tagged {
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/// extract data from fields
+fn data_extractor(data: &String, tagged: &Tagged, conn: &mut SqliteConnection) {
+	use schema::tabella_vendite::dsl::*;
+
+	match tagged {
+		Tagged::Descrizione => {
+			println!("{}", "descrizione");
+			let _ = insert_into(tabella_vendite).values(descrizione.eq(data)).execute(conn);
+		}
+		Tagged::Quantita => {
+			println!("{}", "quantita");
+			let _ = insert_into(tabella_vendite).values(quantita.eq(data)).execute(conn);
+		}
+		Tagged::PrezzoUnitario => {
+			println!("{}", "prezzo_unitario");
+			let _ = insert_into(tabella_vendite).values(prezzo_unitario.eq(data)).execute(conn);
+		}
+		Tagged::PrezzoTotale => {
+			println!("{}", "prezzo_totale");
+			let _ = insert_into(tabella_vendite).values(prezzo_totale.eq(data)).execute(conn);
+		}
+		Tagged::AliquotaIVA => {
+			println!("{}", "aliquota_iva");
+			let _ = insert_into(tabella_vendite).values(aliquota_iva.eq(data)).execute(conn);
+		}
+		Tagged::Fattura => {
+			println!("{}", "fattura");
+			let _ = insert_into(tabella_vendite).values(fattura.eq(data)).execute(conn);
+		}
+		Tagged::GiornoData => {
+			println!("{}", "giorno_data");
+			let _ = insert_into(tabella_vendite).values(giorno_data.eq(data)).execute(conn);
+		}
+		Tagged::ImportoTotale => {
+			println!("{}", "importo_totale");
+			let _ = insert_into(tabella_vendite).values(importo_totale.eq(data)).execute(conn);
+		}
+		Tagged::PrestatoreDenominazione => {
+			println!("{}", "prestatore denominazione");
+			let _ = insert_into(tabella_vendite).values(prestatore_denominazione.eq(data)).execute(conn);
+		}
+		Tagged::PrestatoreIndirizzo => {
+			println!("{}", "prestatore indirizzo");
+			let _ = insert_into(tabella_vendite).values(prestatore_indirizzo.eq(data)).execute(conn);
+		}
+		Tagged::CommittenteDenominazione => {
+			println!("{}", "committente denominazione");
+			let _ = insert_into(tabella_vendite).values(committente_denominazione.eq(data)).execute(conn);
+		}
+		Tagged::CommittenteIndirizzo => {
+			println!("{}", "committente indirizzo");
+			let _ = insert_into(tabella_vendite).values(committente_indirizzo.eq(data)).execute(conn);
+		}
+		Tagged::ImponibileImporto => {
+			println!("{}", "imponibile_importo");
+			let _ = insert_into(tabella_vendite).values(imponibile_importo.eq(data)).execute(conn);
+		}
+		Tagged::Imposto => {
+			println!("{}", "imposto");
+			let _ = insert_into(tabella_vendite).values(imposto.eq(data)).execute(conn);
+		}
+		Tagged::EsigibilitaIVA => {
+			println!("{}", "esigibilita_iva");
+			let _ = insert_into(tabella_vendite).values(esigibilita_iva.eq(data)).execute(conn);
+		}
+		Tagged::DataRiferimentoTermini => {
+			println!("{}", "data_riferimento_termini");
+			let _ = insert_into(tabella_vendite).values(data_riferimento_termini.eq(data)).execute(conn);
+		}
+		Tagged::DataScadenzaPagamento => {
+			println!("{}", "data_scadenza_pagamento");
+			let _ = insert_into(tabella_vendite).values(data_scadenza_pagamento.eq(data)).execute(conn);
+		}
+		Tagged::ImportoPagamento => {
+			println!("{}", "importo_pagamento");
+			let _ = insert_into(tabella_vendite).values(importo_pagamento.eq(data)).execute(conn);
+		}
+		_ => (),
+	}
+}
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
