@@ -13,6 +13,7 @@ use diesel::prelude::*;
 
 // crate utilities
 use crate::custom::tag::*;
+use crate::custom::fattura::*;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -62,57 +63,43 @@ fn establish_db_connection() -> SqliteConnection {
 /// parse xml file (fattura)
 pub fn xml_parser(file: File) {
 
+	// get file reader
 	let mut reader = ParserConfig::default()
 		.ignore_root_level_whitespace(false)
 		.create_reader(BufReader::new(file));
 
+	// initialize tags
 	let mut tag = Tag::new();
 	let mut tagged = Tagged::new_none();
 
 	let mut conn = establish_db_connection();
+	// initialize invoice
+	let mut fattura = Fattura::new();
 
+	// iterate on file
 	loop {
 		match reader.next() {
-			Ok(e) => {
-				// print!("{}\t", reader.position());
+			Ok(line) => {
 
-				match e {
+				match line {
 
 					XmlEvent::EndDocument => {
-						// println!("EndDocument");
 						break;
 					},
 
 					XmlEvent::StartElement { name, attributes, .. } => {
 						if attributes.is_empty() {
-
 							tag.up_scroll(name.to_string());
 							tagged = data_tagger(&tag);
-							println!("{}", tag);
 						}
 					},
 
 					XmlEvent::EndElement { name } => {
 						tag.down_scroll();
-						// tagged = Tagged::new_none();
 					},
 
-					XmlEvent::Comment(data) => {
-						// println!("{:?}", &tagged);
-						data_extractor(&data, &tagged, &mut conn);
-						// println!(r#"Comment("{}")"#, data.escape_debug());
-					},
-
-					XmlEvent::CData(data) => {
-						// println!("{:?}", &tagged);
-						data_extractor(&data, &tagged, &mut conn);
-						// println!("{}", data.escape_debug());
-					}
-
-					XmlEvent::Characters(data) => {
-						// println!("{:?}", &tagged);
-						data_extractor(&data, &tagged, &mut conn);
-						// println!(r#"Characters("{}")"#, data.escape_debug())
+					XmlEvent::Comment(data) | XmlEvent::CData(data) | XmlEvent::Characters(data) => {
+						data_extractor(&data, &tagged, &mut fattura);
 					},
 
 					_ => (),
@@ -146,7 +133,6 @@ fn data_tagger(tag: &Tag) -> Tagged {
 		("PrezzoTotale", "DettaglioLinee", "DatiBeniServizi") => Tagged::PrezzoTotale,
 		("AliquotaIVA", "DettaglioLinee", "DatiBeniServizi") => Tagged::AliquotaIVA,
 		// dati riepilogo
-		// ("AliquotaIVA", "DatiRiepilogo", "DatiBeniServizi") => Tagged::AliquotaIVA,
 		("ImponibileImporto", "DatiRiepilogo", "DatiBeniServizi") => Tagged::ImponibileImporto,
 		("Imposta", "DatiRiepilogo", "DatiBeniServizi") => Tagged::Imposta,
 		("EsigibilitaIVA", "DatiRiepilogo", "DatiBeniServizi") => Tagged::EsigibilitaIVA,
@@ -166,8 +152,6 @@ fn data_tagger(tag: &Tag) -> Tagged {
 		(_, _, _) => Tagged::None
 	}
 }
-
-
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
