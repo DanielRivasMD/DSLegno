@@ -5,10 +5,15 @@ use std::fs::File;
 use std::io::BufReader;
 use xml::common::Position;
 use xml::reader::{ParserConfig, XmlEvent};
+use diesel::sqlite::SqliteConnection;
+use diesel::insert_into;
+use diesel::prelude::*;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-pub fn xml_parser(reader: EventReader<BufReader<File>>) {
+// crate utilities
+use crate::custom::tag::*;
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 mod schema {
@@ -54,6 +59,18 @@ fn establish_db_connection() -> SqliteConnection {
 		.unwrap_or_else(|_| panic!("Error connecting to {}", db_path))
 }
 
+/// parse xml file (fattura)
+pub fn xml_parser(file: File) {
+
+	let mut reader = ParserConfig::default()
+		.ignore_root_level_whitespace(false)
+		.create_reader(BufReader::new(file));
+
+	let mut tag = Tag::new();
+	let mut tagged = Tagged::new_none();
+
+	let mut conn = establish_db_connection();
+
 	loop {
 		match reader.next() {
 			Ok(e) => {
@@ -62,7 +79,7 @@ fn establish_db_connection() -> SqliteConnection {
 				match e {
 
 					XmlEvent::EndDocument => {
-						println!("EndDocument");
+						// println!("EndDocument");
 						break;
 					},
 
@@ -70,39 +87,32 @@ fn establish_db_connection() -> SqliteConnection {
 						if attributes.is_empty() {
 
 							tag.up_scroll(name.to_string());
-
-						} else {
-							let attrs: Vec<_> = attributes
-								.iter()
-								.map(|a| format!("{}={:?}", &a.name, a.value))
-								.collect();
-							println!("StartElement({name} [{}])", attrs.join(", "));
+							tagged = data_tagger(&tag);
+							println!("{}", tag);
 						}
 					},
 
 					XmlEvent::EndElement { name } => {
 						tag.down_scroll();
+						// tagged = Tagged::new_none();
 					},
 
 					XmlEvent::Comment(data) => {
-						println!(r#"Comment("{}")"#, data.escape_debug());
+						// println!("{:?}", &tagged);
+						data_extractor(&data, &tagged, &mut conn);
+						// println!(r#"Comment("{}")"#, data.escape_debug());
 					},
 
 					XmlEvent::CData(data) => {
-						// if tag.child == "IdPaese" {
-							println!("{}", tag);
-							println!("{}", data.escape_debug());
-						// }
+						// println!("{:?}", &tagged);
+						data_extractor(&data, &tagged, &mut conn);
+						// println!("{}", data.escape_debug());
 					}
 
 					XmlEvent::Characters(data) => {
-						println!("{}", tag);
-							println!("{}", data.escape_debug());
+						// println!("{:?}", &tagged);
+						data_extractor(&data, &tagged, &mut conn);
 						// println!(r#"Characters("{}")"#, data.escape_debug())
-					},
-
-					XmlEvent::Whitespace(data) => {  
-						// println!(r#"Whitespace("{}")"#, data.escape_debug())
 					},
 
 					_ => (),
