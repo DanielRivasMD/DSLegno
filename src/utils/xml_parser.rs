@@ -11,6 +11,35 @@ use xml::reader::{ParserConfig, XmlEvent};
 pub fn xml_parser(reader: EventReader<BufReader<File>>) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+mod schema {
+	diesel::table! {
+		tabella_vendite {
+			id -> Integer,
+			operazione -> Integer,
+			prestatore_denominazione -> Text,
+			prestatore_indirizzo -> Text,
+			committente_denominazione -> Text,
+			committente_indirizzo -> Text,
+			fattura -> Text,
+			giorno_data -> Text,
+			importo_totale -> Text,
+			descrizione -> Text,
+			quantita -> Text,
+			prezzo_unitario -> Text,
+			prezzo_totale -> Text,
+			aliquota_iva -> Text,
+			imponibile_importo -> Text,
+			imposto -> Text,
+			esigibilita_iva -> Char,
+			data_riferimento_termini -> Text,
+			data_scadenza_pagamento -> Text,
+			importo_pagamento -> Text,
+		}
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
 fn get_db_path() -> String {
 	// let home_dir = dirs::home_dir().unwrap();
 	// home_dir.to_str().unwrap().to_string() + "/.config/orion/database.sqlite"
