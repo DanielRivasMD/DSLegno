@@ -1,19 +1,16 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#[derive(Default, new)]
+#[derive(Debug, Default, new)]
 pub struct DatiRiepilogo {
 
 	#[new(default)]
-	aliquota_iva: f32,
+	pub imponibile_importo: f32,
 
 	#[new(default)]
-	imponinile_importo: f32,
+	pub imposta: f32,
 
 	#[new(default)]
-	imposta: f32,
-
-	#[new(default)]
-	esigibilita_iva: String,
+	pub esigibilita_iva: String,
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
