@@ -1,25 +1,25 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#[derive(Default, new)]
+#[derive(Debug, Default, new)]
 pub struct Sede {
 
 	#[new(default)]
-	indirizzo: String,
+	pub indirizzo: String,
 
 	#[new(default)]
-	numero_civico: String,
+	pub numero_civico: String,
 
 	#[new(default)]
-	cap: String,
+	pub cap: String,
 
 	#[new(default)]
-	comune: String,
+	pub comune: String,
 
 	#[new(default)]
-	provinzia: String,
+	pub provinzia: String,
 
 	#[new(default)]
-	nazione: String,
+	pub nazione: String,
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
