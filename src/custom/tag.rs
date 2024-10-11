@@ -40,13 +40,16 @@ pub enum Tagged {
 pub struct Tag {
 
   #[new(default)]
- 	child: String,
+ 	pub child: String,
 
   #[new(default)]
- 	parent: String,
+ 	pub parent: String,
 
   #[new(default)]
- 	grandparent: String,
+ 	pub gparent: String,
+
+  #[new(default)]
+ 	pub ggparent: String,
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -55,7 +58,7 @@ impl Tag {
 	pub fn check_lineage(
 		&self,
 	) -> (bool, bool) {
-		(self.grandparent != "", self.parent != "")
+		(self.gparent != "", self.parent != "")
 	}
 
 	pub fn identify(
@@ -69,7 +72,7 @@ impl Tag {
 		&mut self,
 		name: String,
 	) {
-		self.grandparent = self.parent.clone();
+		self.gparent = self.parent.clone();
 		self.parent = self.child.clone();
 		self.identify(name);
 	}
@@ -78,8 +81,8 @@ impl Tag {
 		&mut self,
 	) {
 		self.child = self.parent.clone();
-		self.parent = self.grandparent.clone();
-		self.grandparent = String::new();
+		self.parent = self.gparent.clone();
+		self.gparent = String::new();
 	}
 }
 
@@ -92,7 +95,7 @@ impl Display for Tag {
     writeln!(
       f,
       "\t{:<30}{:?}\n\t{:<30}{:?}\n\t{:<30}{:?}\n",
-      "Child:", self.child, "Parent:", self.parent, "GrandParent: ", self.grandparent,
+      "Child:", self.child, "Parent:", self.parent, "GrandParent: ", self.gparent,
     )
   }
 }
