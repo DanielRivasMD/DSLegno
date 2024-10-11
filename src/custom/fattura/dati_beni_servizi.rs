@@ -1,19 +1,19 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // crate utilities
-use crate::custom::dettaglio_linee::DettaglioLinee;
-use crate::custom::dati_riepilogo::DatiRiepilogo;
+use super::dettaglio_linee::DettaglioLinee;
+use super::dati_riepilogo::DatiRiepilogo;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#[derive(Default, new)]
+#[derive(Debug, Default, new)]
 pub struct DatiBeniServizi {
 
 	#[new(default)]
-	dettaglio_linee: Vec<DettaglioLinee>,
+	pub dettaglio_linee: Vec<DettaglioLinee>,
 
 	#[new(default)]
-	dati_riepilogo: DatiRiepilogo,
+	pub dati_riepilogo: DatiRiepilogo,
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
