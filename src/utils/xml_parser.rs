@@ -73,3 +73,46 @@ pub fn xml_parser(reader: EventReader<BufReader<File>>) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+fn data_tagger(tag: &Tag) -> Tagged {
+	match (tag.child.as_str(), tag.parent.as_str(), tag.gparent.as_str()) {
+		// cedente prestatore
+		("Indirizzo", "Sede", "CedentePrestatore") => Tagged::PrestatoreIndirizzo,
+		// cessionario committente
+		("Indirizzo", "Sede", "CessionarioCommittente") => Tagged::CommittenteIndirizzo,
+		// dati generali documento
+		("Numero", "DatiGeneraliDocumento", "DatiGenerali") => Tagged::Fattura,
+		("Data", "DatiGeneraliDocumento", "DatiGenerali") => Tagged::GiornoData,
+		("ImportoTotaleDocumento", "DatiGeneraliDocumento", "DatiGenerali") => Tagged::ImportoTotale,
+		// dettaglio linee
+		("Descrizione", "DettaglioLinee", "DatiBeniServizi") => Tagged::Descrizione,
+		("Quantita", "DettaglioLinee", "DatiBeniServizi") => Tagged::Quantita,
+		("PrezzoUnitario", "DettaglioLinee", "DatiBeniServizi") => Tagged::PrezzoUnitario,
+		("PrezzoTotale", "DettaglioLinee", "DatiBeniServizi") => Tagged::PrezzoTotale,
+		("AliquotaIVA", "DettaglioLinee", "DatiBeniServizi") => Tagged::AliquotaIVA,
+		// dati riepilogo
+		// ("AliquotaIVA", "DatiRiepilogo", "DatiBeniServizi") => Tagged::AliquotaIVA,
+		("ImponibileImporto", "DatiRiepilogo", "DatiBeniServizi") => Tagged::ImponibileImporto,
+		("Imposto", "DatiRiepilogo", "DatiBeniServizi") => Tagged::Imposto,
+		("EsigibilitaIVA", "DatiRiepilogo", "DatiBeniServizi") => Tagged::EsigibilitaIVA,
+		// condizioni pagamento
+		("DataRiferimentoTerminiPagamento", "DettaglioPagamento", "DatiPagamento") => Tagged::DataRiferimentoTermini,
+		("DataScadenzaPagamento", "DettaglioPagamento", "DatiPagamento") => Tagged::DataScadenzaPagamento,
+		("ImportoPagamento", "DettaglioPagamento", "DatiPagamento") => Tagged::ImportoPagamento,
+		// denominazione
+		("Denominazione", "Anagrafica", "DatiAnagrafici") => {
+			match tag.ggparent.as_str() {
+				"CedentePrestatore" => Tagged::PrestatoreDenominazione,
+				"CessionarioCommittente" => Tagged::CommittenteDenominazione,
+				_ => Tagged::None,
+			}
+		},
+		// none
+		(_, _, _) => Tagged::None
+	}
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////
