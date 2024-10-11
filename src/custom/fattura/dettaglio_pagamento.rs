@@ -1,22 +1,16 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#[derive(Default, new)]
+#[derive(Debug, Default, new)]
 pub struct DettaglioPagamento {
 
 	#[new(default)]
-	modalita_pagamento: String,
+	pub data_riferimento: String,
 
 	#[new(default)]
-	data_riferimento: String,
+	pub data_scadenza_pagamento: String,
 
 	#[new(default)]
-	data_scadenza_pagamento: String,
-
-	#[new(default)]
-	importo_pagamento: f32,
-
-	#[new(default)]
-	iban: u32,
+	pub importo_pagamento: f32,
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
