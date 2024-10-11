@@ -1,23 +1,19 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // crate utilities
-use crate::custom::dati_anagrafica::DatiAnagrafica;
-use crate::custom::iscrizione_rea::IscrizioneREA;
-use crate::custom::sede::Sede;
+use super::dati_anagrafica::DatiAnagrafica;
+use super::sede::Sede;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#[derive(Default, new)]
+#[derive(Debug, Default, new)]
 pub struct Participant {
 
 	#[new(default)]
-	dati_anagrafica: DatiAnagrafica,
+	pub dati_anagrafica: DatiAnagrafica,
 
 	#[new(default)]
-	sede: Sede,
-
-	#[new(default)]
-	iscrizione_rea: IscrizioneREA,
+	pub sede: Sede,
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
