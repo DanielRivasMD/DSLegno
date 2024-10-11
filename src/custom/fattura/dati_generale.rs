@@ -1,22 +1,16 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#[derive(Default, new)]
+#[derive(Debug, Default, new)]
 pub struct DatiGenerale {
 
 	#[new(default)]
-	tipo_documento: String,
+	pub giorno_data: String,
 
 	#[new(default)]
-	divisa: String,
+	pub numero: String,
 
 	#[new(default)]
-	data: String,
-
-	#[new(default)]
-	numero: String,
-
-	#[new(default)]
-	importo_totale: f32,
+	pub importo_totale: f32,
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
