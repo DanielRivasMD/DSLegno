@@ -1,23 +1,23 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // crate utilities
-use crate::custom::dati_generale::DatiGenerale;
-use crate::custom::dati_beni_servizi::DatiBeniServizi;
-use crate::custom::dati_pagamento::DatiPagamento;
+use super::dati_generale::DatiGenerale;
+use super::dati_beni_servizi::DatiBeniServizi;
+use super::dati_pagamento::DatiPagamento;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#[derive(Default, new)]
+#[derive(Debug, Default, new)]
 pub struct FatturaBody {
 
 	#[new(default)]
-	dati_generale: DatiGenerale,
+	pub dati_generale: DatiGenerale,
 
 	#[new(default)]
-	dati_beni_servizi: DatiBeniServizi,
+	pub dati_beni_servizi: DatiBeniServizi,
 
 	#[new(default)]
-	dati_pagamento: DatiPagamento,
+	pub dati_pagamento: DatiPagamento,
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
