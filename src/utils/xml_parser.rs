@@ -17,6 +17,14 @@ fn get_db_path() -> String {
 	"dallasanta.sql".to_string()
 }
 
+fn establish_db_connection() -> SqliteConnection {
+	let db_path = get_db_path().clone();
+	// let db_path = "dallasanta.sql".to_string();
+
+	SqliteConnection::establish(db_path.as_str())
+		.unwrap_or_else(|_| panic!("Error connecting to {}", db_path))
+}
+
 	loop {
 		match reader.next() {
 			Ok(e) => {
