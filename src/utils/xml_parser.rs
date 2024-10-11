@@ -172,81 +172,95 @@ fn data_tagger(tag: &Tag) -> Tagged {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /// extract data from fields
-fn data_extractor(data: &String, tagged: &Tagged, conn: &mut SqliteConnection) {
-	use schema::tabella_vendite::dsl::*;
-
+fn data_extractor(data: &String, tagged: &Tagged, fattura: &mut Fattura) {
 	match tagged {
 		Tagged::Descrizione => {
 			println!("{}", "descrizione");
-			let _ = insert_into(tabella_vendite).values(descrizione.eq(data)).execute(conn);
+			// TODO: better implementation for adding elements
+			if fattura.fattura_body.dati_beni_servizi.dettaglio_linee.len() == 0 || fattura.fattura_body.dati_beni_servizi.dettaglio_linee.last().unwrap().check() {
+				fattura.fattura_body.dati_beni_servizi.dettaglio_linee.push(DettaglioLinee::new());
+			}
+			fattura.fattura_body.dati_beni_servizi.dettaglio_linee.last_mut().unwrap().descrizione = data.to_string();
 		}
 		Tagged::Quantita => {
 			println!("{}", "quantita");
-			let _ = insert_into(tabella_vendite).values(quantita.eq(data)).execute(conn);
+			if fattura.fattura_body.dati_beni_servizi.dettaglio_linee.last().unwrap().check() {
+				fattura.fattura_body.dati_beni_servizi.dettaglio_linee.push(DettaglioLinee::new());
+			}
+			fattura.fattura_body.dati_beni_servizi.dettaglio_linee.last_mut().unwrap().quantita = data.parse::<f32>().unwrap();
 		}
 		Tagged::PrezzoUnitario => {
 			println!("{}", "prezzo_unitario");
-			let _ = insert_into(tabella_vendite).values(prezzo_unitario.eq(data)).execute(conn);
+			if fattura.fattura_body.dati_beni_servizi.dettaglio_linee.last().unwrap().check() {
+				fattura.fattura_body.dati_beni_servizi.dettaglio_linee.push(DettaglioLinee::new());
+			}
+			fattura.fattura_body.dati_beni_servizi.dettaglio_linee.last_mut().unwrap().prezzo_unitario = data.to_string();
 		}
 		Tagged::PrezzoTotale => {
 			println!("{}", "prezzo_totale");
-			let _ = insert_into(tabella_vendite).values(prezzo_totale.eq(data)).execute(conn);
+			if fattura.fattura_body.dati_beni_servizi.dettaglio_linee.last().unwrap().check() {
+				fattura.fattura_body.dati_beni_servizi.dettaglio_linee.push(DettaglioLinee::new());
+			}
+			fattura.fattura_body.dati_beni_servizi.dettaglio_linee.last_mut().unwrap().prezzo_totale = data.parse::<f32>().unwrap();
 		}
 		Tagged::AliquotaIVA => {
 			println!("{}", "aliquota_iva");
-			let _ = insert_into(tabella_vendite).values(aliquota_iva.eq(data)).execute(conn);
+			if fattura.fattura_body.dati_beni_servizi.dettaglio_linee.last().unwrap().check() {
+				fattura.fattura_body.dati_beni_servizi.dettaglio_linee.push(DettaglioLinee::new());
+			}
+			fattura.fattura_body.dati_beni_servizi.dettaglio_linee.last_mut().unwrap().aliquota_iva = data.parse::<f32>().unwrap();
 		}
 		Tagged::Fattura => {
 			println!("{}", "fattura");
-			let _ = insert_into(tabella_vendite).values(fattura.eq(data)).execute(conn);
+			fattura.fattura_body.dati_generale.numero = data.to_string();
 		}
 		Tagged::GiornoData => {
 			println!("{}", "giorno_data");
-			let _ = insert_into(tabella_vendite).values(giorno_data.eq(data)).execute(conn);
+			fattura.fattura_body.dati_generale.giorno_data = data.to_string();
 		}
 		Tagged::ImportoTotale => {
 			println!("{}", "importo_totale");
-			let _ = insert_into(tabella_vendite).values(importo_totale.eq(data)).execute(conn);
+			fattura.fattura_body.dati_generale.importo_totale = data.parse::<f32>().unwrap();
 		}
 		Tagged::PrestatoreDenominazione => {
 			println!("{}", "prestatore denominazione");
-			let _ = insert_into(tabella_vendite).values(prestatore_denominazione.eq(data)).execute(conn);
+			fattura.fattura_header.cedente_prestatore.dati_anagrafica.anagrafica.denominazione = data.to_string();
 		}
 		Tagged::PrestatoreIndirizzo => {
 			println!("{}", "prestatore indirizzo");
-			let _ = insert_into(tabella_vendite).values(prestatore_indirizzo.eq(data)).execute(conn);
+			fattura.fattura_header.cedente_prestatore.sede.indirizzo = data.to_string();
 		}
 		Tagged::CommittenteDenominazione => {
 			println!("{}", "committente denominazione");
-			let _ = insert_into(tabella_vendite).values(committente_denominazione.eq(data)).execute(conn);
+			fattura.fattura_header.cessionario_committente.dati_anagrafica.anagrafica.denominazione = data.to_string();
 		}
 		Tagged::CommittenteIndirizzo => {
 			println!("{}", "committente indirizzo");
-			let _ = insert_into(tabella_vendite).values(committente_indirizzo.eq(data)).execute(conn);
+			fattura.fattura_header.cessionario_committente.sede.indirizzo = data.to_string();
 		}
 		Tagged::ImponibileImporto => {
 			println!("{}", "imponibile_importo");
-			let _ = insert_into(tabella_vendite).values(imponibile_importo.eq(data)).execute(conn);
+			fattura.fattura_body.dati_beni_servizi.dati_riepilogo.imponibile_importo = data.parse::<f32>().unwrap();
 		}
 		Tagged::Imposta => {
 			println!("{}", "imposta");
-			let _ = insert_into(tabella_vendite).values(imposta.eq(data)).execute(conn);
+			fattura.fattura_body.dati_beni_servizi.dati_riepilogo.imposta = data.parse::<f32>().unwrap();
 		}
 		Tagged::EsigibilitaIVA => {
 			println!("{}", "esigibilita_iva");
-			let _ = insert_into(tabella_vendite).values(esigibilita_iva.eq(data)).execute(conn);
+			fattura.fattura_body.dati_beni_servizi.dati_riepilogo.esigibilita_iva = data.to_string();
 		}
 		Tagged::DataRiferimentoTermini => {
 			println!("{}", "data_riferimento_termini");
-			let _ = insert_into(tabella_vendite).values(data_riferimento_termini.eq(data)).execute(conn);
+			fattura.fattura_body.dati_pagamento.dettaglio_pagamento.data_riferimento = data.to_string();
 		}
 		Tagged::DataScadenzaPagamento => {
 			println!("{}", "data_scadenza_pagamento");
-			let _ = insert_into(tabella_vendite).values(data_scadenza_pagamento.eq(data)).execute(conn);
+			fattura.fattura_body.dati_pagamento.dettaglio_pagamento.data_scadenza_pagamento = data.to_string();
 		}
 		Tagged::ImportoPagamento => {
 			println!("{}", "importo_pagamento");
-			let _ = insert_into(tabella_vendite).values(importo_pagamento.eq(data)).execute(conn);
+			fattura.fattura_body.dati_pagamento.dettaglio_pagamento.importo_pagamento = data.parse::<f32>().unwrap();
 		}
 		_ => (),
 	}
