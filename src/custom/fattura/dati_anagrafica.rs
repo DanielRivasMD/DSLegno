@@ -1,25 +1,15 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // crate utilities
-use crate::custom::id_fiscale::IDFiscale;
-use crate::custom::anagrafica::Anagrafica;
+use super::anagrafica::Anagrafica;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#[derive(Default, new)]
+#[derive(Debug, Default, new)]
 pub struct DatiAnagrafica {
 
 	#[new(default)]
-	idfiscale: IDFiscale,
-
-	#[new(default)]
-	codice_fiscale: String,
-
-	#[new(default)]
-	anagrafica: Anagrafica,
-
-	#[new(default)]
-	regime_fiscale: String,
+	pub anagrafica: Anagrafica,
 }
 
 
