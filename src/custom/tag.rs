@@ -9,6 +9,33 @@ use std::fmt::{
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+#[derive(Debug, new)]
+pub enum Tagged {
+	PrestatoreDenominazione,
+	PrestatoreIndirizzo,
+	PrestatoreRea,
+	CommittenteDenominazione,
+	CommittenteIndirizzo,
+	Fattura,
+	GiornoData,
+	ImportoTotale,
+	Descrizione,
+	Quantita,
+	PrezzoUnitario,
+	PrezzoTotale,
+	AliquotaIVA,
+	ImponibileImporto,
+	Imposto,
+	EsigibilitaIVA,
+	DataRiferimentoTermini,
+	DataScadenzaPagamento,
+	ImportoPagamento,
+	None,
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
 #[derive(Clone, new)]
 pub struct Tag {
 
