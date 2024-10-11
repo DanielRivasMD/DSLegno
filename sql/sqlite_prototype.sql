@@ -5,37 +5,36 @@
 ----------------------------------------------------------------------------------------------------
 
 
+-- TODO: use date datatype
 CREATE TABLE IF NOT EXISTS tabella_principale
   (
     ----------------------------------------
     id INTEGER PRIMARY KEY AUTOINCREMENT, -- automatic tracker
     operazione INTEGER,                   -- correlation number
     ----------------------------------------
+    -----       dettaglio linee        -----
+    ----------------------------------------
+    descrizione TEXT,                     -- description
+    quantita REAL,                        -- amount
+    prezzo_unitario REAL,                 -- unit price
+    prezzo_totale REAL,                   -- total price
+    aliquota_iva REAL,                    -- tax
+    ----------------------------------------
+    -----   dati generali documento    -----
+    ----------------------------------------
+    fattura TEXT,                         -- invoice number
+    giorno_data TEXT,                     -- invoice date
+    importo_totale REAL,                  -- total amount
+    ----------------------------------------
     -----      cedente prestatore      -----
     ----------------------------------------
     prestatore_denominazione TEXT,        -- name
     prestatore_indirizzo TEXT,            -- address
-    prestatore_numero_rea INTEGER,        -- number
     ----------------------------------------
     -----   cessionario committente    -----
     ----------------------------------------
     committente_denominazione TEXT,       -- name
     committente_indirizzo TEXT,           -- address
-    ----------------------------------------
-    -----   dati generali documento    -----
-    ----------------------------------------
-    fattura TEXT,                         -- invoice number
-    data TEXT,                            -- invoice date
-    importo_totale REAL,                  -- total amount
-    ----------------------------------------
-    -----       dettaglio linee        -----
-    ----------------------------------------
-    descrizione TEXT,                     -- description
-    numero_linea INTEGER,                 -- number
-    quantita REAL,                        -- amount
-    prezzo_unitario REAL,                 -- unit price
-    prezzo_totale REAL,                   -- total price
-    aliquota_iva REAL,                    -- tax
     ----------------------------------------
     -----        dati riepilogo        -----
     ----------------------------------------
@@ -45,11 +44,9 @@ CREATE TABLE IF NOT EXISTS tabella_principale
     ----------------------------------------
     -----     condizioni pagamento     -----
     ----------------------------------------
-    dati_riferimento_termini TEXT,        -- date
-    dati_scadenza_pagamento TEXT,         -- date
-    importo_pagamento REAL,               -- total
-    ----------------------------------------
-    typo TEXT
+    data_riferimento_termini TEXT,        -- date
+    data_scadenza_pagamento TEXT,         -- date
+    importo_pagamento REAL                -- total
     ----------------------------------------
    );
 
@@ -60,31 +57,29 @@ CREATE TABLE IF NOT EXISTS tabella_acquisti
     id INTEGER PRIMARY KEY AUTOINCREMENT, -- automatic tracker
     operazione INTEGER,                   -- correlation number
     ----------------------------------------
+    -----       dettaglio linee        -----
+    ----------------------------------------
+    descrizione TEXT,                     -- description
+    quantita REAL,                        -- amount
+    prezzo_unitario REAL,                 -- unit price
+    prezzo_totale REAL,                   -- total price
+    aliquota_iva REAL,                    -- tax
+    ----------------------------------------
+    -----   dati generali documento    -----
+    ----------------------------------------
+    fattura TEXT,                         -- invoice number
+    giorno_data TEXT,                     -- invoice date
+    importo_totale REAL,                  -- total amount
+    ----------------------------------------
     -----      cedente prestatore      -----
     ----------------------------------------
     prestatore_denominazione TEXT,        -- name
     prestatore_indirizzo TEXT,            -- address
-    prestatore_numero_rea INTEGER,        -- number
     ----------------------------------------
     -----   cessionario committente    -----
     ----------------------------------------
     committente_denominazione TEXT,       -- name
     committente_indirizzo TEXT,           -- address
-    ----------------------------------------
-    -----   dati generali documento    -----
-    ----------------------------------------
-    fattura TEXT,                         -- invoice number
-    data TEXT,                            -- invoice date
-    importo_totale REAL,                  -- total amount
-    ----------------------------------------
-    -----       dettaglio linee        -----
-    ----------------------------------------
-    descrizione TEXT,                     -- description
-    numero_linea INTEGER,                 -- number
-    quantita REAL,                        -- amount
-    prezzo_unitario REAL,                 -- unit price
-    prezzo_totale REAL,                   -- total price
-    aliquota_iva REAL,                    -- tax
     ----------------------------------------
     -----        dati riepilogo        -----
     ----------------------------------------
@@ -94,8 +89,8 @@ CREATE TABLE IF NOT EXISTS tabella_acquisti
     ----------------------------------------
     -----     condizioni pagamento     -----
     ----------------------------------------
-    dati_riferimento_termini TEXT,        -- date
-    dati_scadenza_pagamento TEXT,         -- date
+    data_riferimento_termini TEXT,        -- date
+    data_scadenza_pagamento TEXT,         -- date
     importo_pagamento REAL                -- total
     ----------------------------------------
   );
@@ -107,31 +102,29 @@ CREATE TABLE IF NOT EXISTS tabella_vendite
     id INTEGER PRIMARY KEY AUTOINCREMENT, -- automatic tracker
     operazione INTEGER,                   -- correlation number
     ----------------------------------------
+    -----       dettaglio linee        -----
+    ----------------------------------------
+    descrizione TEXT,                     -- description
+    quantita REAL,                        -- amount
+    prezzo_unitario REAL,                 -- unit price
+    prezzo_totale REAL,                   -- total price
+    aliquota_iva REAL,                    -- tax
+    ----------------------------------------
+    -----   dati generali documento    -----
+    ----------------------------------------
+    fattura TEXT,                         -- invoice number
+    giorno_data TEXT,                     -- invoice date
+    importo_totale REAL,                  -- total amount
+    ----------------------------------------
     -----      cedente prestatore      -----
     ----------------------------------------
     prestatore_denominazione TEXT,        -- name
     prestatore_indirizzo TEXT,            -- address
-    prestatore_numero_rea INTEGER,        -- number
     ----------------------------------------
     -----   cessionario committente    -----
     ----------------------------------------
     committente_denominazione TEXT,       -- name
     committente_indirizzo TEXT,           -- address
-    ----------------------------------------
-    -----   dati generali documento    -----
-    ----------------------------------------
-    fattura TEXT,                         -- invoice number
-    data TEXT,                            -- invoice date
-    importo_totale REAL,                  -- total amount
-    ----------------------------------------
-    -----       dettaglio linee        -----
-    ----------------------------------------
-    descrizione TEXT,                     -- description
-    numero_linea INTEGER,                 -- number
-    quantita REAL,                        -- amount
-    prezzo_unitario REAL,                 -- unit price
-    prezzo_totale REAL,                   -- total price
-    aliquota_iva REAL,                    -- tax
     ----------------------------------------
     -----        dati riepilogo        -----
     ----------------------------------------
@@ -141,8 +134,8 @@ CREATE TABLE IF NOT EXISTS tabella_vendite
     ----------------------------------------
     -----     condizioni pagamento     -----
     ----------------------------------------
-    dati_riferimento_termini TEXT,        -- date
-    dati_scadenza_pagamento TEXT,         -- date
+    data_riferimento_termini TEXT,        -- date
+    data_scadenza_pagamento TEXT,         -- date
     importo_pagamento REAL                -- total
     ----------------------------------------
   );
