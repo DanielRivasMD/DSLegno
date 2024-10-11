@@ -72,6 +72,7 @@ impl Tag {
 		&mut self,
 		name: String,
 	) {
+		self.ggparent = self.gparent.clone();
 		self.gparent = self.parent.clone();
 		self.parent = self.child.clone();
 		self.identify(name);
@@ -82,7 +83,8 @@ impl Tag {
 	) {
 		self.child = self.parent.clone();
 		self.parent = self.gparent.clone();
-		self.gparent = String::new();
+		self.gparent = self.ggparent.clone();
+		self.ggparent = String::new();
 	}
 }
 
