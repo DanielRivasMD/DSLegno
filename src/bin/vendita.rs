@@ -2,20 +2,16 @@
 
 // library wrapper
 use ds_legno::*;
-use derive_new::new;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // standard libraries
 use std::fs::File;
-use std::io::BufReader;
-use xml::common::Position;
-use xml::reader::{ParserConfig, XmlEvent};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // crate utilities
-use crate::custom::tag::Tag;
+use crate::utils::xml_parser::*;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -24,14 +20,7 @@ fn main() {
 	let file_path = std::env::args_os().nth(1).expect("Please specify a path to an XML file");
 	let file = File::open(file_path).unwrap();
 
-	let mut reader = ParserConfig::default()
-		.ignore_root_level_whitespace(false)
-		.create_reader(BufReader::new(file));
-
-	let mut tag = Tag::new();
-	println!("{}", reader);
-
-	xml_parser(reader);
+	xml_parser(file);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
