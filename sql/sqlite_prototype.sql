@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS tabella_principale
     -----        dati riepilogo        -----
     ----------------------------------------
     imponibile_importo REAL,              -- total
-    imposto REAL,                         -- tax
+    imposta REAL,                         -- tax
     esigibilita_iva CHAR,                 -- tax category
     ----------------------------------------
     -----     condizioni pagamento     -----
@@ -84,7 +84,7 @@ CREATE TABLE IF NOT EXISTS tabella_acquisti
     -----        dati riepilogo        -----
     ----------------------------------------
     imponibile_importo REAL,              -- total
-    imposto REAL,                         -- tax
+    imposta REAL,                         -- tax
     esigibilita_iva CHAR,                 -- tax category
     ----------------------------------------
     -----     condizioni pagamento     -----
@@ -129,7 +129,7 @@ CREATE TABLE IF NOT EXISTS tabella_vendite
     -----        dati riepilogo        -----
     ----------------------------------------
     imponibile_importo REAL,              -- total
-    imposto REAL,                         -- tax
+    imposta REAL,                         -- tax
     esigibilita_iva CHAR,                 -- tax category
     ----------------------------------------
     -----     condizioni pagamento     -----

@@ -34,7 +34,7 @@ mod schema {
 			prezzo_totale -> Text,
 			aliquota_iva -> Text,
 			imponibile_importo -> Text,
-			imposto -> Text,
+			imposta -> Text,
 			esigibilita_iva -> Char,
 			data_riferimento_termini -> Text,
 			data_scadenza_pagamento -> Text,
@@ -148,7 +148,7 @@ fn data_tagger(tag: &Tag) -> Tagged {
 		// dati riepilogo
 		// ("AliquotaIVA", "DatiRiepilogo", "DatiBeniServizi") => Tagged::AliquotaIVA,
 		("ImponibileImporto", "DatiRiepilogo", "DatiBeniServizi") => Tagged::ImponibileImporto,
-		("Imposto", "DatiRiepilogo", "DatiBeniServizi") => Tagged::Imposto,
+		("Imposta", "DatiRiepilogo", "DatiBeniServizi") => Tagged::Imposta,
 		("EsigibilitaIVA", "DatiRiepilogo", "DatiBeniServizi") => Tagged::EsigibilitaIVA,
 		// condizioni pagamento
 		("DataRiferimentoTerminiPagamento", "DettaglioPagamento", "DatiPagamento") => Tagged::DataRiferimentoTermini,
@@ -228,9 +228,9 @@ fn data_extractor(data: &String, tagged: &Tagged, conn: &mut SqliteConnection) {
 			println!("{}", "imponibile_importo");
 			let _ = insert_into(tabella_vendite).values(imponibile_importo.eq(data)).execute(conn);
 		}
-		Tagged::Imposto => {
-			println!("{}", "imposto");
-			let _ = insert_into(tabella_vendite).values(imposto.eq(data)).execute(conn);
+		Tagged::Imposta => {
+			println!("{}", "imposta");
+			let _ = insert_into(tabella_vendite).values(imposta.eq(data)).execute(conn);
 		}
 		Tagged::EsigibilitaIVA => {
 			println!("{}", "esigibilita_iva");

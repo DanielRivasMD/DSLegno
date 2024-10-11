@@ -25,7 +25,7 @@ pub enum Tagged {
 	PrezzoTotale,
 	AliquotaIVA,
 	ImponibileImporto,
-	Imposto,
+	Imposta,
 	EsigibilitaIVA,
 	DataRiferimentoTermini,
 	DataScadenzaPagamento,
