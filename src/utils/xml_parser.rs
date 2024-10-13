@@ -60,6 +60,18 @@ fn establish_db_connection() -> SqliteConnection {
 		.unwrap_or_else(|_| panic!("Error connecting to {}", db_path))
 }
 
+pub fn insert_insertable_struct(fattura: FatturaToUpload, conn: &mut SqliteConnection) -> Result<(), Box<dyn Error>> {
+	// use schema::tabella_vendite::dsl::*;
+
+	// let vendite_form = serde_json::to_string(&fattura).unwrap();
+// println!("{}", vendite_form);
+
+	// insert_into(tabella_vendite).values(&vendite_form).execute(conn)?;
+	insert_into(tabella_vendite).values(&fattura).execute(conn)?;
+
+	Ok(())
+}
+
 /// parse xml file (fattura)
 pub fn xml_parser(file: File) {
 
