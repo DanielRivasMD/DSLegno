@@ -8,6 +8,7 @@ use xml::reader::{ParserConfig, XmlEvent};
 use diesel::sqlite::SqliteConnection;
 use diesel::insert_into;
 use diesel::prelude::*;
+use std::error::Error;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -84,9 +85,8 @@ pub fn xml_parser(file: File) {
 	let mut tag = Tag::new();
 	let mut tagged = Tagged::new_none();
 
-	let mut conn = establish_db_connection();
 	// initialize invoice
-	let mut fattura = Fattura::new();
+	let mut fattura_to_capture = FatturaToCapture::new();
 
 	// iterate on file
 	loop {
@@ -111,7 +111,7 @@ pub fn xml_parser(file: File) {
 					},
 
 					XmlEvent::Comment(data) | XmlEvent::CData(data) | XmlEvent::Characters(data) => {
-						data_extractor(&data, &tagged, &mut fattura);
+						data_extractor(&data, &tagged, &mut fattura_to_capture);
 					},
 
 					_ => (),
@@ -124,6 +124,18 @@ pub fn xml_parser(file: File) {
 			},
 		}
 	}
+
+	// open database connection
+	let mut conn = establish_db_connection();
+
+	// prepare data to upload
+	let fatture_to_upload = fattura_to_capture.upload_formatter();
+
+	// upload to database
+	for fattura_to_upload in fatture_to_upload.into_iter() {
+		let _ = insert_insertable_struct(fattura_to_upload, &mut conn);
+	}
+	println!("{}", "inserted!");
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
