@@ -168,3 +168,24 @@ impl FatturaToCapture {
 	}
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+#[derive(Debug, new)]
+pub struct DettaglioLinee {
+
+	#[new(default)]
+	pub descrizione: String,
+
+	#[new(default)]
+	pub quantita: String,
+
+	#[new(default)]
+	pub prezzo_unitario: String,
+
+	#[new(default)]
+	pub prezzo_totale: String,
+
+	#[new(default)]
+	pub aliquota_iva: String,
+}
+
