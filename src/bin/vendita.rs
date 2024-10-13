@@ -15,7 +15,6 @@ use crate::utils::xml_parser::*;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// TODO: parser functional. select desired fields. IMPORTANT: multiple records on one file
 fn main() {
 	let file_path = std::env::args_os().nth(1).expect("Please specify a path to an XML file");
 	let file = File::open(file_path).unwrap();

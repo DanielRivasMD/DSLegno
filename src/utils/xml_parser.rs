@@ -19,6 +19,7 @@ use crate::custom::schema::tabella_vendite::dsl::*;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+// TODO: migrate sql functions
 fn get_db_path() -> String {
 	// let home_dir = dirs::home_dir().unwrap();
 	// home_dir.to_str().unwrap().to_string() + "/.config/orion/database.sqlite"
@@ -112,6 +113,7 @@ pub fn xml_parser(file: File) {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+// TODO: update data tagger & extractor
 fn data_tagger(tag: &Tag) -> Tagged {
 	match (tag.child.as_str(), tag.parent.as_str(), tag.gparent.as_str()) {
 		// cedente prestatore
