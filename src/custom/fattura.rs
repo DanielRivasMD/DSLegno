@@ -1,7 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // standard libraries
-use serde::{Deserialize, Serialize};
 use diesel::prelude::*;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -12,8 +11,7 @@ use crate::custom::schema::tabella_vendite;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // TODO: find how to transfer fields
-#[derive(Debug, Default, Deserialize, Insertable, Serialize, new)]
-// #[diesel(table_name = crate::custom::schema::tabella_vendite)]
+#[derive(Debug, Default, Insertable, new)]
 #[diesel(table_name = tabella_vendite)]
 pub struct FatturaToUpload {
 
