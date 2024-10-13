@@ -5,46 +5,14 @@ use std::fs::File;
 use std::io::BufReader;
 use xml::common::Position;
 use xml::reader::{ParserConfig, XmlEvent};
-use diesel::sqlite::SqliteConnection;
-use diesel::insert_into;
-use diesel::prelude::*;
-use std::error::Error;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // crate utilities
 use crate::custom::tag::*;
 use crate::custom::fattura::*;
-use crate::custom::schema::tabella_vendite::dsl::*;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-// TODO: migrate sql functions
-fn get_db_path() -> String {
-	// let home_dir = dirs::home_dir().unwrap();
-	// home_dir.to_str().unwrap().to_string() + "/.config/orion/database.sqlite"
-	"dallasanta.sql".to_string()
-}
-
-fn establish_db_connection() -> SqliteConnection {
-	let db_path = get_db_path().clone();
-	// let db_path = "dallasanta.sql".to_string();
-
-	SqliteConnection::establish(db_path.as_str())
-		.unwrap_or_else(|_| panic!("Error connecting to {}", db_path))
-}
-
-pub fn insert_insertable_struct(fattura: FatturaToUpload, conn: &mut SqliteConnection) -> Result<(), Box<dyn Error>> {
-	// use schema::tabella_vendite::dsl::*;
-
-	// let vendite_form = serde_json::to_string(&fattura).unwrap();
-// println!("{}", vendite_form);
-
-	// insert_into(tabella_vendite).values(&vendite_form).execute(conn)?;
-	insert_into(tabella_vendite).values(&fattura).execute(conn)?;
-
-	Ok(())
-}
 
 /// parse xml file (fattura)
 pub fn xml_parser(file: File) {
