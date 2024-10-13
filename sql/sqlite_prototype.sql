@@ -5,6 +5,7 @@
 ----------------------------------------------------------------------------------------------------
 
 
+-- TODO: modify architecture according to feedback
 -- TODO: use date datatype
 CREATE TABLE IF NOT EXISTS tabella_principale
   (
@@ -155,6 +156,7 @@ CREATE TABLE IF NOT EXISTS tabella_operazione
 ----------------------------------------------------------------------------------------------------
 
 
+-- TODO: update insertion triggers
 -- update on insert
 CREATE TRIGGER denovo_acquisti
   AFTER UPDATE ON tabella_acquisti
