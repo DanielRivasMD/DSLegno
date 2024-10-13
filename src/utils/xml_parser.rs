@@ -15,7 +15,7 @@ use crate::custom::fattura::*;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /// parse xml file (fattura)
-pub fn xml_parser(file: File) {
+pub fn xml_parser(file: File) -> FatturaToCapture {
 
 	// get file reader
 	let mut reader = ParserConfig::default()
@@ -66,17 +66,7 @@ pub fn xml_parser(file: File) {
 		}
 	}
 
-	// open database connection
-	let mut conn = establish_db_connection();
-
-	// prepare data to upload
-	let fatture_to_upload = fattura_to_capture.upload_formatter();
-
-	// upload to database
-	for fattura_to_upload in fatture_to_upload.into_iter() {
-		let _ = insert_insertable_struct(fattura_to_upload, &mut conn);
-	}
-	println!("{}", "inserted!");
+	return fattura_to_capture;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -84,28 +74,35 @@ pub fn xml_parser(file: File) {
 // TODO: update data tagger & extractor
 fn data_tagger(tag: &Tag) -> Tagged {
 	match (tag.child.as_str(), tag.parent.as_str(), tag.gparent.as_str()) {
+
 		// cedente prestatore
 		("Indirizzo", "Sede", "CedentePrestatore") => Tagged::PrestatoreIndirizzo,
+
 		// cessionario committente
 		("Indirizzo", "Sede", "CessionarioCommittente") => Tagged::CommittenteIndirizzo,
+
 		// dati generali documento
 		("Numero", "DatiGeneraliDocumento", "DatiGenerali") => Tagged::Fattura,
 		("Data", "DatiGeneraliDocumento", "DatiGenerali") => Tagged::GiornoData,
 		("ImportoTotaleDocumento", "DatiGeneraliDocumento", "DatiGenerali") => Tagged::ImportoTotale,
+
 		// dettaglio linee
 		("Descrizione", "DettaglioLinee", "DatiBeniServizi") => Tagged::Descrizione,
 		("Quantita", "DettaglioLinee", "DatiBeniServizi") => Tagged::Quantita,
 		("PrezzoUnitario", "DettaglioLinee", "DatiBeniServizi") => Tagged::PrezzoUnitario,
 		("PrezzoTotale", "DettaglioLinee", "DatiBeniServizi") => Tagged::PrezzoTotale,
 		("AliquotaIVA", "DettaglioLinee", "DatiBeniServizi") => Tagged::AliquotaIVA,
+
 		// dati riepilogo
 		("ImponibileImporto", "DatiRiepilogo", "DatiBeniServizi") => Tagged::ImponibileImporto,
 		("Imposta", "DatiRiepilogo", "DatiBeniServizi") => Tagged::Imposta,
 		("EsigibilitaIVA", "DatiRiepilogo", "DatiBeniServizi") => Tagged::EsigibilitaIVA,
+
 		// condizioni pagamento
 		("DataRiferimentoTerminiPagamento", "DettaglioPagamento", "DatiPagamento") => Tagged::DataRiferimentoTermini,
 		("DataScadenzaPagamento", "DettaglioPagamento", "DatiPagamento") => Tagged::DataScadenzaPagamento,
 		("ImportoPagamento", "DettaglioPagamento", "DatiPagamento") => Tagged::ImportoPagamento,
+
 		// denominazione
 		("Denominazione", "Anagrafica", "DatiAnagrafici") => {
 			match tag.ggparent.as_str() {
@@ -114,6 +111,7 @@ fn data_tagger(tag: &Tag) -> Tagged {
 				_ => Tagged::None,
 			}
 		},
+
 		// none
 		(_, _, _) => Tagged::None
 	}
@@ -215,6 +213,5 @@ fn data_extractor(data: &String, tagged: &Tagged, fattura: &mut FatturaToCapture
 		_ => (),
 	}
 }
-
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
