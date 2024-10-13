@@ -6,7 +6,7 @@ use diesel::prelude::*;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // crate utilities
-use crate::custom::schema::tabella_vendite;
+use crate::custom::schema::*;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -124,7 +124,11 @@ impl FatturaToCapture {
 	pub fn upload_formatter(
 		&self,
 	) -> Vec<FatturaToUpload> {
+
+		// preallocate
 		let mut fatture: Vec<FatturaToUpload> = vec![];
+
+		// iterate on details
 		for details in self.dettaglio_linee.iter() {
 			fatture.push(
 				FatturaToUpload {
@@ -149,6 +153,7 @@ impl FatturaToCapture {
 				}
 			);
 		}
+
 		return fatture;
 	}
 }
@@ -183,6 +188,5 @@ impl DettaglioLinee {
 		!(self.descrizione.is_empty() | self.quantita.is_empty() | self.prezzo_unitario.is_empty() | self.prezzo_totale.is_empty() | self.aliquota_iva.is_empty())
 	}
 }
-
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
