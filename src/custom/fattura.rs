@@ -86,12 +86,52 @@ pub struct FatturaToUpload {
 
 #[derive(Debug, Default, new)]
 pub struct Fattura {
+pub struct FatturaToCapture {
 
 	#[new(default)]
 	pub fattura_header: FatturaHeader,
+	pub dettaglio_linee: Vec<DettaglioLinee>,
 
 	#[new(default)]
 	pub fattura_body: FatturaBody,
+	pub numero_fattura: String,
+
+	#[new(default)]
+	pub giorno_data: String,
+
+	#[new(default)]
+	pub importo_totale: String,
+
+	#[new(default)]
+	pub prestatore_denominazione: String,
+
+	#[new(default)]
+	pub prestatore_indirizzo: String,
+
+	#[new(default)]
+	pub committente_denominazione: String,
+
+	#[new(default)]
+	pub committente_indirizzo: String,
+
+	#[new(default)]
+	pub imponibile_importo: String,
+
+	#[new(default)]
+	pub imposta: String,
+
+	#[new(default)]
+	pub esigibilita_iva: String,
+
+	#[new(default)]
+	pub data_riferimento_termini: String,
+
+	#[new(default)]
+	pub data_scadenza_pagamento: String,
+
+	#[new(default)]
+	pub importo_pagamento: String,
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+
