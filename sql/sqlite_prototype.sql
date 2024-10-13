@@ -67,7 +67,7 @@ CREATE TABLE IF NOT EXISTS tabella_acquisti
     ----------------------------------------
     -----   dati generali documento    -----
     ----------------------------------------
-    fattura TEXT,                         -- invoice number
+    numero_fattura TEXT,                  -- invoice number
     giorno_data TEXT,                     -- invoice date
     importo_totale REAL,                  -- total amount
     ----------------------------------------
@@ -112,7 +112,7 @@ CREATE TABLE IF NOT EXISTS tabella_vendite
     ----------------------------------------
     -----   dati generali documento    -----
     ----------------------------------------
-    fattura TEXT,                         -- invoice number
+    numero_fattura TEXT,                  -- invoice number
     giorno_data TEXT,                     -- invoice date
     importo_totale REAL,                  -- total amount
     ----------------------------------------
