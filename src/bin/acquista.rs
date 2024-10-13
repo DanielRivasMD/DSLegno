@@ -1,381 +1,49 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+// library wrapper
+use ds_legno::*;
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// standard libraries
 use std::fs::File;
-use std::io::BufReader;
-use xml::common::Position;
-use xml::reader::{ParserConfig, XmlEvent};
 
-use std::fmt::{
-  Display,
-  Formatter,
-  Result,
-};
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#[macro_use]
-extern crate derive_new;
+// crate utilities
+use crate::utils::sql::*;
+use crate::utils::xml_parser::*;
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// TODO: migrate custom structs
-#[derive(Default, new)]
-struct FatturaHeader {
+// DOC: first argument will be used as input
+// DOC: check whether invoice number exists prior to inserting
 
-	// dati_transmissione: DatiTrasmittente,
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	#[new(default)]
-	cedente_prestatore: Participant,
-
-	#[new(default)]
-	cessionario_committente: Participant,
-}
-
-
-// struct DatiTrasmittente {
-
-// 	id_trasmittente: IDTrasmittente,
-
-// }
-
-// struct IDTrasmittente {
-
-// 	id_paese: String,
-
-// 	id_codice: String,
-// }
-
-#[derive(Default, new)]
-struct Participant {
-
-	#[new(default)]
-	dati_anagrafica: DatiAnagrafica,
-
-	#[new(default)]
-	sede: Sede,
-
-	#[new(default)]
-	iscrizione_rea: IscrizioneREA,
-}
-
-#[derive(Default, new)]
-struct DatiAnagrafica {
-
-	#[new(default)]
-	idfiscale: IDFiscale,
-
-	#[new(default)]
-	codice_fiscale: String,
-
-	#[new(default)]
-	anagrafica: Anagrafica,
-
-	#[new(default)]
-	regime_fiscale: String,
-}
-
-#[derive(Default, new)]
-struct IDFiscale {
-
-	#[new(default)]
-	idpaese: String,
-
-	#[new(default)]
-	idcodice: String,
-}
-
-#[derive(Default, new)]
-struct Anagrafica {
-
-	#[new(default)]
-	denominazine: String,
-}
-
-#[derive(Default, new)]
-struct Sede {
-
-	#[new(default)]
-	indirizzo: String,
-
-	#[new(default)]
-	numero_civico: String,
-
-	#[new(default)]
-	cap: String,
-
-	#[new(default)]
-	comune: String,
-
-	#[new(default)]
-	provinzia: String,
-
-	#[new(default)]
-	nazione: String,
-}
-
-#[derive(Default, new)]
-struct IscrizioneREA {
-
-	#[new(default)]
-	ufficio: String,
-
-	#[new(default)]
-	numero_rea: String,
-
-	#[new(default)]
-	capitale_sociale: String,
-
-	#[new(default)]
-	socio_unico: String,
-
-	#[new(default)]
-	stato_liquidazione: String,
-}
-
-#[derive(Default, new)]
-struct FatturaBody {
-
-	#[new(default)]
-	dati_generale: DatiGenerale,
-
-	#[new(default)]
-	dati_beni_servizi: DatiBeniServizi,
-
-	#[new(default)]
-	dati_pagamento: DatiPagamento,
-}
-
-#[derive(Default, new)]
-struct DatiGenerale {
-
-	#[new(default)]
-	tipo_documento: String,
-
-	#[new(default)]
-	divisa: String,
-
-	#[new(default)]
-	data: String,
-
-	#[new(default)]
-	numero: String,
-
-	#[new(default)]
-	importo_totale: f32,
-}
-
-#[derive(Default, new)]
-struct DatiBeniServizi {
-
-	#[new(default)]
-	dettaglio_linee: Vec<DettaglioLinee>,
-
-	#[new(default)]
-	dati_riepilogo: DatiRiepilogo,
-}
-
-#[derive(new)]
-struct DettaglioLinee {
-
-	#[new(default)]
-	numero_linea: u32,
-
-	#[new(default)]
-	descrizione: String,
-
-	#[new(default)]
-	quantita: f32,
-
-	#[new(default)]
-	unita_misura: String,
-
-	#[new(default)]
-	prezzo_unitario: String,
-
-	#[new(default)]
-	preazzo_totale: f32,
-
-	#[new(default)]
-	aliquota_iva: f32,
-}
-
-#[derive(Default, new)]
-struct DatiRiepilogo {
-
-	#[new(default)]
-	aliquota_iva: f32,
-
-	#[new(default)]
-	imponinile_importo: f32,
-
-	#[new(default)]
-	imposta: f32,
-
-	#[new(default)]
-	esigibilita_iva: String,
-}
-
-#[derive(Default, new)]
-struct DatiPagamento {
-
-	#[new(default)]
-	condizioni_pagamento: String,
-
-	#[new(default)]
-	dettaglio_pagamento: DettaglioPagamento,
-}
-
-#[derive(Default, new)]
-struct DettaglioPagamento {
-
-	#[new(default)]
-	modalita_pagamento: String,
-
-	#[new(default)]
-	data_riferimento: String,
-
-	#[new(default)]
-	data_scadenza_pagamento: String,
-
-	#[new(default)]
-	importo_pagamento: f32,
-
-	#[new(default)]
-	iban: u32,
-}
-
-
-#[derive(Clone, new)]
-struct Tag {
-
-  #[new(default)]
- 	child: String,
-
-  #[new(default)]
- 	parent: String,
-
-  #[new(default)]
- 	grandparent: String,
-}
-
-
-impl Tag {
-	fn check_lineage(
-		&self,
-	) -> (bool, bool) {
-		(self.grandparent != "", self.parent != "")
-	}
-
-	fn identify(
-		&mut self,
-		name: String,
-	) {
-		self.child = name;
-	}
-
-	fn up_scroll(
-		&mut self,
-		name: String,
-	) {
-		self.grandparent = self.parent.clone();
-		self.parent = self.child.clone();
-		self.identify(name);
-	}
-
-	fn down_scroll(
-		&mut self,
-	) {
-		self.child = self.parent.clone();
-		self.parent = self.grandparent.clone();
-		self.grandparent = String::new();
-	}
-}
-
-/// Implement Display for Ind.
-impl Display for Tag {
-  fn fmt(
-    &self,
-    f: &mut Formatter,
-  ) -> Result {
-    writeln!(
-      f,
-      "\t{:<30}{:?}\n\t{:<30}{:?}\n\t{:<30}{:?}\n",
-      "Child:", self.child, "Parent:", self.parent, "GrandParent: ", self.grandparent,
-    )
-  }
-}
-
-// TODO: parser functional. select desired fields. IMPORTANT: multiple records on one file
 fn main() {
-	let file_path = std::env::args_os().nth(1).expect("Please specify a path to an XML file");
-	let file = File::open(file_path).unwrap();
+	// get path
+	let file_path = std::env::args_os().nth(1)?;
+	let file = File::open(file_path)?;
 
-	let mut reader = ParserConfig::default()
-		.ignore_root_level_whitespace(false)
-		.create_reader(BufReader::new(file));
+	// parse file
+	let fattura_to_capture = xml_parser(file)?;
 
-	let mut tag = Tag::new();
+	// open database connection
+	let mut conn = establish_db_connection()?;
 
-	// TODO: move xml reader logic to function
-	loop {
-		match reader.next() {
-			Ok(e) => {
-				// print!("{}\t", reader.position());
+	// prepare data to upload
+	let fatture_to_upload = fattura_to_capture.upload_formatter()?;
 
-				match e {
-
-					XmlEvent::EndDocument => {
-						println!("EndDocument");
-						break;
-					},
-
-					XmlEvent::StartElement { name, attributes, .. } => {
-						if attributes.is_empty() {
-
-							tag.up_scroll(name.to_string());
-
-						} else {
-							let attrs: Vec<_> = attributes
-								.iter()
-								.map(|a| format!("{}={:?}", &a.name, a.value))
-								.collect();
-							println!("StartElement({name} [{}])", attrs.join(", "));
-						}
-					},
-
-					XmlEvent::EndElement { name } => {
-						tag.down_scroll();
-					},
-
-					XmlEvent::Comment(data) => {
-						println!(r#"Comment("{}")"#, data.escape_debug());
-					},
-
-					XmlEvent::CData(data) => {
-						// if tag.child == "IdPaese" {
-							println!("{}", tag);
-							println!("{}", data.escape_debug());
-						// }
-					}
-
-					XmlEvent::Characters(data) => {
-						println!("{}", tag);
-							println!("{}", data.escape_debug());
-						// println!(r#"Characters("{}")"#, data.escape_debug())
-					},
-
-					XmlEvent::Whitespace(data) => {  
-						// println!(r#"Whitespace("{}")"#, data.escape_debug())
-					},
-
-					_ => (),
-
-				}
-			},
-			Err(e) => {
-				eprintln!("Error at {}: {e}", reader.position());
-				break;
-			},
-		}
+	// upload to database
+	for fattura_to_upload in fatture_to_upload.into_iter() {
+		let _ = insert_insertable_struct(fattura_to_upload, &mut conn)?;
 	}
+
+	Ok(())
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
