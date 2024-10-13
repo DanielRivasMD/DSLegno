@@ -1,6 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // standard libraries
+use anyhow::Result as anyResult;
 use diesel::prelude::*;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -123,7 +124,7 @@ pub struct FatturaToCapture {
 impl FatturaToCapture {
 	pub fn upload_formatter(
 		&self,
-	) -> Vec<FatturaToUpload> {
+	) -> anyResult<Vec<FatturaToUpload>> {
 
 		// preallocate
 		let mut fatture: Vec<FatturaToUpload> = vec![];
@@ -184,7 +185,7 @@ pub struct DettaglioLinee {
 impl DettaglioLinee {
 	pub fn check(
 		&self,
-	) -> bool {
+	) -> anyResult<bool> {
 		!(self.descrizione.is_empty() | self.quantita.is_empty() | self.prezzo_unitario.is_empty() | self.prezzo_totale.is_empty() | self.aliquota_iva.is_empty())
 	}
 }

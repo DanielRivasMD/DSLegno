@@ -18,22 +18,24 @@ use crate::utils::xml_parser::*;
 
 fn main() {
 	// get path
-	let file_path = std::env::args_os().nth(1).expect("Please specify a path to an XML file");
-	let file = File::open(file_path).unwrap();
+	let file_path = std::env::args_os().nth(1)?;
+	let file = File::open(file_path)?;
 
 	// parse file
-	let fattura_to_capture = xml_parser(file);
+	let fattura_to_capture = xml_parser(file)?;
 
 	// open database connection
-	let mut conn = establish_db_connection();
+	let mut conn = establish_db_connection()?;
 
 	// prepare data to upload
-	let fatture_to_upload = fattura_to_capture.upload_formatter();
+	let fatture_to_upload = fattura_to_capture.upload_formatter()?;
 
 	// upload to database
 	for fattura_to_upload in fatture_to_upload.into_iter() {
-		let _ = insert_insertable_struct(fattura_to_upload, &mut conn);
+		let _ = insert_insertable_struct(fattura_to_upload, &mut conn)?;
 	}
+
+	Ok(())
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

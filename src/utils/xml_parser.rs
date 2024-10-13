@@ -1,6 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // standard libraries
+use anyhow::Result as anyResult;
 use std::fs::File;
 use std::io::BufReader;
 use xml::common::Position;
@@ -15,7 +16,7 @@ use crate::custom::fattura::*;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /// parse xml file (fattura)
-pub fn xml_parser(file: File) -> FatturaToCapture {
+pub fn xml_parser(file: File) -> anyResult<FatturaToCapture> {
 
 	// get file reader
 	let mut reader = ParserConfig::default()
@@ -66,13 +67,13 @@ pub fn xml_parser(file: File) -> FatturaToCapture {
 		}
 	}
 
-	return fattura_to_capture;
+	Ok(fattura_to_capture)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // TODO: update data tagger & extractor
-fn data_tagger(tag: &Tag) -> Tagged {
+fn data_tagger(tag: &Tag) -> anyResult<Tagged> {
 	match (tag.child.as_str(), tag.parent.as_str(), tag.gparent.as_str()) {
 
 		// cedente prestatore
@@ -120,7 +121,7 @@ fn data_tagger(tag: &Tag) -> Tagged {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /// extract data from fields
-fn data_extractor(data: &String, tagged: &Tagged, fattura: &mut FatturaToCapture) {
+fn data_extractor(data: &String, tagged: &Tagged, fattura: &mut FatturaToCapture) -> anyResult<()> {
 	match tagged {
 		Tagged::Descrizione => {
 			println!("{}", "descrizione");
