@@ -4,6 +4,21 @@
 
 ----------------------------------------------------------------------------------------------------
 
+-- Tabella acquisti
+-- •⁠  ⁠add column 'Progetto di taglio'
+
+-- Tabella vendite
+-- •⁠  ⁠add column PEFC => Chiara send example invoice
+
+-- Tabella operazioni
+-- •⁠  ⁠rename as tabella sommario
+-- •⁠  ⁠add info from where the operation comes from (acquisto) and some info about vendita (clients names, invoice numbers,?) 
+-- •⁠  ⁠add sum of PEFC Mc for each work
+-- •⁠  ⁠add sum of euros spent in acquisition - no IVA - yearly and monthly 
+-- •⁠  ⁠add sum of euros got in vendite - no Iva - (check if it is the imponibile) - yearly and monthly
+
+----------------------------------------------------------------------------------------------------
+
 
 -- TODO: modify architecture according to feedback
 -- TODO: use date datatype
@@ -60,6 +75,7 @@ CREATE TABLE IF NOT EXISTS tabella_acquisti
     ----------------------------------------
     -----       dettaglio linee        -----
     ----------------------------------------
+    progetto_di_taglio TEXT,              -- project
     descrizione TEXT,                     -- description
     quantita REAL,                        -- amount
     prezzo_unitario REAL,                 -- unit price
@@ -105,6 +121,7 @@ CREATE TABLE IF NOT EXISTS tabella_vendite
     ----------------------------------------
     -----       dettaglio linee        -----
     ----------------------------------------
+    pefc INTEGER,                         -- pefc
     descrizione TEXT,                     -- description
     quantita REAL,                        -- amount
     prezzo_unitario REAL,                 -- unit price
@@ -142,14 +159,46 @@ CREATE TABLE IF NOT EXISTS tabella_vendite
   );
 
 
-CREATE TABLE IF NOT EXISTS tabella_operazione
+CREATE TABLE IF NOT EXISTS tabella_sommario
   (
     numero INTEGER PRIMARY KEY,
+    giorno_data TEXT,
+    acquisto TEXT,
+    vendita TEXT,
     somma_mc_acquisto REAL,
     somma_eur_acquisto REAL,
+    somma_eur_acquisto_no_iva REAL,
     somma_mc_vendita REAL,
+    somma_mc_vendita_pefc REAL,
     somma_eur_vendita REAL,
+    somma_eur_vendita_no_iva REAL,
     pagamento INTEGER
+  );
+
+
+CREATE TABLE IF NOT EXISTS tabella_mensile
+  (
+    numero INTEGER PRIMARY KEY AUTOINCREMENT, -- automatic tracker
+    somma_mc_acquisto REAL,
+    somma_eur_acquisto REAL,
+    somma_eur_acquisto_no_iva REAL,
+    somma_mc_vendita REAL,
+    somma_mc_vendita_pefc REAL,
+    somma_eur_vendita REAL,
+    somma_eur_vendita_no_iva REAL,
+  );
+
+
+CREATE TABLE IF NOT EXISTS tabella_annualmente
+  (
+    numero INTEGER PRIMARY KEY AUTOINCREMENT, -- automatic tracker
+    somma_mc_acquisto REAL,
+    somma_eur_acquisto REAL,
+    somma_eur_acquisto_no_iva REAL,
+    somma_mc_vendita REAL,
+    somma_mc_vendita_pefc REAL,
+    somma_eur_vendita REAL,
+    somma_eur_vendita_no_iva REAL,
   );
 
 
