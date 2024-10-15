@@ -29,8 +29,10 @@ path = "src/ds_legno.rs"
 
 
 [dependencies]
+anyhow = "1.0.89"
 async-recursion = "1.1.1"
 chrono = { version = "0.4.38", features = ["serde"] }
+colored = "2.1.0"
 derive-new = "0.7.0"
 diesel = { version = "2.2.4", features = ["sqlite"] }
 
@@ -42,6 +44,7 @@ futures = "0.3.30"
 reqwest = { version = "0.12.7", features = ["json"] }
 serde = { version = "1.0.210", features = ["derive"] }
 serde_json = "1.0.128"
+thiserror = "1.0.64"
 xml = "0.8.20"
 
 
