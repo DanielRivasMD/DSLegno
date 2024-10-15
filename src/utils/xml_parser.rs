@@ -44,7 +44,7 @@ pub fn xml_parser(file: File) -> anyResult<FatturaToCapture> {
 					XmlEvent::StartElement { name, attributes, .. } => {
 						if attributes.is_empty() {
 							tag.up_scroll(name.to_string());
-							tagged = data_tagger(&tag);
+							tagged = data_tagger(&tag)?;
 						}
 					},
 
@@ -53,7 +53,7 @@ pub fn xml_parser(file: File) -> anyResult<FatturaToCapture> {
 					},
 
 					XmlEvent::Comment(data) | XmlEvent::CData(data) | XmlEvent::Characters(data) => {
-						data_extractor(&data, &tagged, &mut fattura_to_capture);
+						data_extractor(&data, &tagged, &mut fattura_to_capture)?;
 					},
 
 					_ => (),
@@ -77,44 +77,44 @@ fn data_tagger(tag: &Tag) -> anyResult<Tagged> {
 	match (tag.child.as_str(), tag.parent.as_str(), tag.gparent.as_str()) {
 
 		// cedente prestatore
-		("Indirizzo", "Sede", "CedentePrestatore") => Tagged::PrestatoreIndirizzo,
+		("Indirizzo", "Sede", "CedentePrestatore") => Ok(Tagged::PrestatoreIndirizzo),
 
 		// cessionario committente
-		("Indirizzo", "Sede", "CessionarioCommittente") => Tagged::CommittenteIndirizzo,
+		("Indirizzo", "Sede", "CessionarioCommittente") => Ok(Tagged::CommittenteIndirizzo),
 
 		// dati generali documento
-		("Numero", "DatiGeneraliDocumento", "DatiGenerali") => Tagged::Fattura,
-		("Data", "DatiGeneraliDocumento", "DatiGenerali") => Tagged::GiornoData,
-		("ImportoTotaleDocumento", "DatiGeneraliDocumento", "DatiGenerali") => Tagged::ImportoTotale,
+		("Numero", "DatiGeneraliDocumento", "DatiGenerali") => Ok(Tagged::Fattura),
+		("Data", "DatiGeneraliDocumento", "DatiGenerali") => Ok(Tagged::GiornoData),
+		("ImportoTotaleDocumento", "DatiGeneraliDocumento", "DatiGenerali") => Ok(Tagged::ImportoTotale),
 
 		// dettaglio linee
-		("Descrizione", "DettaglioLinee", "DatiBeniServizi") => Tagged::Descrizione,
-		("Quantita", "DettaglioLinee", "DatiBeniServizi") => Tagged::Quantita,
-		("PrezzoUnitario", "DettaglioLinee", "DatiBeniServizi") => Tagged::PrezzoUnitario,
-		("PrezzoTotale", "DettaglioLinee", "DatiBeniServizi") => Tagged::PrezzoTotale,
-		("AliquotaIVA", "DettaglioLinee", "DatiBeniServizi") => Tagged::AliquotaIVA,
+		("Descrizione", "DettaglioLinee", "DatiBeniServizi") => Ok(Tagged::Descrizione),
+		("Quantita", "DettaglioLinee", "DatiBeniServizi") => Ok(Tagged::Quantita),
+		("PrezzoUnitario", "DettaglioLinee", "DatiBeniServizi") => Ok(Tagged::PrezzoUnitario),
+		("PrezzoTotale", "DettaglioLinee", "DatiBeniServizi") => Ok(Tagged::PrezzoTotale),
+		("AliquotaIVA", "DettaglioLinee", "DatiBeniServizi") => Ok(Tagged::AliquotaIVA),
 
 		// dati riepilogo
-		("ImponibileImporto", "DatiRiepilogo", "DatiBeniServizi") => Tagged::ImponibileImporto,
-		("Imposta", "DatiRiepilogo", "DatiBeniServizi") => Tagged::Imposta,
-		("EsigibilitaIVA", "DatiRiepilogo", "DatiBeniServizi") => Tagged::EsigibilitaIVA,
+		("ImponibileImporto", "DatiRiepilogo", "DatiBeniServizi") => Ok(Tagged::ImponibileImporto),
+		("Imposta", "DatiRiepilogo", "DatiBeniServizi") => Ok(Tagged::Imposta),
+		("EsigibilitaIVA", "DatiRiepilogo", "DatiBeniServizi") => Ok(Tagged::EsigibilitaIVA),
 
 		// condizioni pagamento
-		("DataRiferimentoTerminiPagamento", "DettaglioPagamento", "DatiPagamento") => Tagged::DataRiferimentoTermini,
-		("DataScadenzaPagamento", "DettaglioPagamento", "DatiPagamento") => Tagged::DataScadenzaPagamento,
-		("ImportoPagamento", "DettaglioPagamento", "DatiPagamento") => Tagged::ImportoPagamento,
+		("DataRiferimentoTerminiPagamento", "DettaglioPagamento", "DatiPagamento") => Ok(Tagged::DataRiferimentoTermini),
+		("DataScadenzaPagamento", "DettaglioPagamento", "DatiPagamento") => Ok(Tagged::DataScadenzaPagamento),
+		("ImportoPagamento", "DettaglioPagamento", "DatiPagamento") => Ok(Tagged::ImportoPagamento),
 
 		// denominazione
 		("Denominazione", "Anagrafica", "DatiAnagrafici") => {
 			match tag.ggparent.as_str() {
-				"CedentePrestatore" => Tagged::PrestatoreDenominazione,
-				"CessionarioCommittente" => Tagged::CommittenteDenominazione,
-				_ => Tagged::None,
+				"CedentePrestatore" => Ok(Tagged::PrestatoreDenominazione),
+				"CessionarioCommittente" => Ok(Tagged::CommittenteDenominazione),
+				_ => Ok(Tagged::None),
 			}
 		},
 
 		// none
-		(_, _, _) => Tagged::None
+		(_, _, _) => Ok(Tagged::None)
 	}
 }
 
@@ -126,35 +126,35 @@ fn data_extractor(data: &String, tagged: &Tagged, fattura: &mut FatturaToCapture
 		Tagged::Descrizione => {
 			println!("{}", "descrizione");
 			// TODO: better implementation for adding elements
-			if fattura.dettaglio_linee.len() == 0 || fattura.dettaglio_linee.last().unwrap().check() {
+			if fattura.dettaglio_linee.len() == 0 || fattura.dettaglio_linee.last().unwrap().check()? {
 				fattura.dettaglio_linee.push(DettaglioLinee::new());
 			}
 			fattura.dettaglio_linee.last_mut().unwrap().descrizione = data.to_string();
 		}
 		Tagged::Quantita => {
 			println!("{}", "quantita");
-			if fattura.dettaglio_linee.last().unwrap().check() {
+			if fattura.dettaglio_linee.last().unwrap().check()? {
 				fattura.dettaglio_linee.push(DettaglioLinee::new());
 			}
 			fattura.dettaglio_linee.last_mut().unwrap().quantita = data.to_string();
 		}
 		Tagged::PrezzoUnitario => {
 			println!("{}", "prezzo_unitario");
-			if fattura.dettaglio_linee.last().unwrap().check() {
+			if fattura.dettaglio_linee.last().unwrap().check()? {
 				fattura.dettaglio_linee.push(DettaglioLinee::new());
 			}
 			fattura.dettaglio_linee.last_mut().unwrap().prezzo_unitario = data.to_string();
 		}
 		Tagged::PrezzoTotale => {
 			println!("{}", "prezzo_totale");
-			if fattura.dettaglio_linee.last().unwrap().check() {
+			if fattura.dettaglio_linee.last().unwrap().check()? {
 				fattura.dettaglio_linee.push(DettaglioLinee::new());
 			}
 			fattura.dettaglio_linee.last_mut().unwrap().prezzo_totale = data.to_string();
 		}
 		Tagged::AliquotaIVA => {
 			println!("{}", "aliquota_iva");
-			if fattura.dettaglio_linee.last().unwrap().check() {
+			if fattura.dettaglio_linee.last().unwrap().check()? {
 				fattura.dettaglio_linee.push(DettaglioLinee::new());
 			}
 			fattura.dettaglio_linee.last_mut().unwrap().aliquota_iva = data.to_string();
@@ -213,6 +213,7 @@ fn data_extractor(data: &String, tagged: &Tagged, fattura: &mut FatturaToCapture
 		}
 		_ => (),
 	}
+	Ok(())
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

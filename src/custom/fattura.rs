@@ -155,7 +155,7 @@ impl FatturaToCapture {
 			);
 		}
 
-		return fatture;
+		Ok(fatture)
 	}
 }
 
@@ -186,7 +186,7 @@ impl DettaglioLinee {
 	pub fn check(
 		&self,
 	) -> anyResult<bool> {
-		!(self.descrizione.is_empty() | self.quantita.is_empty() | self.prezzo_unitario.is_empty() | self.prezzo_totale.is_empty() | self.aliquota_iva.is_empty())
+		Ok(!(self.descrizione.is_empty() | self.quantita.is_empty() | self.prezzo_unitario.is_empty() | self.prezzo_totale.is_empty() | self.aliquota_iva.is_empty()))
 	}
 }
 

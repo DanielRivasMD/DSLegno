@@ -17,8 +17,8 @@ use crate::custom::schema::tabella_vendite::dsl::*;
 pub fn establish_db_connection() -> anyResult<SqliteConnection> {
 	let db_path = get_db_path()?.clone();
 
-	SqliteConnection::establish(db_path.as_str())
-		.unwrap_or_else(|_| panic!("Error connecting to {}", db_path))
+	Ok(SqliteConnection::establish(db_path.as_str())
+		.unwrap_or_else(|_| panic!("Error connecting to {}", db_path)))
 }
 
 pub fn insert_insertable_struct(fattura: FatturaToUpload, conn: &mut SqliteConnection) -> anyResult<()> {
@@ -31,7 +31,7 @@ pub fn insert_insertable_struct(fattura: FatturaToUpload, conn: &mut SqliteConne
 fn get_db_path() -> anyResult<String> {
 	// let home_dir = dirs::home_dir().unwrap();
 	// home_dir.to_str().unwrap().to_string() + "/.config/orion/database.sqlite"
-	"dallasanta.sql".to_string()
+	Ok("dallasanta.sql".to_string())
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
