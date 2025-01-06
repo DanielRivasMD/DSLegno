@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS tabella_principale
     ----------------------------------------
     -----   dati generali documento    -----
     ----------------------------------------
-    fattura TEXT,                         -- invoice number
+    numero_fattura TEXT,                  -- invoice number
     giorno_data TEXT,                     -- invoice date
     importo_totale REAL,                  -- total amount
     ----------------------------------------
@@ -57,7 +57,9 @@ CREATE TABLE IF NOT EXISTS tabella_principale
     ----------------------------------------
     data_riferimento_termini TEXT,        -- date
     data_scadenza_pagamento TEXT,         -- date
-    importo_pagamento REAL                -- total
+    importo_pagamento REAL,               -- total
+    ----------------------------------------
+    typo TEXT                             -- type
     ----------------------------------------
    );
 
@@ -209,36 +211,36 @@ BEGIN
   -- update tabella principale
   INSERT INTO tabella_principale (
     operazione,
-    prestatore_denominazione, prestatore_indirizzo, prestatore_numero_rea,
+    prestatore_denominazione, prestatore_indirizzo,
     committente_denominazione, committente_indirizzo,
-    fattura, data, importo_totale,
-    descrizione, numero_linea, quantita, prezzo_unitario, prezzo_totale, aliquota_iva,
-    imponibile_importo, imposto, esigibilita_iva,
-    dati_riferimento_termini, dati_scadenza_pagamento, importo_pagamento,
+    numero_fattura, giorno_data, importo_totale,
+    descrizione, quantita, prezzo_unitario, prezzo_totale, aliquota_iva,
+    imponibile_importo, imposta, esigibilita_iva,
+    data_riferimento_termini, data_scadenza_pagamento, importo_pagamento,
     typo
   )
 VALUES
   (
     NEW.operazione,
-    NEW.prestatore_denominazione, NEW.prestatore_indirizzo, NEW.prestatore_numero_rea,
+    NEW.prestatore_denominazione, NEW.prestatore_indirizzo,
     NEW.committente_denominazione, NEW.committente_indirizzo,
-    NEW.fattura, NEW.data, NEW.importo_totale,
-    NEW.descrizione, NEW.numero_linea, NEW.quantita, NEW.prezzo_unitario, NEW.prezzo_totale, NEW.aliquota_iva,
-    NEW.imponibile_importo, NEW.imposto, NEW.esigibilita_iva,
-    NEW.dati_riferimento_termini, NEW.dati_scadenza_pagamento, NEW.importo_pagamento,
+    NEW.numero_fattura, NEW.giorno_data, NEW.importo_totale,
+    NEW.descrizione, NEW.quantita, NEW.prezzo_unitario, NEW.prezzo_totale, NEW.aliquota_iva,
+    NEW.imponibile_importo, NEW.imposta, NEW.esigibilita_iva,
+    NEW.data_riferimento_termini, NEW.data_scadenza_pagamento, NEW.importo_pagamento,
     'ACQUISTO'
   );
 
   -- update tabella principale
-  INSERT OR REPLACE INTO tabella_operazione (
+  INSERT OR REPLACE INTO tabella_sommario (
     numero, somma_mc_acquisto, somma_eur_acquisto, somma_mc_vendita, somma_eur_vendita, pagamento
   ) VALUES (
     NEW.operazione,
     ( SELECT SUM(quantita) FROM tabella_acquisti WHERE operazione = NEW.operazione ),
     ( SELECT SUM(prezzo_totale) FROM tabella_acquisti WHERE operazione = NEW.operazione ),
-    ( SELECT somma_mc_vendita FROM tabella_operazione WHERE numero = NEW.operazione ),
-    ( SELECT somma_eur_vendita FROM tabella_operazione WHERE numero = NEW.operazione ),
-    ( SELECT pagamento FROM tabella_operazione WHERE numero = NEW.operazione )
+    ( SELECT somma_mc_vendita FROM tabella_sommario WHERE numero = NEW.operazione ),
+    ( SELECT somma_eur_vendita FROM tabella_sommario WHERE numero = NEW.operazione ),
+    ( SELECT pagamento FROM tabella_sommario WHERE numero = NEW.operazione )
   );
 
 END;
@@ -253,23 +255,23 @@ BEGIN
   -- update tabella principale
   INSERT INTO tabella_principale (
     operazione,
-    prestatore_denominazione, prestatore_indirizzo, prestatore_numero_rea,
+    prestatore_denominazione, prestatore_indirizzo,
     committente_denominazione, committente_indirizzo,
-    fattura, data, importo_totale,
-    descrizione, numero_linea, quantita, prezzo_unitario, prezzo_totale, aliquota_iva,
-    imponibile_importo, imposto, esigibilita_iva,
-    dati_riferimento_termini, dati_scadenza_pagamento, importo_pagamento,
+    numero_fattura, giorno_data, importo_totale,
+    descrizione, prezzo_unitario, prezzo_totale, aliquota_iva,
+    imponibile_importo, imposta, esigibilita_iva,
+    data_riferimento_termini, data_scadenza_pagamento, importo_pagamento,
     typo
   )
 VALUES
   (
     NEW.operazione,
-    NEW.prestatore_denominazione, NEW.prestatore_indirizzo, NEW.prestatore_numero_rea,
+    NEW.prestatore_denominazione, NEW.prestatore_indirizzo,
     NEW.committente_denominazione, NEW.committente_indirizzo,
-    NEW.fattura, NEW.data, NEW.importo_totale,
-    NEW.descrizione, NEW.numero_linea, NEW.quantita, NEW.prezzo_unitario, NEW.prezzo_totale, NEW.aliquota_iva,
-    NEW.imponibile_importo, NEW.imposto, NEW.esigibilita_iva,
-    NEW.dati_riferimento_termini, NEW.dati_scadenza_pagamento, NEW.importo_pagamento,
+    NEW.numero_fattura, NEW.giorno_data, NEW.importo_totale,
+    NEW.descrizione, NEW.quantita, NEW.prezzo_unitario, NEW.prezzo_totale, NEW.aliquota_iva,
+    NEW.imponibile_importo, NEW.imposta, NEW.esigibilita_iva,
+    NEW.data_riferimento_termini, NEW.data_scadenza_pagamento, NEW.importo_pagamento,
     'ACQUISTO'
   );
 
@@ -279,31 +281,31 @@ VALUES
   ( SELECT operazione FROM tabella_acquisti UNION SELECT operazione FROM tabella_vendite );
 
   -- update tabella operazione new record
-  INSERT OR REPLACE INTO tabella_operazione (
+  INSERT OR REPLACE INTO tabella_sommario (
     numero, somma_mc_acquisto, somma_eur_acquisto, somma_mc_vendita, somma_eur_vendita, pagamento
   ) VALUES (
     NEW.operazione,
     ( SELECT SUM(quantita) FROM tabella_acquisti WHERE operazione = NEW.operazione ),
     ( SELECT SUM(prezzo_totale) FROM tabella_acquisti WHERE operazione = NEW.operazione ),
-    ( SELECT somma_mc_vendita FROM tabella_operazione WHERE numero = NEW.operazione ),
-    ( SELECT somma_eur_vendita FROM tabella_operazione WHERE numero = NEW.operazione ),
-    ( SELECT pagamento FROM tabella_operazione WHERE numero = NEW.operazione )
+    ( SELECT somma_mc_vendita FROM tabella_sommario WHERE numero = NEW.operazione ),
+    ( SELECT somma_eur_vendita FROM tabella_sommario WHERE numero = NEW.operazione ),
+    ( SELECT pagamento FROM tabella_sommario WHERE numero = NEW.operazione )
   );
 
   -- update tabella operazione old record
-  INSERT OR REPLACE INTO tabella_operazione (
+  INSERT OR REPLACE INTO tabella_sommario (
     numero, somma_mc_acquisto, somma_eur_acquisto, somma_mc_vendita, somma_eur_vendita, pagamento
   ) VALUES (
     OLD.operazione,
     ( SELECT SUM(quantita) FROM tabella_acquisti WHERE operazione = OLD.operazione ),
     ( SELECT SUM(prezzo_totale) FROM tabella_acquisti WHERE operazione = OLD.operazione ),
-    ( SELECT somma_mc_vendita FROM tabella_operazione WHERE numero = OLD.operazione ),
-    ( SELECT somma_eur_vendita FROM tabella_operazione WHERE numero = OLD.operazione ),
-    ( SELECT pagamento FROM tabella_operazione WHERE numero = OLD.operazione )
+    ( SELECT somma_mc_vendita FROM tabella_sommario WHERE numero = OLD.operazione ),
+    ( SELECT somma_eur_vendita FROM tabella_sommario WHERE numero = OLD.operazione ),
+    ( SELECT pagamento FROM tabella_sommario WHERE numero = OLD.operazione )
   );
 
   -- purge records tabella operazione
-  DELETE FROM tabella_operazione
+  DELETE FROM tabella_sommario
   WHERE numero NOT IN
   ( SELECT operazione FROM tabella_acquisti UNION SELECT operazione FROM tabella_vendite );
 
@@ -319,36 +321,36 @@ BEGIN
   -- update tabella principale
   INSERT INTO tabella_principale (
     operazione,
-    prestatore_denominazione, prestatore_indirizzo, prestatore_numero_rea,
+    prestatore_denominazione, prestatore_indirizzo,
     committente_denominazione, committente_indirizzo,
-    fattura, data, importo_totale,
-    descrizione, numero_linea, quantita, prezzo_unitario, prezzo_totale, aliquota_iva,
-    imponibile_importo, imposto, esigibilita_iva,
-    dati_riferimento_termini, dati_scadenza_pagamento, importo_pagamento,
+    numero_fattura, giorno_data, importo_totale,
+    descrizione, quantita, prezzo_unitario, prezzo_totale, aliquota_iva,
+    imponibile_importo, imposta, esigibilita_iva,
+    data_riferimento_termini, data_scadenza_pagamento, importo_pagamento,
     typo
   )
 VALUES
   (
     NEW.operazione,
-    NEW.prestatore_denominazione, NEW.prestatore_indirizzo, NEW.prestatore_numero_rea,
+    NEW.prestatore_denominazione, NEW.prestatore_indirizzo,
     NEW.committente_denominazione, NEW.committente_indirizzo,
-    NEW.fattura, NEW.data, NEW.importo_totale,
-    NEW.descrizione, NEW.numero_linea, NEW.quantita, NEW.prezzo_unitario, NEW.prezzo_totale, NEW.aliquota_iva,
-    NEW.imponibile_importo, NEW.imposto, NEW.esigibilita_iva,
-    NEW.dati_riferimento_termini, NEW.dati_scadenza_pagamento, NEW.importo_pagamento,
-    'ACQUISTO'
+    NEW.numero_fattura, NEW.giorno_data, NEW.importo_totale,
+    NEW.descrizione, NEW.quantita, NEW.prezzo_unitario, NEW.prezzo_totale, NEW.aliquota_iva,
+    NEW.imponibile_importo, NEW.imposta, NEW.esigibilita_iva,
+    NEW.data_riferimento_termini, NEW.data_scadenza_pagamento, NEW.importo_pagamento,
+    'VENDITO'
   );
 
   -- update tabella principale
-  INSERT OR REPLACE INTO tabella_operazione (
+  INSERT OR REPLACE INTO tabella_sommario (
     numero, somma_mc_acquisto, somma_eur_acquisto, somma_mc_vendita, somma_eur_vendita, pagamento
   ) VALUES (
     NEW.operazione,
-    ( SELECT somma_mc_acquisto FROM tabella_operazione WHERE numero = NEW.operazione ),
-    ( SELECT somma_eur_acquisto FROM tabella_operazione WHERE numero = NEW.operazione ),
+    ( SELECT somma_mc_acquisto FROM tabella_sommario WHERE numero = NEW.operazione ),
+    ( SELECT somma_eur_acquisto FROM tabella_sommario WHERE numero = NEW.operazione ),
     ( SELECT SUM(quantita) FROM tabella_vendite WHERE operazione = NEW.operazione ),
     ( SELECT SUM(prezzo_totale) FROM tabella_vendite WHERE operazione = NEW.operazione ),
-    ( SELECT pagamento FROM tabella_operazione WHERE numero = NEW.operazione )
+    ( SELECT pagamento FROM tabella_sommario WHERE numero = NEW.operazione )
   );
 
 END;
@@ -364,24 +366,24 @@ BEGIN
   -- update tabella principale
   INSERT INTO tabella_principale (
     operazione,
-    prestatore_denominazione, prestatore_indirizzo, prestatore_numero_rea,
+    prestatore_denominazione, prestatore_indirizzo,
     committente_denominazione, committente_indirizzo,
-    fattura, data, importo_totale,
-    descrizione, numero_linea, quantita, prezzo_unitario, prezzo_totale, aliquota_iva,
-    imponibile_importo, imposto, esigibilita_iva,
-    dati_riferimento_termini, dati_scadenza_pagamento, importo_pagamento,
+    numero_fattura, giorno_data, importo_totale,
+    descrizione, quantita, prezzo_unitario, prezzo_totale, aliquota_iva,
+    imponibile_importo, imposta, esigibilita_iva,
+    data_riferimento_termini, data_scadenza_pagamento, importo_pagamento,
     typo
   )
 VALUES
   (
     NEW.operazione,
-    NEW.prestatore_denominazione, NEW.prestatore_indirizzo, NEW.prestatore_numero_rea,
+    NEW.prestatore_denominazione, NEW.prestatore_indirizzo,
     NEW.committente_denominazione, NEW.committente_indirizzo,
-    NEW.fattura, NEW.data, NEW.importo_totale,
-    NEW.descrizione, NEW.numero_linea, NEW.quantita, NEW.prezzo_unitario, NEW.prezzo_totale, NEW.aliquota_iva,
-    NEW.imponibile_importo, NEW.imposto, NEW.esigibilita_iva,
-    NEW.dati_riferimento_termini, NEW.dati_scadenza_pagamento, NEW.importo_pagamento,
-    'ACQUISTO'
+    NEW.numero_fattura, NEW.giorno_data, NEW.importo_totale,
+    NEW.descrizione, NEW.quantita, NEW.prezzo_unitario, NEW.prezzo_totale, NEW.aliquota_iva,
+    NEW.imponibile_importo, NEW.imposta, NEW.esigibilita_iva,
+    NEW.data_riferimento_termini, NEW.data_scadenza_pagamento, NEW.importo_pagamento,
+    'VENDITO'
   );
 
   -- purge records tabella principale
@@ -390,31 +392,31 @@ VALUES
   ( SELECT operazione FROM tabella_acquisti UNION SELECT operazione FROM tabella_vendite );
 
   -- update tabella operazione new record
-  INSERT OR REPLACE INTO tabella_operazione (
+  INSERT OR REPLACE INTO tabella_sommario (
     numero, somma_mc_acquisto, somma_eur_acquisto, somma_mc_vendita, somma_eur_vendita, pagamento
   ) VALUES (
     NEW.operazione,
-    ( SELECT somma_mc_acquisto FROM tabella_operazione WHERE numero = NEW.operazione ),
-    ( SELECT somma_eur_acquisto FROM tabella_operazione WHERE numero = NEW.operazione ),
+    ( SELECT somma_mc_acquisto FROM tabella_sommario WHERE numero = NEW.operazione ),
+    ( SELECT somma_eur_acquisto FROM tabella_sommario WHERE numero = NEW.operazione ),
     ( SELECT SUM(quantita) FROM tabella_vendite WHERE operazione = NEW.operazione ),
     ( SELECT SUM(prezzo_totale) FROM tabella_vendite WHERE operazione = NEW.operazione ),
-    ( SELECT pagamento FROM tabella_operazione WHERE numero = NEW.operazione )
+    ( SELECT pagamento FROM tabella_sommario WHERE numero = NEW.operazione )
   );
 
   -- update tabella operazione old record
-  INSERT OR REPLACE INTO tabella_operazione (
+  INSERT OR REPLACE INTO tabella_sommario (
     numero, somma_mc_acquisto, somma_eur_acquisto, somma_mc_vendita, somma_eur_vendita, pagamento
   ) VALUES (
     OLD.operazione,
-    ( SELECT somma_mc_acquisto FROM tabella_operazione WHERE numero = OLD.operazione ),
-    ( SELECT somma_eur_acquisto FROM tabella_operazione WHERE numero = OLD.operazione ),
+    ( SELECT somma_mc_acquisto FROM tabella_sommario WHERE numero = OLD.operazione ),
+    ( SELECT somma_eur_acquisto FROM tabella_sommario WHERE numero = OLD.operazione ),
     ( SELECT SUM(quantita) FROM tabella_vendite WHERE operazione = OLD.operazione ),
     ( SELECT SUM(prezzo_totale) FROM tabella_vendite WHERE operazione = OLD.operazione ),
-    ( SELECT pagamento FROM tabella_operazione WHERE numero = OLD.operazione )
+    ( SELECT pagamento FROM tabella_sommario WHERE numero = OLD.operazione )
   );
 
   -- purge records tabella operazione
-  DELETE FROM tabella_operazione
+  DELETE FROM tabella_sommario
   WHERE numero NOT IN
   ( SELECT operazione FROM tabella_acquisti UNION SELECT operazione FROM tabella_vendite );
 
