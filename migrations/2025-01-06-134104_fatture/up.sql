@@ -180,7 +180,7 @@ CREATE TABLE IF NOT EXISTS tabella_mensile
     somma_mc_vendita REAL,
     somma_mc_vendita_pefc REAL,
     somma_eur_vendita REAL,
-    somma_eur_vendita_no_iva REAL,
+    somma_eur_vendita_no_iva REAL
   );
 
 
@@ -193,12 +193,11 @@ CREATE TABLE IF NOT EXISTS tabella_annualmente
     somma_mc_vendita REAL,
     somma_mc_vendita_pefc REAL,
     somma_eur_vendita REAL,
-    somma_eur_vendita_no_iva REAL,
+    somma_eur_vendita_no_iva REAL
   );
 
 
 ----------------------------------------------------------------------------------------------------
-
 
 -- TODO: update insertion triggers
 -- update on insert
