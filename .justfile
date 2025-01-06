@@ -106,3 +106,10 @@ import '.just/rs.conf'
   cargo run --bin vendita -- data/vendita.xml
 
 ####################################################################################################
+
+# diesel managed-sql
+[group('sql')]
+@diesel:
+  cargo watch --clear --shell 'rm dallasanta.db; diesel setup'
+
+####################################################################################################
