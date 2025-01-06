@@ -28,10 +28,11 @@ pub fn insert_insertable_struct(fattura: FatturaToUpload, conn: &mut SqliteConne
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+// TODO: hardcoded variable
 fn get_db_path() -> anyResult<String> {
 	// let home_dir = dirs::home_dir().unwrap();
 	// home_dir.to_str().unwrap().to_string() + "/.config/orion/database.sqlite"
-	Ok("dallasanta.sql".to_string())
+	Ok("dallasanta.db".to_string())
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
