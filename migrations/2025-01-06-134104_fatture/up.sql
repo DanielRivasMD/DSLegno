@@ -258,7 +258,7 @@ BEGIN
     prestatore_denominazione, prestatore_indirizzo,
     committente_denominazione, committente_indirizzo,
     numero_fattura, giorno_data, importo_totale,
-    descrizione, prezzo_unitario, prezzo_totale, aliquota_iva,
+    descrizione, quantita, prezzo_unitario, prezzo_totale, aliquota_iva,
     imponibile_importo, imposta, esigibilita_iva,
     data_riferimento_termini, data_scadenza_pagamento, importo_pagamento,
     typo
