@@ -5,15 +5,13 @@
 -- Tabella vendite
 
 -- Tabella sommario
--- •⁠  ⁠add info where the operation comes from (acquisto) and some info about vendita (clients names, invoice numbers,?) 
--- •⁠  ⁠add sum of PEFC Mc for each work
 -- •⁠  ⁠add sum of euros spent in acquisition - no IVA - yearly and monthly 
 -- •⁠  ⁠add sum of euros got in vendite - no Iva - (check if it is the imponibile) - yearly and monthly
 
 ----------------------------------------------------------------------------------------------------
+-- database architecture
+----------------------------------------------------------------------------------------------------
 
--- TODO: modify architecture according to feedback
--- TODO: use date datatype
 CREATE TABLE IF NOT EXISTS tabella_principale
   (
     ----------------------------------------
@@ -166,13 +164,14 @@ CREATE TABLE IF NOT EXISTS tabella_sommario
     somma_mc_vendita_pefc REAL,
     somma_eur_vendita REAL,
     somma_eur_vendita_no_iva REAL,
-    pagamento INTEGER
+    pagamento TEXT
   );
 
 
 CREATE TABLE IF NOT EXISTS tabella_mensile
   (
     numero INTEGER PRIMARY KEY AUTOINCREMENT, -- automatic tracker
+    mese_anno TEXT,
     somma_mc_acquisto REAL,
     somma_eur_acquisto REAL,
     somma_eur_acquisto_no_iva REAL,
@@ -186,6 +185,7 @@ CREATE TABLE IF NOT EXISTS tabella_mensile
 CREATE TABLE IF NOT EXISTS tabella_annuale
   (
     numero INTEGER PRIMARY KEY AUTOINCREMENT, -- automatic tracker
+    anno TEXT,
     somma_mc_acquisto REAL,
     somma_eur_acquisto REAL,
     somma_eur_acquisto_no_iva REAL,
@@ -197,8 +197,9 @@ CREATE TABLE IF NOT EXISTS tabella_annuale
 
 
 ----------------------------------------------------------------------------------------------------
+-- action triggers
+----------------------------------------------------------------------------------------------------
 
--- TODO: update insertion triggers
 -- update on insert
 CREATE TRIGGER denovo_acquisti
   AFTER UPDATE ON tabella_acquisti
@@ -228,16 +229,18 @@ VALUES
     'ACQUISTO'
   );
 
-  -- update tabella principale
+  -- update tabella sommario
   INSERT OR REPLACE INTO tabella_sommario (
-    numero, somma_mc_acquisto, somma_eur_acquisto, somma_mc_vendita, somma_eur_vendita, pagamento
+    numero, somma_mc_acquisto, somma_eur_acquisto, somma_eur_acquisto_no_iva, somma_mc_vendita, somma_mc_vendita_pefc, somma_eur_vendita, somma_eur_vendita_no_iva
   ) VALUES (
     NEW.operazione,
     ( SELECT SUM(quantita) FROM tabella_acquisti WHERE operazione = NEW.operazione ),
+    ( SELECT SUM(importo_totale) FROM tabella_acquisti WHERE operazione = NEW.operazione ),
     ( SELECT SUM(prezzo_totale) FROM tabella_acquisti WHERE operazione = NEW.operazione ),
     ( SELECT somma_mc_vendita FROM tabella_sommario WHERE numero = NEW.operazione ),
+    ( SELECT somma_mc_vendita_pefc FROM tabella_sommario WHERE numero = NEW.operazione ),
     ( SELECT somma_eur_vendita FROM tabella_sommario WHERE numero = NEW.operazione ),
-    ( SELECT pagamento FROM tabella_sommario WHERE numero = NEW.operazione )
+    ( SELECT somma_eur_vendita_no_iva FROM tabella_sommario WHERE numero = NEW.operazione )
   );
 
 END;
@@ -277,31 +280,35 @@ VALUES
   WHERE id NOT IN
   ( SELECT operazione FROM tabella_acquisti UNION SELECT operazione FROM tabella_vendite );
 
-  -- update tabella operazione new record
+  -- update tabella sommario new record
   INSERT OR REPLACE INTO tabella_sommario (
-    numero, somma_mc_acquisto, somma_eur_acquisto, somma_mc_vendita, somma_eur_vendita, pagamento
+    numero, somma_mc_acquisto, somma_eur_acquisto, somma_eur_acquisto_no_iva, somma_mc_vendita, somma_mc_vendita_pefc, somma_eur_vendita, somma_eur_vendita_no_iva
   ) VALUES (
     NEW.operazione,
     ( SELECT SUM(quantita) FROM tabella_acquisti WHERE operazione = NEW.operazione ),
+    ( SELECT SUM(importo_totale) FROM tabella_acquisti WHERE operazione = NEW.operazione ),
     ( SELECT SUM(prezzo_totale) FROM tabella_acquisti WHERE operazione = NEW.operazione ),
     ( SELECT somma_mc_vendita FROM tabella_sommario WHERE numero = NEW.operazione ),
+    ( SELECT somma_mc_vendita_pefc FROM tabella_sommario WHERE numero = NEW.operazione ),
     ( SELECT somma_eur_vendita FROM tabella_sommario WHERE numero = NEW.operazione ),
-    ( SELECT pagamento FROM tabella_sommario WHERE numero = NEW.operazione )
+    ( SELECT somma_eur_vendita_no_iva FROM tabella_sommario WHERE numero = NEW.operazione )
   );
 
-  -- update tabella operazione old record
+  -- update tabella sommario old record
   INSERT OR REPLACE INTO tabella_sommario (
-    numero, somma_mc_acquisto, somma_eur_acquisto, somma_mc_vendita, somma_eur_vendita, pagamento
+    numero, somma_mc_acquisto, somma_eur_acquisto, somma_eur_acquisto_no_iva, somma_mc_vendita, somma_mc_vendita_pefc, somma_eur_vendita, somma_eur_vendita_no_iva
   ) VALUES (
     OLD.operazione,
     ( SELECT SUM(quantita) FROM tabella_acquisti WHERE operazione = OLD.operazione ),
+    ( SELECT SUM(importo_totale) FROM tabella_acquisti WHERE operazione = OLD.operazione ),
     ( SELECT SUM(prezzo_totale) FROM tabella_acquisti WHERE operazione = OLD.operazione ),
     ( SELECT somma_mc_vendita FROM tabella_sommario WHERE numero = OLD.operazione ),
+    ( SELECT somma_mc_vendita_pefc FROM tabella_sommario WHERE numero = OLD.operazione ),
     ( SELECT somma_eur_vendita FROM tabella_sommario WHERE numero = OLD.operazione ),
-    ( SELECT pagamento FROM tabella_sommario WHERE numero = OLD.operazione )
+    ( SELECT somma_eur_vendita_no_iva FROM tabella_sommario WHERE numero = OLD.operazione )
   );
 
-  -- purge records tabella operazione
+  -- purge records tabella sommario
   DELETE FROM tabella_sommario
   WHERE numero NOT IN
   ( SELECT operazione FROM tabella_acquisti UNION SELECT operazione FROM tabella_vendite );
@@ -338,22 +345,23 @@ VALUES
     'VENDITO'
   );
 
-  -- update tabella principale
+  -- update tabella sommario
   INSERT OR REPLACE INTO tabella_sommario (
-    numero, somma_mc_acquisto, somma_eur_acquisto, somma_mc_vendita, somma_eur_vendita, pagamento
+    numero, somma_mc_acquisto, somma_eur_acquisto, somma_eur_acquisto_no_iva, somma_mc_vendita, somma_mc_vendita_pefc, somma_eur_vendita, somma_eur_vendita_no_iva
   ) VALUES (
     NEW.operazione,
     ( SELECT somma_mc_acquisto FROM tabella_sommario WHERE numero = NEW.operazione ),
     ( SELECT somma_eur_acquisto FROM tabella_sommario WHERE numero = NEW.operazione ),
+    ( SELECT somma_eur_acquisto_no_iva FROM tabella_sommario WHERE numero = NEW.operazione ),
     ( SELECT SUM(quantita) FROM tabella_vendite WHERE operazione = NEW.operazione ),
-    ( SELECT SUM(prezzo_totale) FROM tabella_vendite WHERE operazione = NEW.operazione ),
-    ( SELECT pagamento FROM tabella_sommario WHERE numero = NEW.operazione )
+    ( SELECT SUM(quantita) FROM tabella_vendite WHERE operazione = NEW.operazione AND pefc = "si" ),
+    ( SELECT SUM(importo_totale) FROM tabella_vendite WHERE operazione = NEW.operazione ),
+    ( SELECT SUM(prezzo_totale) FROM tabella_vendite WHERE operazione = NEW.operazione )
   );
 
 END;
 
 
--- BUG: verify changes on tabella principale
 -- update on change
 CREATE TRIGGER update_vendite
   AFTER UPDATE ON tabella_vendite
@@ -388,31 +396,35 @@ VALUES
   WHERE id NOT IN
   ( SELECT operazione FROM tabella_acquisti UNION SELECT operazione FROM tabella_vendite );
 
-  -- update tabella operazione new record
+  -- update tabella sommario new record
   INSERT OR REPLACE INTO tabella_sommario (
-    numero, somma_mc_acquisto, somma_eur_acquisto, somma_mc_vendita, somma_eur_vendita, pagamento
+    numero, somma_mc_acquisto, somma_eur_acquisto, somma_eur_acquisto_no_iva, somma_mc_vendita, somma_mc_vendita_pefc, somma_eur_vendita, somma_eur_vendita_no_iva
   ) VALUES (
     NEW.operazione,
     ( SELECT somma_mc_acquisto FROM tabella_sommario WHERE numero = NEW.operazione ),
     ( SELECT somma_eur_acquisto FROM tabella_sommario WHERE numero = NEW.operazione ),
+    ( SELECT somma_eur_acquisto_no_iva FROM tabella_sommario WHERE numero = NEW.operazione ),
     ( SELECT SUM(quantita) FROM tabella_vendite WHERE operazione = NEW.operazione ),
-    ( SELECT SUM(prezzo_totale) FROM tabella_vendite WHERE operazione = NEW.operazione ),
-    ( SELECT pagamento FROM tabella_sommario WHERE numero = NEW.operazione )
+    ( SELECT SUM(quantita) FROM tabella_vendite WHERE operazione = NEW.operazione AND pefc = "si" ),
+    ( SELECT SUM(importo_totale) FROM tabella_vendite WHERE operazione = NEW.operazione ),
+    ( SELECT SUM(prezzo_totale) FROM tabella_vendite WHERE operazione = NEW.operazione )
   );
 
-  -- update tabella operazione old record
+  -- update tabella sommario old record
   INSERT OR REPLACE INTO tabella_sommario (
-    numero, somma_mc_acquisto, somma_eur_acquisto, somma_mc_vendita, somma_eur_vendita, pagamento
+    numero, somma_mc_acquisto, somma_eur_acquisto, somma_eur_acquisto_no_iva, somma_mc_vendita, somma_mc_vendita_pefc, somma_eur_vendita, somma_eur_vendita_no_iva
   ) VALUES (
     OLD.operazione,
     ( SELECT somma_mc_acquisto FROM tabella_sommario WHERE numero = OLD.operazione ),
     ( SELECT somma_eur_acquisto FROM tabella_sommario WHERE numero = OLD.operazione ),
+    ( SELECT somma_eur_acquisto_no_iva FROM tabella_sommario WHERE numero = OLD.operazione ),
     ( SELECT SUM(quantita) FROM tabella_vendite WHERE operazione = OLD.operazione ),
-    ( SELECT SUM(prezzo_totale) FROM tabella_vendite WHERE operazione = OLD.operazione ),
-    ( SELECT pagamento FROM tabella_sommario WHERE numero = OLD.operazione )
+    ( SELECT SUM(quantita) FROM tabella_vendite WHERE operazione = OLD.operazione AND pefc = "si" ),
+    ( SELECT SUM(importo_totale) FROM tabella_vendite WHERE operazione = OLD.operazione ),
+    ( SELECT SUM(prezzo_totale) FROM tabella_vendite WHERE operazione = OLD.operazione )
   );
 
-  -- purge records tabella operazione
+  -- purge records tabella sommario
   DELETE FROM tabella_sommario
   WHERE numero NOT IN
   ( SELECT operazione FROM tabella_acquisti UNION SELECT operazione FROM tabella_vendite );
