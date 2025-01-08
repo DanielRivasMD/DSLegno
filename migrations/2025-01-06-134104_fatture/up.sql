@@ -275,10 +275,10 @@ VALUES
     'ACQUISTO'
   );
 
-  -- purge records tabella principale
-  DELETE FROM tabella_principale
-  WHERE id NOT IN
-  ( SELECT operazione FROM tabella_acquisti UNION SELECT operazione FROM tabella_vendite );
+  -- -- purge records tabella principale
+  -- DELETE FROM tabella_principale
+  -- WHERE id NOT IN
+  -- ( SELECT operazione FROM tabella_acquisti UNION SELECT operazione FROM tabella_vendite );
 
   -- update tabella sommario new record
   INSERT OR REPLACE INTO tabella_sommario (
@@ -308,10 +308,10 @@ VALUES
     ( SELECT somma_eur_vendita_no_iva FROM tabella_sommario WHERE numero = OLD.operazione )
   );
 
-  -- purge records tabella sommario
-  DELETE FROM tabella_sommario
-  WHERE numero NOT IN
-  ( SELECT operazione FROM tabella_acquisti UNION SELECT operazione FROM tabella_vendite );
+  -- -- purge records tabella sommario
+  -- DELETE FROM tabella_sommario
+  -- WHERE numero NOT IN
+  -- ( SELECT operazione FROM tabella_acquisti UNION SELECT operazione FROM tabella_vendite );
 
 END;
 
@@ -391,10 +391,10 @@ VALUES
     'VENDITO'
   );
 
-  -- purge records tabella principale
-  DELETE FROM tabella_principale
-  WHERE id NOT IN
-  ( SELECT operazione FROM tabella_acquisti UNION SELECT operazione FROM tabella_vendite );
+  -- -- purge records tabella principale
+  -- DELETE FROM tabella_principale
+  -- WHERE id NOT IN
+  -- ( SELECT operazione FROM tabella_acquisti UNION SELECT operazione FROM tabella_vendite );
 
   -- update tabella sommario new record
   INSERT OR REPLACE INTO tabella_sommario (
@@ -424,10 +424,10 @@ VALUES
     ( SELECT SUM(prezzo_totale) FROM tabella_vendite WHERE operazione = OLD.operazione )
   );
 
-  -- purge records tabella sommario
-  DELETE FROM tabella_sommario
-  WHERE numero NOT IN
-  ( SELECT operazione FROM tabella_acquisti UNION SELECT operazione FROM tabella_vendite );
+  -- -- purge records tabella sommario
+  -- DELETE FROM tabella_sommario
+  -- WHERE numero NOT IN
+  -- ( SELECT operazione FROM tabella_acquisti UNION SELECT operazione FROM tabella_vendite );
 
 END;
 
