@@ -2,6 +2,7 @@
 
 // modules
 pub mod error;
+pub mod help;
 pub mod sql;
 pub mod xml_parser;
 
