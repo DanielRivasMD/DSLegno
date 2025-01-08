@@ -2,6 +2,7 @@
 
 // modules
 pub mod fattura;
+pub mod log_flag;
 pub mod tag;
 pub mod schema;
 
