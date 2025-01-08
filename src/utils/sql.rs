@@ -10,6 +10,7 @@ use diesel::prelude::*;
 
 // crate utilities
 use crate::custom::fattura::*;
+use crate::custom::schema::tabella_acquisti::dsl::*;
 use crate::custom::schema::tabella_vendite::dsl::*;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -21,14 +22,19 @@ pub fn establish_db_connection() -> anyResult<SqliteConnection> {
 		.unwrap_or_else(|_| panic!("Error connecting to {}", db_path)))
 }
 
-pub fn insert_insertable_struct(fattura: FatturaToUpload, conn: &mut SqliteConnection) -> anyResult<()> {
-	insert_into(tabella_vendite).values(&fattura).execute(conn)?;
+pub fn insert_insertable_struct_acquisti(fattura: FatturaToUploadAcquisti, conn: &mut SqliteConnection) -> anyResult<()> {
+  insert_into(tabella_acquisti).values(&fattura).execute(conn)?;
+	Ok(())
+}
+
+pub fn insert_insertable_struct_vendite(fattura: FatturaToUploadVendite, conn: &mut SqliteConnection) -> anyResult<()> {
+  insert_into(tabella_vendite).values(&fattura).execute(conn)?;
 	Ok(())
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// TODO: hardcoded variable
+// DOC: hardcoded variable
 fn get_db_path() -> anyResult<String> {
 	// let home_dir = dirs::home_dir().unwrap();
 	// home_dir.to_str().unwrap().to_string() + "/.config/orion/database.sqlite"
