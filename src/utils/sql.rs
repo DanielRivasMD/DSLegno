@@ -35,9 +35,8 @@ pub fn insert_insertable_struct_vendite(fattura: FatturaToUploadVendite, conn: &
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // DOC: hardcoded variable
+// TODO: cli arg?
 fn get_db_path() -> anyResult<String> {
-	// let home_dir = dirs::home_dir().unwrap();
-	// home_dir.to_str().unwrap().to_string() + "/.config/orion/database.sqlite"
 	Ok("dallasanta.db".to_string())
 }
 

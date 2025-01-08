@@ -14,15 +14,15 @@ use crate::custom::{invoice::InvoiceType, log_flag::LogFlag};
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
 pub struct Cli {
-  /// Set looging level
+  /// Logging level
   #[arg(short, long, value_enum, default_value_t = LogFlag::Info)]
   pub log: LogFlag,
 
   /// Input file
-  #[arg(long, value_name = "INPUT")]
+  #[arg(long)]
   pub input: PathBuf,
 
-  /// Invoice
+  /// Invoice type
   #[arg(long)]
   pub invoice: InvoiceType,
 }

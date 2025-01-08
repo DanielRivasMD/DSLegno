@@ -89,7 +89,7 @@ impl Tag {
 	}
 }
 
-/// Implement Display for Ind.
+/// implement Display for Ind
 impl Display for Tag {
   fn fmt(
     &self,

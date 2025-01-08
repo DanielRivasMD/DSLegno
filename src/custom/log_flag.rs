@@ -5,7 +5,7 @@ use clap::ValueEnum;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-/// Hold logging options from command line arguments.
+/// logging options from command line arguments
 #[derive(Clone, Debug, Eq, PartialEq, ValueEnum)]
 pub enum LogFlag {
   Info,
