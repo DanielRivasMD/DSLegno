@@ -1,8 +1,10 @@
 [package]
 name = "ds-legno"
 version = "0.1.0"
-authors = [
-  "Daniel Rivas <danielrivasmd@gmail.com>"
+version = "1.0.0"
+author = [
+  "Daniel Rivas <danielrivasmd@gmail.com>",
+  "Chiara Dalla Santa <chiara.dallasanta@gmail.com>",
 ]
 repository = "https://github.com/DanielRivasMD/DSLegno"
 keywords = []
@@ -62,4 +64,3 @@ rpath            = false
 lto              = false
 debug-assertions = false
 codegen-units    = 1
-
