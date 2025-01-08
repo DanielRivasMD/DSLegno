@@ -5,8 +5,6 @@
 -- Tabella vendite
 
 -- Tabella sommario
--- •⁠  ⁠add sum of euros spent in acquisition - no IVA - yearly and monthly 
--- •⁠  ⁠add sum of euros got in vendite - no Iva - (check if it is the imponibile) - yearly and monthly
 
 ----------------------------------------------------------------------------------------------------
 -- database architecture
@@ -216,9 +214,7 @@ BEGIN
     imponibile_importo, imposta, esigibilita_iva,
     data_riferimento_termini, data_scadenza_pagamento, importo_pagamento,
     typo
-  )
-VALUES
-  (
+  ) VALUES (
     NEW.operazione,
     NEW.prestatore_denominazione, NEW.prestatore_indirizzo,
     NEW.committente_denominazione, NEW.committente_indirizzo,
@@ -241,6 +237,48 @@ VALUES
     ( SELECT somma_mc_vendita_pefc FROM tabella_sommario WHERE numero = NEW.operazione ),
     ( SELECT somma_eur_vendita FROM tabella_sommario WHERE numero = NEW.operazione ),
     ( SELECT somma_eur_vendita_no_iva FROM tabella_sommario WHERE numero = NEW.operazione )
+  );
+
+  -- update tabella mensile
+  INSERT INTO tabella_mensile (
+    mese_anno,
+    somma_mc_acquisto,
+    somma_eur_acquisto,
+    somma_eur_acquisto_no_iva,
+    somma_mc_vendita,
+    somma_mc_vendita_pefc,
+    somma_eur_vendita,
+    somma_eur_vendita_no_iva
+  ) VALUES (
+    ( SELECT SUBSTR(giorno_data, 1, 7) FROM tabella_acquisti WHERE operazione = NEW.operazione ),
+    ( SELECT SUM(quantita) FROM tabella_acquisti WHERE SUBSTR(giorno_data, 1, 7) = ( SELECT SUBSTR(giorno_data, 1, 7) FROM tabella_acquisti WHERE operazione = NEW.operazione ) ),
+    ( SELECT SUM(importo_totale) FROM tabella_acquisti WHERE SUBSTR(giorno_data, 1, 7) = ( SELECT SUBSTR(giorno_data, 1, 7) FROM tabella_acquisti WHERE operazione = NEW.operazione ) ),
+    ( SELECT SUM(prezzo_totale) FROM tabella_acquisti WHERE SUBSTR(giorno_data, 1, 7) = ( SELECT SUBSTR(giorno_data, 1, 7) FROM tabella_acquisti WHERE operazione = NEW.operazione ) ),
+    ( SELECT somma_mc_vendita FROM tabella_mensile WHERE mese_anno = ( SELECT SUBSTR(giorno_data, 1, 7) FROM tabella_acquisti WHERE operazione = NEW.operazione ) ),
+    ( SELECT somma_mc_vendita_pefc FROM tabella_mensile WHERE mese_anno = ( SELECT SUBSTR(giorno_data, 1, 7) FROM tabella_acquisti WHERE operazione = NEW.operazione ) ),
+    ( SELECT somma_eur_vendita FROM tabella_mensile WHERE mese_anno = ( SELECT SUBSTR(giorno_data, 1, 7) FROM tabella_acquisti WHERE operazione = NEW.operazione ) ),
+    ( SELECT somma_eur_vendita_no_iva FROM tabella_mensile WHERE mese_anno = ( SELECT SUBSTR(giorno_data, 1, 7) FROM tabella_acquisti WHERE operazione = NEW.operazione ) )
+  );
+
+  -- update tabella annuale
+  INSERT INTO tabella_annuale (
+    anno,
+    somma_mc_acquisto,
+    somma_eur_acquisto,
+    somma_eur_acquisto_no_iva,
+    somma_mc_vendita,
+    somma_mc_vendita_pefc,
+    somma_eur_vendita,
+    somma_eur_vendita_no_iva
+  ) VALUES (
+    ( SELECT SUBSTR(giorno_data, 1, 4) FROM tabella_acquisti WHERE operazione = NEW.operazione ),
+    ( SELECT SUM(quantita) FROM tabella_acquisti WHERE SUBSTR(giorno_data, 1, 4) = ( SELECT SUBSTR(giorno_data, 1, 4) FROM tabella_acquisti WHERE operazione = NEW.operazione ) ),
+    ( SELECT SUM(importo_totale) FROM tabella_acquisti WHERE SUBSTR(giorno_data, 1, 4) = ( SELECT SUBSTR(giorno_data, 1, 4) FROM tabella_acquisti WHERE operazione = NEW.operazione ) ),
+    ( SELECT SUM(prezzo_totale) FROM tabella_acquisti WHERE SUBSTR(giorno_data, 1, 4) = ( SELECT SUBSTR(giorno_data, 1, 4) FROM tabella_acquisti WHERE operazione = NEW.operazione ) ),
+    ( SELECT somma_mc_vendita FROM tabella_annuale WHERE anno = ( SELECT SUBSTR(giorno_data, 1, 4) FROM tabella_acquisti WHERE operazione = NEW.operazione ) ),
+    ( SELECT somma_mc_vendita_pefc FROM tabella_annuale WHERE anno = ( SELECT SUBSTR(giorno_data, 1, 4) FROM tabella_acquisti WHERE operazione = NEW.operazione ) ),
+    ( SELECT somma_eur_vendita FROM tabella_annuale WHERE anno = ( SELECT SUBSTR(giorno_data, 1, 4) FROM tabella_acquisti WHERE operazione = NEW.operazione ) ),
+    ( SELECT somma_eur_vendita_no_iva FROM tabella_annuale WHERE anno = ( SELECT SUBSTR(giorno_data, 1, 4) FROM tabella_acquisti WHERE operazione = NEW.operazione ) )
   );
 
 END;
@@ -313,6 +351,48 @@ VALUES
   -- WHERE numero NOT IN
   -- ( SELECT operazione FROM tabella_acquisti UNION SELECT operazione FROM tabella_vendite );
 
+  -- update tabella mensile
+  INSERT OR REPLACE INTO tabella_mensile (
+    mese_anno,
+    somma_mc_acquisto,
+    somma_eur_acquisto,
+    somma_eur_acquisto_no_iva,
+    somma_mc_vendita,
+    somma_mc_vendita_pefc,
+    somma_eur_vendita,
+    somma_eur_vendita_no_iva
+  ) VALUES (
+    ( SELECT SUBSTR(giorno_data, 1, 7) FROM tabella_acquisti WHERE operazione = NEW.operazione ),
+    ( SELECT SUM(quantita) FROM tabella_acquisti WHERE SUBSTR(giorno_data, 1, 7) = ( SELECT SUBSTR(giorno_data, 1, 7) FROM tabella_acquisti WHERE operazione = NEW.operazione ) ),
+    ( SELECT SUM(importo_totale) FROM tabella_acquisti WHERE SUBSTR(giorno_data, 1, 7) = ( SELECT SUBSTR(giorno_data, 1, 7) FROM tabella_acquisti WHERE operazione = NEW.operazione ) ),
+    ( SELECT SUM(prezzo_totale) FROM tabella_acquisti WHERE SUBSTR(giorno_data, 1, 7) = ( SELECT SUBSTR(giorno_data, 1, 7) FROM tabella_acquisti WHERE operazione = NEW.operazione ) ),
+    ( SELECT somma_mc_vendita FROM tabella_mensile WHERE mese_anno = ( SELECT SUBSTR(giorno_data, 1, 7) FROM tabella_acquisti WHERE operazione = NEW.operazione ) ),
+    ( SELECT somma_mc_vendita_pefc FROM tabella_mensile WHERE mese_anno = ( SELECT SUBSTR(giorno_data, 1, 7) FROM tabella_acquisti WHERE operazione = NEW.operazione ) ),
+    ( SELECT somma_eur_vendita FROM tabella_mensile WHERE mese_anno = ( SELECT SUBSTR(giorno_data, 1, 7) FROM tabella_acquisti WHERE operazione = NEW.operazione ) ),
+    ( SELECT somma_eur_vendita_no_iva FROM tabella_mensile WHERE mese_anno = ( SELECT SUBSTR(giorno_data, 1, 7) FROM tabella_acquisti WHERE operazione = NEW.operazione ) )
+  );
+
+  -- update tabella annuale
+  INSERT OR REPLACE INTO tabella_annuale (
+    anno,
+    somma_mc_acquisto,
+    somma_eur_acquisto,
+    somma_eur_acquisto_no_iva,
+    somma_mc_vendita,
+    somma_mc_vendita_pefc,
+    somma_eur_vendita,
+    somma_eur_vendita_no_iva
+  ) VALUES (
+    ( SELECT SUBSTR(giorno_data, 1, 4) FROM tabella_acquisti WHERE operazione = NEW.operazione ),
+    ( SELECT SUM(quantita) FROM tabella_acquisti WHERE SUBSTR(giorno_data, 1, 4) = ( SELECT SUBSTR(giorno_data, 1, 4) FROM tabella_acquisti WHERE operazione = NEW.operazione ) ),
+    ( SELECT SUM(importo_totale) FROM tabella_acquisti WHERE SUBSTR(giorno_data, 1, 4) = ( SELECT SUBSTR(giorno_data, 1, 4) FROM tabella_acquisti WHERE operazione = NEW.operazione ) ),
+    ( SELECT SUM(prezzo_totale) FROM tabella_acquisti WHERE SUBSTR(giorno_data, 1, 4) = ( SELECT SUBSTR(giorno_data, 1, 4) FROM tabella_acquisti WHERE operazione = NEW.operazione ) ),
+    ( SELECT somma_mc_vendita FROM tabella_annuale WHERE anno = ( SELECT SUBSTR(giorno_data, 1, 4) FROM tabella_acquisti WHERE operazione = NEW.operazione ) ),
+    ( SELECT somma_mc_vendita_pefc FROM tabella_annuale WHERE anno = ( SELECT SUBSTR(giorno_data, 1, 4) FROM tabella_acquisti WHERE operazione = NEW.operazione ) ),
+    ( SELECT somma_eur_vendita FROM tabella_annuale WHERE anno = ( SELECT SUBSTR(giorno_data, 1, 4) FROM tabella_acquisti WHERE operazione = NEW.operazione ) ),
+    ( SELECT somma_eur_vendita_no_iva FROM tabella_annuale WHERE anno = ( SELECT SUBSTR(giorno_data, 1, 4) FROM tabella_acquisti WHERE operazione = NEW.operazione ) )
+  );
+
 END;
 
 
@@ -332,9 +412,7 @@ BEGIN
     imponibile_importo, imposta, esigibilita_iva,
     data_riferimento_termini, data_scadenza_pagamento, importo_pagamento,
     typo
-  )
-VALUES
-  (
+  ) VALUES (
     NEW.operazione,
     NEW.prestatore_denominazione, NEW.prestatore_indirizzo,
     NEW.committente_denominazione, NEW.committente_indirizzo,
@@ -359,6 +437,48 @@ VALUES
     ( SELECT SUM(prezzo_totale) FROM tabella_vendite WHERE operazione = NEW.operazione )
   );
 
+  -- update tabella mensile
+  INSERT INTO tabella_mensile (
+    mese_anno,
+    somma_mc_acquisto,
+    somma_eur_acquisto,
+    somma_eur_acquisto_no_iva,
+    somma_mc_vendita,
+    somma_mc_vendita_pefc,
+    somma_eur_vendita,
+    somma_eur_vendita_no_iva
+  ) VALUES (
+    ( SELECT SUBSTR(giorno_data, 1, 7) FROM tabella_vendite WHERE operazione = NEW.operazione ),
+    ( SELECT somma_mc_acquisto FROM tabella_mensile WHERE mese_anno = ( SELECT SUBSTR(giorno_data, 1, 7) FROM tabella_vendite WHERE operazione = NEW.operazione ) ),
+    ( SELECT somma_eur_acquisto FROM tabella_mensile WHERE mese_anno = ( SELECT SUBSTR(giorno_data, 1, 7) FROM tabella_vendite WHERE operazione = NEW.operazione ) ),
+    ( SELECT somma_eur_acquisto_no_iva FROM tabella_mensile WHERE mese_anno = ( SELECT SUBSTR(giorno_data, 1, 7) FROM tabella_vendite WHERE operazione = NEW.operazione ) ),
+    ( SELECT SUM(quantita) FROM tabella_vendite WHERE SUBSTR(giorno_data, 1, 7) = ( SELECT SUBSTR(giorno_data, 1, 7) FROM tabella_vendite WHERE operazione = NEW.operazione ) ),
+    ( SELECT SUM(quantita) FROM tabella_vendite WHERE SUBSTR(giorno_data, 1, 7) = ( SELECT SUBSTR(giorno_data, 1, 7) FROM tabella_vendite WHERE operazione = NEW.operazione ) AND pefc = "si"),
+    ( SELECT SUM(importo_totale) FROM tabella_vendite WHERE SUBSTR(giorno_data, 1, 7) = ( SELECT SUBSTR(giorno_data, 1, 7) FROM tabella_vendite WHERE operazione = NEW.operazione ) ),
+    ( SELECT SUM(prezzo_totale) FROM tabella_vendite WHERE SUBSTR(giorno_data, 1, 7) = ( SELECT SUBSTR(giorno_data, 1, 7) FROM tabella_vendite WHERE operazione = NEW.operazione ) )
+  );
+
+  -- update tabella annuale
+  INSERT INTO tabella_annuale (
+    anno,
+    somma_mc_acquisto,
+    somma_eur_acquisto,
+    somma_eur_acquisto_no_iva,
+    somma_mc_vendita,
+    somma_mc_vendita_pefc,
+    somma_eur_vendita,
+    somma_eur_vendita_no_iva
+  ) VALUES (
+    ( SELECT SUBSTR(giorno_data, 1, 4) FROM tabella_vendite WHERE operazione = NEW.operazione ),
+    ( SELECT somma_mc_acquisto FROM tabella_annuale WHERE anno = ( SELECT SUBSTR(giorno_data, 1, 4) FROM tabella_vendite WHERE operazione = NEW.operazione ) ),
+    ( SELECT somma_eur_acquisto FROM tabella_annuale WHERE anno = ( SELECT SUBSTR(giorno_data, 1, 4) FROM tabella_vendite WHERE operazione = NEW.operazione ) ),
+    ( SELECT somma_eur_acquisto_no_iva FROM tabella_annuale WHERE anno = ( SELECT SUBSTR(giorno_data, 1, 4) FROM tabella_vendite WHERE operazione = NEW.operazione ) ),
+    ( SELECT SUM(quantita) FROM tabella_vendite WHERE SUBSTR(giorno_data, 1, 4) = ( SELECT SUBSTR(giorno_data, 1, 4) FROM tabella_vendite WHERE operazione = NEW.operazione ) ),
+    ( SELECT SUM(quantita) FROM tabella_vendite WHERE SUBSTR(giorno_data, 1, 4) = ( SELECT SUBSTR(giorno_data, 1, 4) FROM tabella_vendite WHERE operazione = NEW.operazione ) AND pefc = "si"),
+    ( SELECT SUM(importo_totale) FROM tabella_vendite WHERE SUBSTR(giorno_data, 1, 4) = ( SELECT SUBSTR(giorno_data, 1, 4) FROM tabella_vendite WHERE operazione = NEW.operazione ) ),
+    ( SELECT SUM(prezzo_totale) FROM tabella_vendite WHERE SUBSTR(giorno_data, 1, 4) = ( SELECT SUBSTR(giorno_data, 1, 4) FROM tabella_vendite WHERE operazione = NEW.operazione ) )
+  );
+
 END;
 
 
@@ -378,9 +498,7 @@ BEGIN
     imponibile_importo, imposta, esigibilita_iva,
     data_riferimento_termini, data_scadenza_pagamento, importo_pagamento,
     typo
-  )
-VALUES
-  (
+  ) VALUES (
     NEW.operazione,
     NEW.prestatore_denominazione, NEW.prestatore_indirizzo,
     NEW.committente_denominazione, NEW.committente_indirizzo,
@@ -428,6 +546,48 @@ VALUES
   -- DELETE FROM tabella_sommario
   -- WHERE numero NOT IN
   -- ( SELECT operazione FROM tabella_acquisti UNION SELECT operazione FROM tabella_vendite );
+
+  -- update tabella mensile
+  INSERT INTO tabella_mensile (
+    mese_anno,
+    somma_mc_acquisto,
+    somma_eur_acquisto,
+    somma_eur_acquisto_no_iva,
+    somma_mc_vendita,
+    somma_mc_vendita_pefc,
+    somma_eur_vendita,
+    somma_eur_vendita_no_iva
+  ) VALUES (
+    ( SELECT SUBSTR(giorno_data, 1, 7) FROM tabella_vendite WHERE operazione = NEW.operazione ),
+    ( SELECT somma_mc_acquisto FROM tabella_mensile WHERE mese_anno = ( SELECT SUBSTR(giorno_data, 1, 7) FROM tabella_vendite WHERE operazione = NEW.operazione ) ),
+    ( SELECT somma_eur_acquisto FROM tabella_mensile WHERE mese_anno = ( SELECT SUBSTR(giorno_data, 1, 7) FROM tabella_vendite WHERE operazione = NEW.operazione ) ),
+    ( SELECT somma_eur_acquisto_no_iva FROM tabella_mensile WHERE mese_anno = ( SELECT SUBSTR(giorno_data, 1, 7) FROM tabella_vendite WHERE operazione = NEW.operazione ) ),
+    ( SELECT SUM(quantita) FROM tabella_vendite WHERE SUBSTR(giorno_data, 1, 7) = ( SELECT SUBSTR(giorno_data, 1, 7) FROM tabella_vendite WHERE operazione = NEW.operazione ) ),
+    ( SELECT SUM(quantita) FROM tabella_vendite WHERE SUBSTR(giorno_data, 1, 7) = ( SELECT SUBSTR(giorno_data, 1, 7) FROM tabella_vendite WHERE operazione = NEW.operazione ) AND pefc = "si"),
+    ( SELECT SUM(importo_totale) FROM tabella_vendite WHERE SUBSTR(giorno_data, 1, 7) = ( SELECT SUBSTR(giorno_data, 1, 7) FROM tabella_vendite WHERE operazione = NEW.operazione ) ),
+    ( SELECT SUM(prezzo_totale) FROM tabella_vendite WHERE SUBSTR(giorno_data, 1, 7) = ( SELECT SUBSTR(giorno_data, 1, 7) FROM tabella_vendite WHERE operazione = NEW.operazione ) )
+  );
+
+  -- update tabella annuale
+  INSERT INTO tabella_annuale (
+    anno,
+    somma_mc_acquisto,
+    somma_eur_acquisto,
+    somma_eur_acquisto_no_iva,
+    somma_mc_vendita,
+    somma_mc_vendita_pefc,
+    somma_eur_vendita,
+    somma_eur_vendita_no_iva
+  ) VALUES (
+    ( SELECT SUBSTR(giorno_data, 1, 4) FROM tabella_vendite WHERE operazione = NEW.operazione ),
+    ( SELECT somma_mc_acquisto FROM tabella_annuale WHERE anno = ( SELECT SUBSTR(giorno_data, 1, 4) FROM tabella_vendite WHERE operazione = NEW.operazione ) ),
+    ( SELECT somma_eur_acquisto FROM tabella_annuale WHERE anno = ( SELECT SUBSTR(giorno_data, 1, 4) FROM tabella_vendite WHERE operazione = NEW.operazione ) ),
+    ( SELECT somma_eur_acquisto_no_iva FROM tabella_annuale WHERE anno = ( SELECT SUBSTR(giorno_data, 1, 4) FROM tabella_vendite WHERE operazione = NEW.operazione ) ),
+    ( SELECT SUM(quantita) FROM tabella_vendite WHERE SUBSTR(giorno_data, 1, 4) = ( SELECT SUBSTR(giorno_data, 1, 4) FROM tabella_vendite WHERE operazione = NEW.operazione ) ),
+    ( SELECT SUM(quantita) FROM tabella_vendite WHERE SUBSTR(giorno_data, 1, 4) = ( SELECT SUBSTR(giorno_data, 1, 4) FROM tabella_vendite WHERE operazione = NEW.operazione ) AND pefc = "si"),
+    ( SELECT SUM(importo_totale) FROM tabella_vendite WHERE SUBSTR(giorno_data, 1, 4) = ( SELECT SUBSTR(giorno_data, 1, 4) FROM tabella_vendite WHERE operazione = NEW.operazione ) ),
+    ( SELECT SUM(prezzo_totale) FROM tabella_vendite WHERE SUBSTR(giorno_data, 1, 4) = ( SELECT SUBSTR(giorno_data, 1, 4) FROM tabella_vendite WHERE operazione = NEW.operazione ) )
+  );
 
 END;
 
