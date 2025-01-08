@@ -1,6 +1,5 @@
 [package]
 name = "ds-legno"
-version = "0.1.0"
 version = "1.0.0"
 author = [
   "Daniel Rivas <danielrivasmd@gmail.com>",
