@@ -96,14 +96,14 @@ import '.just/rs.conf'
 # run acquista
 [group('rust')]
 @acquista:
-  cargo run --bin acquista -- data/acquisto.xml
+  cargo run -- --input data/acquisto.xml --invoice acquista
 
 ####################################################################################################
 
 # run vendita
 [group('rust')]
 @vendita:
-  cargo run --bin vendita -- data/vendita.xml
+  cargo run -- --input data/vendita.xml --invoice vendita
 
 ####################################################################################################
 
