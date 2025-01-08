@@ -14,13 +14,8 @@ edition = "2021"
 
 
 [[bin]]
-name = "vendita"
-path = "src/bin/vendita.rs"
-
-
-[[bin]]
-name = "acquista"
-path = "src/bin/acquista.rs"
+name = "fattura"
+path = "src/bin/fattura.rs"
 
 
 [lib]
