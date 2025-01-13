@@ -1,15 +1,9 @@
-# Development
+### Dalla Santa Legno
 
-1. Install npm: https://docs.npmjs.com/downloading-and-installing-node-js-and-npm
-2. Install the tailwind css cli: https://tailwindcss.com/docs/installation
-3. Run the following command in the root of the project to start the tailwind CSS compiler:
+Welcome to **Dalla Santa Legno** database manager
 
-```bash
-npx tailwindcss -i ./input.css -o ./assets/tailwind.css --watch
-```
+The files uploaded to this shared folder are:
 
-Run the following command in the root of the project to start the Dioxus dev server:
+- `dallasanta.db`: a database that contains the tables required to hold and display the data loaded from the invoices. Additionally, this database also contains triggers that will update the values on the corresponding summary tables once the values on `operazione` are manually changed.
 
-```bash
-dx serve --hot-reload --platform desktop
-```
+- `fattura.exe`: a program executable that reads the data contained in `xml` files, communicate with `dallasanta.db` and upload data to the corresponding tables.
