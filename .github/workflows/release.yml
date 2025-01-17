@@ -1,0 +1,119 @@
+name: release
+
+on:
+  push:
+    tags:
+      - v*
+
+jobs:
+  create-release:
+    name: Create release
+    runs-on: ubuntu-latest
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref_name }}
+          release_name: Release ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+
+  build-msys-mingw64:
+    name: Build for Windows
+    needs: create-release
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v2
+
+      - name: Setup msys2 dependencies
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: true
+          install: git zip mingw-w64-x86_64-libzip mingw-w64-x86_64-rust mingw-w64-x86_64-sqlite3 mingw-w64-x86_64-pkg-config
+
+      - name: Run cargo check
+        run: cargo check --release
+
+      - name: Build
+        run: cargo build --release
+
+      - name: Package
+        run: tools/package_release_windows.sh ${{ github.ref_name }}
+
+      - name: Compile .ISS to .EXE Installer
+        uses: Minionguyjpro/Inno-Setup-Action@v1.2.2
+        with:
+          path: setup.iss
+          options: /O+
+
+      - name: Upload binaries
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          UPLOAD_URL: ${{ needs.create-release.outputs.upload_url }}
+        with:
+          upload_url: ${{ env.UPLOAD_URL }}
+          asset_path: fattura_${{ github.ref_name }}_Win64.zip
+          asset_name: fattura_${{ github.ref_name }}_Win64.zip
+          asset_content_type: application/zip
+
+      - name: Upload installer
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          UPLOAD_URL: ${{ needs.create-release.outputs.upload_url }}
+        with:
+          upload_url: ${{ env.UPLOAD_URL }}
+          asset_path: Output\fattura.exe
+          asset_name: fattura_${{ github.ref_name }}_Win64_installer.exe
+          asset_content_type: application/octet-stream
+
+  build-linux:
+    name: Build for Linux
+    needs: create-release
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v2
+
+      - name: Install stable toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+
+      - name: Install OS dependencies
+        run: sudo apt-get install -y build-essential pkg-config libssl-dev libsqlite3-dev libpango1.0-dev libgtk-3-dev
+
+      - name: Run cargo check
+        run: cargo check --release
+
+      - name: Build
+        run: cargo build --release
+
+      - name: Package
+        run: tools/package_release_linux.sh ${{ github.ref_name }}
+
+      - name: Upload artifact
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          UPLOAD_URL: ${{ needs.create-release.outputs.upload_url }}
+        with:
+          upload_url: ${{ env.UPLOAD_URL }}
+          asset_path: fattura_${{ github.ref_name }}_Linux.zip
+          asset_name: fattura_${{ github.ref_name }}_Linux.zip
+          asset_content_type: application/zip
