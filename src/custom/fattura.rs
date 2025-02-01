@@ -11,7 +11,6 @@ use crate::custom::schema::*;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// TODO: find how to transfer fields & use generics
 #[derive(Debug, Default, Insertable, new)]
 #[diesel(table_name = tabella_acquisti)]
 pub struct FatturaToUploadAcquisti {
@@ -177,67 +176,71 @@ pub struct FatturaToCapture {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// TODO: use generic implementation
-impl FatturaToCapture {
-    pub fn upload_formatter_acquisti(&self) -> anyResult<Vec<FatturaToUploadAcquisti>> {
-        // preallocate
-        let mut fatture: Vec<FatturaToUploadAcquisti> = vec![];
+// trait for common behavior
+pub trait FatturaUpload<T> {
+    fn from_details(details: &DettaglioLinee, fattura: &FatturaToCapture) -> T;
+}
 
-        // iterate on details
-        for details in self.dettaglio_linee.iter() {
-            fatture.push(FatturaToUploadAcquisti {
-                descrizione: details.descrizione.clone(),
-                quantita: details.quantita.clone(),
-                prezzo_unitario: details.prezzo_unitario.clone(),
-                prezzo_totale: details.prezzo_totale.clone(),
-                aliquota_iva: details.aliquota_iva.clone(),
-                numero_fattura: self.numero_fattura.clone(),
-                giorno_data: self.giorno_data.clone(),
-                importo_totale: self.importo_totale.clone(),
-                prestatore_denominazione: self.prestatore_denominazione.clone(),
-                prestatore_indirizzo: self.prestatore_indirizzo.clone(),
-                committente_denominazione: self.committente_denominazione.clone(),
-                committente_indirizzo: self.committente_indirizzo.clone(),
-                imponibile_importo: self.imponibile_importo.clone(),
-                imposta: self.imposta.clone(),
-                esigibilita_iva: self.esigibilita_iva.clone(),
-                data_riferimento_termini: self.data_riferimento_termini.clone(),
-                data_scadenza_pagamento: self.data_scadenza_pagamento.clone(),
-                importo_pagamento: self.importo_pagamento.clone(),
-            });
+// implement the trait for acquisti
+impl FatturaUpload<FatturaToUploadAcquisti> for FatturaToUploadAcquisti {
+    fn from_details(details: &DettaglioLinee, fattura: &FatturaToCapture) -> Self {
+        Self {
+            descrizione: details.descrizione.clone(),
+            quantita: details.quantita.clone(),
+            prezzo_unitario: details.prezzo_unitario.clone(),
+            prezzo_totale: details.prezzo_totale.clone(),
+            aliquota_iva: details.aliquota_iva.clone(),
+            numero_fattura: fattura.numero_fattura.clone(),
+            giorno_data: fattura.giorno_data.clone(),
+            importo_totale: fattura.importo_totale.clone(),
+            prestatore_denominazione: fattura.prestatore_denominazione.clone(),
+            prestatore_indirizzo: fattura.prestatore_indirizzo.clone(),
+            committente_denominazione: fattura.committente_denominazione.clone(),
+            committente_indirizzo: fattura.committente_indirizzo.clone(),
+            imponibile_importo: fattura.imponibile_importo.clone(),
+            imposta: fattura.imposta.clone(),
+            esigibilita_iva: fattura.esigibilita_iva.clone(),
+            data_riferimento_termini: fattura.data_riferimento_termini.clone(),
+            data_scadenza_pagamento: fattura.data_scadenza_pagamento.clone(),
+            importo_pagamento: fattura.importo_pagamento.clone(),
         }
-
-        Ok(fatture)
     }
+}
 
-    pub fn upload_formatter_vendite(&self) -> anyResult<Vec<FatturaToUploadVendite>> {
-        // preallocate
-        let mut fatture: Vec<FatturaToUploadVendite> = vec![];
-
-        // iterate on details
-        for details in self.dettaglio_linee.iter() {
-            fatture.push(FatturaToUploadVendite {
-                descrizione: details.descrizione.clone(),
-                quantita: details.quantita.clone(),
-                prezzo_unitario: details.prezzo_unitario.clone(),
-                prezzo_totale: details.prezzo_totale.clone(),
-                aliquota_iva: details.aliquota_iva.clone(),
-                numero_fattura: self.numero_fattura.clone(),
-                giorno_data: self.giorno_data.clone(),
-                importo_totale: self.importo_totale.clone(),
-                prestatore_denominazione: self.prestatore_denominazione.clone(),
-                prestatore_indirizzo: self.prestatore_indirizzo.clone(),
-                committente_denominazione: self.committente_denominazione.clone(),
-                committente_indirizzo: self.committente_indirizzo.clone(),
-                imponibile_importo: self.imponibile_importo.clone(),
-                imposta: self.imposta.clone(),
-                esigibilita_iva: self.esigibilita_iva.clone(),
-                data_riferimento_termini: self.data_riferimento_termini.clone(),
-                data_scadenza_pagamento: self.data_scadenza_pagamento.clone(),
-                importo_pagamento: self.importo_pagamento.clone(),
-            });
+// implement the trait for vendite
+impl FatturaUpload<FatturaToUploadVendite> for FatturaToUploadVendite {
+    fn from_details(details: &DettaglioLinee, fattura: &FatturaToCapture) -> Self {
+        Self {
+            descrizione: details.descrizione.clone(),
+            quantita: details.quantita.clone(),
+            prezzo_unitario: details.prezzo_unitario.clone(),
+            prezzo_totale: details.prezzo_totale.clone(),
+            aliquota_iva: details.aliquota_iva.clone(),
+            numero_fattura: fattura.numero_fattura.clone(),
+            giorno_data: fattura.giorno_data.clone(),
+            importo_totale: fattura.importo_totale.clone(),
+            prestatore_denominazione: fattura.prestatore_denominazione.clone(),
+            prestatore_indirizzo: fattura.prestatore_indirizzo.clone(),
+            committente_denominazione: fattura.committente_denominazione.clone(),
+            committente_indirizzo: fattura.committente_indirizzo.clone(),
+            imponibile_importo: fattura.imponibile_importo.clone(),
+            imposta: fattura.imposta.clone(),
+            esigibilita_iva: fattura.esigibilita_iva.clone(),
+            data_riferimento_termini: fattura.data_riferimento_termini.clone(),
+            data_scadenza_pagamento: fattura.data_scadenza_pagamento.clone(),
+            importo_pagamento: fattura.importo_pagamento.clone(),
         }
+    }
+}
 
+// generalized method FatturaToCapture
+impl FatturaToCapture {
+    pub fn upload_formatter<T: FatturaUpload<T>>(&self) -> anyResult<Vec<T>> {
+        let fatture: Vec<T> = self
+            .dettaglio_linee
+            .iter()
+            .map(|details| T::from_details(details, self))
+            .collect();
         Ok(fatture)
     }
 }
@@ -274,4 +277,4 @@ impl DettaglioLinee {
     }
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////

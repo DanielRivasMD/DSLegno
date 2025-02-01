@@ -39,10 +39,10 @@ fn main() -> anyResult<()> {
 	let mut conn = establish_db_connection()?;
 
 	match params.invoice {
-		
+
 		InvoiceType::Acquista => {
 			// prepare data to upload
-			let fatture_to_upload = fattura_to_capture.upload_formatter_acquisti()?;
+			let fatture_to_upload = fattura_to_capture.upload_formatter()?;
 			// upload to database
 			for fattura_to_upload in fatture_to_upload.into_iter() {
 				insert_insertable_struct_acquisti(fattura_to_upload, &mut conn)?;
@@ -51,7 +51,7 @@ fn main() -> anyResult<()> {
 
 		InvoiceType::Vendita => {
 			// prepare data to upload
-			let fatture_to_upload = fattura_to_capture.upload_formatter_vendite()?;
+			let fatture_to_upload = fattura_to_capture.upload_formatter()?;
 			// upload to database
 			for fattura_to_upload in fatture_to_upload.into_iter() {
 				insert_insertable_struct_vendite(fattura_to_upload, &mut conn)?
@@ -63,4 +63,3 @@ fn main() -> anyResult<()> {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-
