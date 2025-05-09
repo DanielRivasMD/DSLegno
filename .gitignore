@@ -22,5 +22,6 @@ data
 # database
 dallasanta.db
 dallasanta.db-journal
+dallasanta.sql
 
 ####################################################################################################
