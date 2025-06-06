@@ -37,3 +37,19 @@ for DIR in "$DIR1" "$DIR2"; do
 done
 
 ####################################################################################################
+
+# Create a soft link of $HOME/DSLegno/com.fabrizio.fattura-watchers.plist to /Users/fabrizio/Library/LaunchAgents/com.fabrizio.fattura-watchers.plist
+TARGET="$HOME/DSLegno/com.fabrizio.fattura-watchers.plist"
+LINK="/Users/fabrizio/Library/LaunchAgents/com.fabrizio.fattura-watchers.plist"
+
+# Ensure the LaunchAgents directory exists
+mkdir -p "$(dirname "$LINK")"
+
+if [ ! -L "$LINK" ]; then
+    ln -s "$TARGET" "$LINK"
+    echo "Symbolic link created: $LINK -> $TARGET"
+else
+    echo "Symbolic link $LINK already exists."
+fi
+
+####################################################################################################
