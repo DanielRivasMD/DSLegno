@@ -26,6 +26,11 @@ curl --proto '=https' --tlsv1.2 -LsSf https://github.com/diesel-rs/diesel/releas
 
 ####################################################################################################
 
+# Set up database
+diesel setup
+
+####################################################################################################
+
 # Ensure directories $HOME/Desktop/Acquista and $HOME/Desktop/Vendita exist, create them if needed and log
 DIR1="$HOME/Desktop/Acquista"
 DIR2="$HOME/Desktop/Vendita"
