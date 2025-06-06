@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+   "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <!-- Define a unique label -->
+    <key>Label</key>
+    <string>com.fabrizio.fattura.watchers</string>
+
+    <!-- Command to execute: the shell script created above -->
+    <key>ProgramArguments</key>
+    <array>
+      <string>/Users/fabrizio/DSLegno/fattura-watchers.sh</string>
+    </array>
+
+    <!-- Start the job as soon as you log in -->
+    <key>RunAtLoad</key>
+    <true/>
+
+    <!-- Restart the process if it crashes -->
+    <key>KeepAlive</key>
+    <true/>
+
+    <!-- Log files for debugging purposes -->
+    <key>StandardOutPath</key>
+    <string>/Users/fabrizio/Library/Logs/fattura-watchers.out.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/fabrizio/Library/Logs/fattura-watchers.err.log</string>
+
+    <!-- (Optional) Set any needed environment variables -->
+    <key>EnvironmentVariables</key>
+    <dict>
+      <key>HOME</key>
+      <string>/Users/fabrizio</string>
+      <!-- Ensure PATH includes the directory for watchexec -->
+      <key>PATH</key>
+      <string>/opt/homebrew/bin</string>
+    </dict>
+  </dict>
+</plist>
+
