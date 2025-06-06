@@ -5,6 +5,7 @@
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
 ####################################################################################################
+
 # Reload the shell environment so that brew is available in the current session
 eval "$(/opt/homebrew/bin/brew shellenv)"
 
@@ -19,6 +20,9 @@ brew install --cask db-browser-for-sqlite
 # sqlite
 brew install sqlite
 brew install litecli
+
+# diesel
+curl --proto '=https' --tlsv1.2 -LsSf https://github.com/diesel-rs/diesel/releases/latest/download/diesel_cli-installer.sh | sh
 
 ####################################################################################################
 
