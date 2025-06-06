@@ -5,20 +5,19 @@
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
 ####################################################################################################
+# Reload the shell environment so that brew is available in the current session
+eval "$(/opt/homebrew/bin/brew shellenv)"
+
+####################################################################################################
 
 # watchexec
-brew install
+brew install watchexec
 
 # gui
-brew install
+brew install --cask db-browser-for-sqlite
 
 # sqlite
 brew install sqlite
 brew install litecli
-
-####################################################################################################
-
-# set up cron job
-
 
 ####################################################################################################
