@@ -22,18 +22,12 @@ brew install litecli
 
 ####################################################################################################
 
-# Verify if directories $HOME/Desktop/Acquista and $HOME/Desktop/Vendita exist, if not create them and log
+# Ensure directories $HOME/Desktop/Acquista and $HOME/Desktop/Vendita exist, create them if needed and log
 DIR1="$HOME/Desktop/Acquista"
 DIR2="$HOME/Desktop/Vendita"
 
 for DIR in "$DIR1" "$DIR2"; do
-    if [ ! -d "$DIR" ]; then
-        echo "Directory $DIR does not exist. Creating it..."
-        mkdir -p "$DIR"
-        echo "Directory $DIR created."
-    else
-        echo "Directory $DIR already exists."
-    fi
+    mkdir -p "$DIR"
 done
 
 ####################################################################################################
