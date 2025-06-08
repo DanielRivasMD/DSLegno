@@ -1,16 +1,13 @@
 ----------------------------------------------------------------------------------------------------
--- Tabella acquisti
--- Tabella vendite
--- Tabella sommario
-----------------------------------------------------------------------------------------------------
--- database architecture
+-- TABLE DECLARATIONS
 ----------------------------------------------------------------------------------------------------
 
+-- Main detailed table for both purchases and sales
 CREATE TABLE IF NOT EXISTS tabella_principale
   (
     ----------------------------------------
     id INTEGER PRIMARY KEY AUTOINCREMENT, -- automatic tracker
-    operazione INTEGER,                   -- correlation number
+    operazione INTEGER,                   -- correlation number (key refined by user update)
     ----------------------------------------
     -----       dettaglio linee        -----
     ----------------------------------------
@@ -18,7 +15,7 @@ CREATE TABLE IF NOT EXISTS tabella_principale
     quantita REAL,                        -- amount
     prezzo_unitario REAL,                 -- unit price
     prezzo_totale REAL,                   -- total price
-    aliquota_iva REAL,                    -- tax
+    aliquota_iva REAL,                    -- tax rate
     ----------------------------------------
     -----   dati generali documento    -----
     ----------------------------------------
@@ -28,91 +25,95 @@ CREATE TABLE IF NOT EXISTS tabella_principale
     ----------------------------------------
     -----      cedente prestatore      -----
     ----------------------------------------
-    prestatore_denominazione TEXT,        -- name
-    prestatore_indirizzo TEXT,            -- address
+    prestatore_denominazione TEXT,        -- seller name
+    prestatore_indirizzo TEXT,            -- seller address
     ----------------------------------------
     -----   cessionario committente    -----
     ----------------------------------------
-    committente_denominazione TEXT,       -- name
-    committente_indirizzo TEXT,           -- address
+    committente_denominazione TEXT,       -- buyer name
+    committente_indirizzo TEXT,           -- buyer address
     ----------------------------------------
     -----        dati riepilogo        -----
     ----------------------------------------
-    imponibile_importo REAL,              -- total
+    imponibile_importo REAL,              -- taxable total
     imposta REAL,                         -- tax
-    esigibilita_iva CHAR,                 -- tax category
+    esigibilita_iva CHAR,                 -- tax category flag
     ----------------------------------------
     -----     condizioni pagamento     -----
     ----------------------------------------
-    data_riferimento_termini TEXT,        -- date
-    data_scadenza_pagamento TEXT,         -- date
-    importo_pagamento REAL,               -- total
+    data_riferimento_termini TEXT,        -- payment reference date
+    data_scadenza_pagamento TEXT,         -- payment due date
+    importo_pagamento REAL,               -- payment amount
     ----------------------------------------
-    typo TEXT                             -- type
+    typo TEXT                             -- transaction type ('ACQUISTO' or 'VENDITO')
     ----------------------------------------
   );
 
-
+----------------------------------------------------------------------------------------------------
+-- Table for purchases (acquisti)
+----------------------------------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS tabella_acquisti
   (
     ----------------------------------------
     id INTEGER PRIMARY KEY AUTOINCREMENT, -- automatic tracker
-    operazione INTEGER,                   -- correlation number
+    operazione INTEGER,                   -- correlation number (initially NULL)
     ----------------------------------------
     -----       dettaglio linee        -----
     ----------------------------------------
-    progetto_di_taglio TEXT,              -- project => to edit manually
+    progetto_di_taglio TEXT,              -- cutting project (initially NULL; to be updated by user)
     descrizione TEXT,                     -- description
     quantita REAL,                        -- amount
     prezzo_unitario REAL,                 -- unit price
     prezzo_totale REAL,                   -- total price
-    aliquota_iva REAL,                    -- tax
+    aliquota_iva REAL,                    -- tax rate
     ----------------------------------------
     -----   dati generali documento    -----
     ----------------------------------------
     numero_fattura TEXT,                  -- invoice number
-    giorno_data TEXT,                     -- invoice date
+    giorno_data TEXT,                     -- invoice date (format should enable extraction of YYYY-MM and YYYY)
     importo_totale REAL,                  -- total amount
     ----------------------------------------
     -----      cedente prestatore      -----
     ----------------------------------------
-    prestatore_denominazione TEXT,        -- name
-    prestatore_indirizzo TEXT,            -- address
+    prestatore_denominazione TEXT,        -- seller name
+    prestatore_indirizzo TEXT,            -- seller address
     ----------------------------------------
     -----   cessionario committente    -----
     ----------------------------------------
-    committente_denominazione TEXT,       -- name
-    committente_indirizzo TEXT,           -- address
+    committente_denominazione TEXT,       -- buyer name
+    committente_indirizzo TEXT,           -- buyer address
     ----------------------------------------
     -----        dati riepilogo        -----
     ----------------------------------------
-    imponibile_importo REAL,              -- total
+    imponibile_importo REAL,              -- taxable total
     imposta REAL,                         -- tax
-    esigibilita_iva CHAR,                 -- tax category
+    esigibilita_iva CHAR,                 -- tax category flag
     ----------------------------------------
     -----     condizioni pagamento     -----
     ----------------------------------------
-    data_riferimento_termini TEXT,        -- date
-    data_scadenza_pagamento TEXT,         -- date
-    importo_pagamento REAL                -- total
+    data_riferimento_termini TEXT,        -- payment reference date
+    data_scadenza_pagamento TEXT,         -- payment due date
+    importo_pagamento REAL                -- payment amount
     ----------------------------------------
   );
 
-
+----------------------------------------------------------------------------------------------------
+-- Table for sales (vendite)
+----------------------------------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS tabella_vendite
   (
     ----------------------------------------
     id INTEGER PRIMARY KEY AUTOINCREMENT, -- automatic tracker
-    operazione INTEGER,                   -- correlation number
+    operazione INTEGER,                   -- correlation number (initially NULL)
     ----------------------------------------
     -----       dettaglio linee        -----
     ----------------------------------------
-    pefc TEXT,                            -- pefc => boolean value to add manually
+    pefc TEXT,                            -- PEFC flag (e.g., "si")
     descrizione TEXT,                     -- description
     quantita REAL,                        -- amount
     prezzo_unitario REAL,                 -- unit price
     prezzo_totale REAL,                   -- total price
-    aliquota_iva REAL,                    -- tax
+    aliquota_iva REAL,                    -- tax rate
     ----------------------------------------
     -----   dati generali documento    -----
     ----------------------------------------
@@ -122,297 +123,94 @@ CREATE TABLE IF NOT EXISTS tabella_vendite
     ----------------------------------------
     -----      cedente prestatore      -----
     ----------------------------------------
-    prestatore_denominazione TEXT,        -- name
-    prestatore_indirizzo TEXT,            -- address
+    prestatore_denominazione TEXT,        -- seller name
+    prestatore_indirizzo TEXT,            -- seller address
     ----------------------------------------
     -----   cessionario committente    -----
     ----------------------------------------
-    committente_denominazione TEXT,       -- name
-    committente_indirizzo TEXT,           -- address
+    committente_denominazione TEXT,       -- buyer name
+    committente_indirizzo TEXT,           -- buyer address
     ----------------------------------------
     -----        dati riepilogo        -----
     ----------------------------------------
-    imponibile_importo REAL,              -- total
+    imponibile_importo REAL,              -- taxable total
     imposta REAL,                         -- tax
-    esigibilita_iva CHAR,                 -- tax category
+    esigibilita_iva CHAR,                 -- tax category flag
     ----------------------------------------
     -----     condizioni pagamento     -----
     ----------------------------------------
-    data_riferimento_termini TEXT,        -- date
-    data_scadenza_pagamento TEXT,         -- date
-    importo_pagamento REAL                -- total
+    data_riferimento_termini TEXT,        -- payment reference date
+    data_scadenza_pagamento TEXT,         -- payment due date
+    importo_pagamento REAL                -- payment amount
     ----------------------------------------
   );
 
 ----------------------------------------------------------------------------------------------------
--- Tabella sommario
--- This table aggregates day-by-day summary data.
--- It includes details such as the date, descriptive fields for purchase and sale,
--- and aggregated totals both including tax and excluding tax.
+-- Daily/Operative Summary Table (sommario)
 ----------------------------------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS tabella_sommario
   (
-    numero INTEGER PRIMARY KEY,           -- Unique identifier for the summary (manual assignment)
-    giorno_data TEXT,                     -- Date of the summary record (e.g., YYYY-MM-DD)
-    acquisto TEXT,                        -- Purchase details (general textual info)
-    vendita TEXT,                         -- Sale details (general textual info)
-    somma_mc_acquisto REAL,               -- Aggregated purchased quantity (measured in unit of measure)
-    somma_eur_acquisto REAL,              -- Aggregated purchase total (in Euros)
-    somma_eur_acquisto_no_iva REAL,       -- Aggregated purchase total without VAT
-    somma_mc_vendita REAL,                -- Aggregated sold quantity (in unit of measure)
-    somma_mc_vendita_pefc REAL,           -- Aggregated sold quantity (specific for PEFC, if applicable)
-    somma_eur_vendita REAL,               -- Aggregated sales total (in Euros)
-    somma_eur_vendita_no_iva REAL,        -- Aggregated sales total without VAT
-    pagamento TEXT                        -- Payment conditions or status (textual info)
+    numero INTEGER PRIMARY KEY,           -- key (operazione)
+    giorno_data TEXT,                     -- date of record
+    acquisto TEXT,                        -- placeholder for purchase info
+    vendita TEXT,                         -- placeholder for sale info
+    somma_mc_acquisto REAL,               -- aggregated purchase quantity
+    somma_eur_acquisto REAL,              -- aggregated purchase total (Euro)
+    somma_eur_acquisto_no_iva REAL,       -- aggregated purchase total without VAT
+    somma_mc_vendita REAL,                -- aggregated sales quantity
+    somma_mc_vendita_pefc REAL,           -- aggregated PEFC sales quantity
+    somma_eur_vendita REAL,               -- aggregated sales total (Euro)
+    somma_eur_vendita_no_iva REAL,        -- aggregated sales total without VAT
+    pagamento TEXT                        -- payment status/info
   );
 
-
 ----------------------------------------------------------------------------------------------------
--- Tabella mensile
--- This table aggregates monthly data.
--- It summarizes key totals for each month (e.g., month and year) including:
---   - Purchased and sold quantities,
---   - Total Euro amounts,
---   - Totals with and without VAT.
+-- Monthly Aggregation Table (mensile)
 ----------------------------------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS tabella_mensile
   (
-    numero INTEGER PRIMARY KEY AUTOINCREMENT,  -- Auto-increment unique identifier
-    mese_anno TEXT,                            -- Month and year (e.g., '06-2025')
-    somma_mc_acquisto REAL,                    -- Total quantity purchased during the month
-    somma_eur_acquisto REAL,                   -- Total purchase amount in Euros for the month
-    somma_eur_acquisto_no_iva REAL,            -- Purchase amount without VAT for the month
-    somma_mc_vendita REAL,                     -- Total quantity sold during the month
-    somma_mc_vendita_pefc REAL,                -- Total quantity sold (PEFC-specific count) during the month
-    somma_eur_vendita REAL,                    -- Total sales amount in Euros for the month
-    somma_eur_vendita_no_iva REAL              -- Sales amount without VAT for the month
+    numero INTEGER PRIMARY KEY AUTOINCREMENT, -- automatic tracker
+    mese_anno TEXT,                           -- month and year in format YYYY-MM
+    somma_mc_acquisto REAL,                   -- total purchase quantity for month
+    somma_eur_acquisto REAL,                  -- total purchase amount (Euro) for month
+    somma_eur_acquisto_no_iva REAL,           -- purchase total without VAT for month
+    somma_mc_vendita REAL,                    -- total sales quantity for month
+    somma_mc_vendita_pefc REAL,               -- total PEFC sales quantity for month
+    somma_eur_vendita REAL,                   -- total sales amount (Euro) for month
+    somma_eur_vendita_no_iva REAL             -- sales amount without VAT for month
   );
 
-
 ----------------------------------------------------------------------------------------------------
--- Tabella annuale
--- This table aggregates annual data.
--- It functions similarly to the monthly table, but summarizes the totals for the whole year.
--- Columns represent aggregated totals for the year's purchased and sold quantities,
--- total monetary values with and without VAT.
+-- Annual Aggregation Table (annuale)
 ----------------------------------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS tabella_annuale
   (
-    numero INTEGER PRIMARY KEY AUTOINCREMENT,  -- Auto-increment unique identifier
-    anno TEXT,                                 -- Year of the summary (e.g., '2025')
-    somma_mc_acquisto REAL,                    -- Total quantity purchased during the year
-    somma_eur_acquisto REAL,                   -- Total purchase amount in Euros for the year
-    somma_eur_acquisto_no_iva REAL,            -- Total purchase amount without VAT for the year
-    somma_mc_vendita REAL,                     -- Total quantity sold during the year
-    somma_mc_vendita_pefc REAL,                -- Total sold quantity (PEFC-specific count) during the year
-    somma_eur_vendita REAL,                    -- Total sales amount in Euros for the year
-    somma_eur_vendita_no_iva REAL              -- Total sales amount without VAT for the year
+    numero INTEGER PRIMARY KEY AUTOINCREMENT, -- automatic tracker
+    anno TEXT,                                -- year (YYYY)
+    somma_mc_acquisto REAL,                   -- total purchase quantity for year
+    somma_eur_acquisto REAL,                  -- total purchase amount (Euro) for year
+    somma_eur_acquisto_no_iva REAL,           -- total purchase amount without VAT for year
+    somma_mc_vendita REAL,                    -- total sales quantity for year
+    somma_mc_vendita_pefc REAL,               -- total PEFC sales quantity for year
+    somma_eur_vendita REAL,                   -- total sales amount (Euro) for year
+    somma_eur_vendita_no_iva REAL             -- sales amount without VAT for year
   );
-
 
 ----------------------------------------------------------------------------------------------------
--- ACTION TRIGGERS
--- This trigger fires after an UPDATE on the 'tabella_acquisti' table when NEW.operazione 
--- is provided (i.e., not NULL). Its purpose is to propagate and aggregate data into the 
--- main and summary tables (tabella_principale, tabella_sommario, tabella_mensile, and tabella_annuale).
+-- TRIGGERS
 ----------------------------------------------------------------------------------------------------
-
-CREATE TRIGGER denovo_acquisti
-  AFTER UPDATE ON tabella_acquisti
-  WHEN ( NEW.operazione IS NOT NULL )
-BEGIN
-
-  -----------------------------------------------------------------------------------------------
-  -- 1. Update tabella_principale
-  --
-  -- Inserts a new record into 'tabella_principale' using values from the updated 'tabella_acquisti'
-  -- record. The 'typo' field is hard-coded as 'ACQUISTO' indicating a purchase.
-  -----------------------------------------------------------------------------------------------
-  INSERT INTO tabella_principale (
-    operazione,
-    prestatore_denominazione, prestatore_indirizzo,
-    committente_denominazione, committente_indirizzo,
-    numero_fattura, giorno_data, importo_totale,
-    descrizione, quantita, prezzo_unitario, prezzo_totale, aliquota_iva,
-    imponibile_importo, imposta, esigibilita_iva,
-    data_riferimento_termini, data_scadenza_pagamento, importo_pagamento,
-    typo
-  ) VALUES (
-    NEW.operazione,
-    NEW.prestatore_denominazione, NEW.prestatore_indirizzo,
-    NEW.committente_denominazione, NEW.committente_indirizzo,
-    NEW.numero_fattura, NEW.giorno_data, NEW.importo_totale,
-    NEW.descrizione, NEW.quantita, NEW.prezzo_unitario, NEW.prezzo_totale, NEW.aliquota_iva,
-    NEW.imponibile_importo, NEW.imposta, NEW.esigibilita_iva,
-    NEW.data_riferimento_termini, NEW.data_scadenza_pagamento, NEW.importo_pagamento,
-    'ACQUISTO'
-  );
-
-  -----------------------------------------------------------------------------------------------
-  -- 2. Update tabella_sommario
-  --
-  -- Inserts or replaces a record in 'tabella_sommario' keyed by NEW.operazione.
-  --
-  -- For the purchase (acquisto) aggregates, it computes:
-  --   - Total quantity (SUM of quantita)
-  --   - Total invoice amount (SUM of importo_totale)
-  --   - Total net amount (SUM of prezzo_totale)
-  --
-  -- For the sale (vendita) aggregates, it preserves the existing values from tabella_sommario.
-  -----------------------------------------------------------------------------------------------
-  INSERT OR REPLACE INTO tabella_sommario (
-    numero, 
-    somma_mc_acquisto, 
-    somma_eur_acquisto, 
-    somma_eur_acquisto_no_iva, 
-    somma_mc_vendita, 
-    somma_mc_vendita_pefc, 
-    somma_eur_vendita, 
-    somma_eur_vendita_no_iva
-  ) VALUES (
-    NEW.operazione,
-    ( SELECT SUM(quantita) FROM tabella_acquisti WHERE operazione = NEW.operazione ),
-    ( SELECT SUM(importo_totale) FROM tabella_acquisti WHERE operazione = NEW.operazione ),
-    ( SELECT SUM(prezzo_totale) FROM tabella_acquisti WHERE operazione = NEW.operazione ),
-    ( SELECT somma_mc_vendita FROM tabella_sommario WHERE numero = NEW.operazione ),
-    ( SELECT somma_mc_vendita_pefc FROM tabella_sommario WHERE numero = NEW.operazione ),
-    ( SELECT somma_eur_vendita FROM tabella_sommario WHERE numero = NEW.operazione ),
-    ( SELECT somma_eur_vendita_no_iva FROM tabella_sommario WHERE numero = NEW.operazione )
-  );
-
-  -----------------------------------------------------------------------------------------------
-  -- 3. Update tabella_mensile
-  --
-  -- Inserts a new record into 'tabella_mensile' to aggregate monthly data.
-  --
-  -- The month is extracted from 'giorno_data' using SUBSTR to obtain the first 7 characters (YYYY-MM).
-  -- It aggregates the purchases (quantity, invoice amount, net total) for that month.
-  -- For sales aggregates, it retains any pre-existing monthly values from tabella_mensile.
-  -----------------------------------------------------------------------------------------------
-  INSERT INTO tabella_mensile (
-    mese_anno,
-    somma_mc_acquisto,
-    somma_eur_acquisto,
-    somma_eur_acquisto_no_iva,
-    somma_mc_vendita,
-    somma_mc_vendita_pefc,
-    somma_eur_vendita,
-    somma_eur_vendita_no_iva
-  ) VALUES (
-    ( SELECT SUBSTR(giorno_data, 1, 7) 
-      FROM tabella_acquisti WHERE operazione = NEW.operazione ),
-    ( SELECT SUM(quantita)
-      FROM tabella_acquisti
-      WHERE SUBSTR(giorno_data, 1, 7) =
-            ( SELECT SUBSTR(giorno_data, 1, 7)
-              FROM tabella_acquisti WHERE operazione = NEW.operazione ) ),
-    ( SELECT SUM(importo_totale)
-      FROM tabella_acquisti
-      WHERE SUBSTR(giorno_data, 1, 7) =
-            ( SELECT SUBSTR(giorno_data, 1, 7)
-              FROM tabella_acquisti WHERE operazione = NEW.operazione ) ),
-    ( SELECT SUM(prezzo_totale)
-      FROM tabella_acquisti
-      WHERE SUBSTR(giorno_data, 1, 7) =
-            ( SELECT SUBSTR(giorno_data, 1, 7)
-              FROM tabella_acquisti WHERE operazione = NEW.operazione ) ),
-    ( SELECT somma_mc_vendita
-      FROM tabella_mensile
-      WHERE mese_anno =
-            ( SELECT SUBSTR(giorno_data, 1, 7)
-              FROM tabella_acquisti WHERE operazione = NEW.operazione ) ),
-    ( SELECT somma_mc_vendita_pefc
-      FROM tabella_mensile
-      WHERE mese_anno =
-            ( SELECT SUBSTR(giorno_data, 1, 7)
-              FROM tabella_acquisti WHERE operazione = NEW.operazione ) ),
-    ( SELECT somma_eur_vendita
-      FROM tabella_mensile
-      WHERE mese_anno =
-            ( SELECT SUBSTR(giorno_data, 1, 7)
-              FROM tabella_acquisti WHERE operazione = NEW.operazione ) ),
-    ( SELECT somma_eur_vendita_no_iva
-      FROM tabella_mensile
-      WHERE mese_anno =
-            ( SELECT SUBSTR(giorno_data, 1, 7)
-              FROM tabella_acquisti WHERE operazione = NEW.operazione ) )
-  );
-
-  -----------------------------------------------------------------------------------------------
-  -- 4. Update tabella_annuale
-  --
-  -- Inserts a new record into 'tabella_annuale' to aggregate annual data.
-  --
-  -- The year is extracted from 'giorno_data' using SUBSTR to obtain the first 4 characters (YYYY).
-  -- It aggregates the purchases similarly to the monthly trigger,
-  -- and retains any pre-existing annual sales aggregates from tabella_annuale.
-  -----------------------------------------------------------------------------------------------
-  INSERT INTO tabella_annuale (
-    anno,
-    somma_mc_acquisto,
-    somma_eur_acquisto,
-    somma_eur_acquisto_no_iva,
-    somma_mc_vendita,
-    somma_mc_vendita_pefc,
-    somma_eur_vendita,
-    somma_eur_vendita_no_iva
-  ) VALUES (
-    ( SELECT SUBSTR(giorno_data, 1, 4)
-      FROM tabella_acquisti WHERE operazione = NEW.operazione ),
-    ( SELECT SUM(quantita)
-      FROM tabella_acquisti
-      WHERE SUBSTR(giorno_data, 1, 4) =
-            ( SELECT SUBSTR(giorno_data, 1, 4)
-              FROM tabella_acquisti WHERE operazione = NEW.operazione ) ),
-    ( SELECT SUM(importo_totale)
-      FROM tabella_acquisti
-      WHERE SUBSTR(giorno_data, 1, 4) =
-            ( SELECT SUBSTR(giorno_data, 1, 4)
-              FROM tabella_acquisti WHERE operazione = NEW.operazione ) ),
-    ( SELECT SUM(prezzo_totale)
-      FROM tabella_acquisti
-      WHERE SUBSTR(giorno_data, 1, 4) =
-            ( SELECT SUBSTR(giorno_data, 1, 4)
-              FROM tabella_acquisti WHERE operazione = NEW.operazione ) ),
-    ( SELECT somma_mc_vendita
-      FROM tabella_annuale
-      WHERE anno =
-            ( SELECT SUBSTR(giorno_data, 1, 4)
-              FROM tabella_acquisti WHERE operazione = NEW.operazione ) ),
-    ( SELECT somma_mc_vendita_pefc
-      FROM tabella_annuale
-      WHERE anno =
-            ( SELECT SUBSTR(giorno_data, 1, 4)
-              FROM tabella_acquisti WHERE operazione = NEW.operazione ) ),
-    ( SELECT somma_eur_vendita
-      FROM tabella_annuale
-      WHERE anno =
-            ( SELECT SUBSTR(giorno_data, 1, 4)
-              FROM tabella_acquisti WHERE operazione = NEW.operazione ) ),
-    ( SELECT somma_eur_vendita_no_iva
-      FROM tabella_annuale
-      WHERE anno =
-            ( SELECT SUBSTR(giorno_data, 1, 4)
-              FROM tabella_acquisti WHERE operazione = NEW.operazione ) )
-  );
-
-END;
-
-----------------------------------------------------------------------------------------------------
-
--- update on change
--- This trigger fires after an UPDATE on tabella_acquisti when the operazione value changes,
--- meaning OLD.operazione is not equal to NEW.operazione.
+-- For data imported into tabella_acquisti, propagation occurs when the user updates either
+-- the 'operazione' or 'progetto_di_taglio' columns.
 CREATE TRIGGER update_acquisti
   AFTER UPDATE ON tabella_acquisti
-  WHEN ( OLD.operazione <> NEW.operazione )
+  WHEN (
+       COALESCE(OLD.operazione, 0) <> COALESCE(NEW.operazione, 0)
+    OR COALESCE(OLD.progetto_di_taglio, '') <> COALESCE(NEW.progetto_di_taglio, '')
+  )
 BEGIN
 
   -----------------------------------------------------------------------------------------------
-  -- 1. Update tabella_principale with the new record
-  --
-  -- Insert a new record into tabella_principale using data from the NEW row of tabella_acquisti.
-  -- The fixed field 'typo' is set to 'ACQUISTO' to denote that this row represents a purchase.
+  -- 1. Update tabella_principale with the new acquisti record
   -----------------------------------------------------------------------------------------------
   INSERT INTO tabella_principale (
     operazione,
@@ -424,8 +222,7 @@ BEGIN
     data_riferimento_termini, data_scadenza_pagamento, importo_pagamento,
     typo
   )
-  VALUES
-  (
+  VALUES (
     NEW.operazione,
     NEW.prestatore_denominazione, NEW.prestatore_indirizzo,
     NEW.committente_denominazione, NEW.committente_indirizzo,
@@ -438,8 +235,6 @@ BEGIN
 
   -----------------------------------------------------------------------------------------------
   -- Purge outdated records from tabella_principale
-  --
-  -- Remove any records whose id (i.e. operazione) no longer exists in tabella_acquisti or tabella_vendite.
   -----------------------------------------------------------------------------------------------
   DELETE FROM tabella_principale
   WHERE id NOT IN (
@@ -449,11 +244,7 @@ BEGIN
   );
 
   -----------------------------------------------------------------------------------------------
-  -- 2. Update tabella_sommario for the NEW operazione (New Record)
-  --
-  -- Insert or update the summary aggregates for the new operazione value.
-  -- Purchase data aggregates are recalculated based on the records from tabella_acquisti,
-  -- while existing sales aggregates are preserved.
+  -- 2. Update tabella_sommario for the new acquisti record (NEW.operazione)
   -----------------------------------------------------------------------------------------------
   INSERT OR REPLACE INTO tabella_sommario (
     numero,
@@ -476,10 +267,7 @@ BEGIN
   );
 
   -----------------------------------------------------------------------------------------------
-  -- 3. Update tabella_sommario for the OLD operazione (Old Record)
-  --
-  -- Recalculate the summary aggregates associated with the OLD operazione in case data needs
-  -- to be updated after the operazione change.
+  -- 3. Update summary for the OLD acquisti record (OLD.operazione)
   -----------------------------------------------------------------------------------------------
   INSERT OR REPLACE INTO tabella_sommario (
     numero,
@@ -503,9 +291,6 @@ BEGIN
 
   -----------------------------------------------------------------------------------------------
   -- Purge outdated records from tabella_sommario
-  --
-  -- Remove any summary records where numero (i.e. operazione) is no longer present in
-  -- either tabella_acquisti or tabella_vendite.
   -----------------------------------------------------------------------------------------------
   DELETE FROM tabella_sommario
   WHERE numero NOT IN (
@@ -515,10 +300,7 @@ BEGIN
   );
 
   -----------------------------------------------------------------------------------------------
-  -- 4. Update tabella_mensile (Monthly Aggregation)
-  --
-  -- Insert or replace the monthly summary. The month (YYYY-MM format) is extracted from giorno_data.
-  -- Purchase data aggregates for that month are recalculated, while any sales data is retained.
+  -- 4. Update monthly aggregations (tabella_mensile)
   -----------------------------------------------------------------------------------------------
   INSERT OR REPLACE INTO tabella_mensile (
     mese_anno,
@@ -578,10 +360,7 @@ BEGIN
   );
 
   -----------------------------------------------------------------------------------------------
-  -- 5. Update tabella_annuale (Annual Aggregation)
-  --
-  -- Insert or replace the annual summary. The year (YYYY format) is extracted from giorno_data.
-  -- Purchase data aggregates for that year are recalculated, while any sales data is retained.
+  -- 5. Update annual aggregations (tabella_annuale)
   -----------------------------------------------------------------------------------------------
   INSERT OR REPLACE INTO tabella_annuale (
     anno,
@@ -643,105 +422,14 @@ BEGIN
 END;
 
 ----------------------------------------------------------------------------------------------------
-
--- update on insert
-CREATE TRIGGER denovo_vendite
-  AFTER UPDATE ON tabella_vendite
-  WHEN ( NEW.operazione IS NOT NULL )
-BEGIN
-
-  -- update tabella principale
-  INSERT INTO tabella_principale (
-    operazione,
-    prestatore_denominazione, prestatore_indirizzo,
-    committente_denominazione, committente_indirizzo,
-    numero_fattura, giorno_data, importo_totale,
-    descrizione, quantita, prezzo_unitario, prezzo_totale, aliquota_iva,
-    imponibile_importo, imposta, esigibilita_iva,
-    data_riferimento_termini, data_scadenza_pagamento, importo_pagamento,
-    typo
-  ) VALUES (
-    NEW.operazione,
-    NEW.prestatore_denominazione, NEW.prestatore_indirizzo,
-    NEW.committente_denominazione, NEW.committente_indirizzo,
-    NEW.numero_fattura, NEW.giorno_data, NEW.importo_totale,
-    NEW.descrizione, NEW.quantita, NEW.prezzo_unitario, NEW.prezzo_totale, NEW.aliquota_iva,
-    NEW.imponibile_importo, NEW.imposta, NEW.esigibilita_iva,
-    NEW.data_riferimento_termini, NEW.data_scadenza_pagamento, NEW.importo_pagamento,
-    'VENDITO'
-  );
-
-  -- update tabella sommario
-  INSERT OR REPLACE INTO tabella_sommario (
-    numero, somma_mc_acquisto, somma_eur_acquisto, somma_eur_acquisto_no_iva, somma_mc_vendita, somma_mc_vendita_pefc, somma_eur_vendita, somma_eur_vendita_no_iva
-  ) VALUES (
-    NEW.operazione,
-    ( SELECT somma_mc_acquisto FROM tabella_sommario WHERE numero = NEW.operazione ),
-    ( SELECT somma_eur_acquisto FROM tabella_sommario WHERE numero = NEW.operazione ),
-    ( SELECT somma_eur_acquisto_no_iva FROM tabella_sommario WHERE numero = NEW.operazione ),
-    ( SELECT SUM(quantita) FROM tabella_vendite WHERE operazione = NEW.operazione ),
-    ( SELECT SUM(quantita) FROM tabella_vendite WHERE operazione = NEW.operazione AND pefc = "si" ),
-    ( SELECT SUM(importo_totale) FROM tabella_vendite WHERE operazione = NEW.operazione ),
-    ( SELECT SUM(prezzo_totale) FROM tabella_vendite WHERE operazione = NEW.operazione )
-  );
-
-  -- update tabella mensile
-  INSERT INTO tabella_mensile (
-    mese_anno,
-    somma_mc_acquisto,
-    somma_eur_acquisto,
-    somma_eur_acquisto_no_iva,
-    somma_mc_vendita,
-    somma_mc_vendita_pefc,
-    somma_eur_vendita,
-    somma_eur_vendita_no_iva
-  ) VALUES (
-    ( SELECT SUBSTR(giorno_data, 1, 7) FROM tabella_vendite WHERE operazione = NEW.operazione ),
-    ( SELECT somma_mc_acquisto FROM tabella_mensile WHERE mese_anno = ( SELECT SUBSTR(giorno_data, 1, 7) FROM tabella_vendite WHERE operazione = NEW.operazione ) ),
-    ( SELECT somma_eur_acquisto FROM tabella_mensile WHERE mese_anno = ( SELECT SUBSTR(giorno_data, 1, 7) FROM tabella_vendite WHERE operazione = NEW.operazione ) ),
-    ( SELECT somma_eur_acquisto_no_iva FROM tabella_mensile WHERE mese_anno = ( SELECT SUBSTR(giorno_data, 1, 7) FROM tabella_vendite WHERE operazione = NEW.operazione ) ),
-    ( SELECT SUM(quantita) FROM tabella_vendite WHERE SUBSTR(giorno_data, 1, 7) = ( SELECT SUBSTR(giorno_data, 1, 7) FROM tabella_vendite WHERE operazione = NEW.operazione ) ),
-    ( SELECT SUM(quantita) FROM tabella_vendite WHERE SUBSTR(giorno_data, 1, 7) = ( SELECT SUBSTR(giorno_data, 1, 7) FROM tabella_vendite WHERE operazione = NEW.operazione ) AND pefc = "si"),
-    ( SELECT SUM(importo_totale) FROM tabella_vendite WHERE SUBSTR(giorno_data, 1, 7) = ( SELECT SUBSTR(giorno_data, 1, 7) FROM tabella_vendite WHERE operazione = NEW.operazione ) ),
-    ( SELECT SUM(prezzo_totale) FROM tabella_vendite WHERE SUBSTR(giorno_data, 1, 7) = ( SELECT SUBSTR(giorno_data, 1, 7) FROM tabella_vendite WHERE operazione = NEW.operazione ) )
-  );
-
-  -- update tabella annuale
-  INSERT INTO tabella_annuale (
-    anno,
-    somma_mc_acquisto,
-    somma_eur_acquisto,
-    somma_eur_acquisto_no_iva,
-    somma_mc_vendita,
-    somma_mc_vendita_pefc,
-    somma_eur_vendita,
-    somma_eur_vendita_no_iva
-  ) VALUES (
-    ( SELECT SUBSTR(giorno_data, 1, 4) FROM tabella_vendite WHERE operazione = NEW.operazione ),
-    ( SELECT somma_mc_acquisto FROM tabella_annuale WHERE anno = ( SELECT SUBSTR(giorno_data, 1, 4) FROM tabella_vendite WHERE operazione = NEW.operazione ) ),
-    ( SELECT somma_eur_acquisto FROM tabella_annuale WHERE anno = ( SELECT SUBSTR(giorno_data, 1, 4) FROM tabella_vendite WHERE operazione = NEW.operazione ) ),
-    ( SELECT somma_eur_acquisto_no_iva FROM tabella_annuale WHERE anno = ( SELECT SUBSTR(giorno_data, 1, 4) FROM tabella_vendite WHERE operazione = NEW.operazione ) ),
-    ( SELECT SUM(quantita) FROM tabella_vendite WHERE SUBSTR(giorno_data, 1, 4) = ( SELECT SUBSTR(giorno_data, 1, 4) FROM tabella_vendite WHERE operazione = NEW.operazione ) ),
-    ( SELECT SUM(quantita) FROM tabella_vendite WHERE SUBSTR(giorno_data, 1, 4) = ( SELECT SUBSTR(giorno_data, 1, 4) FROM tabella_vendite WHERE operazione = NEW.operazione ) AND pefc = "si"),
-    ( SELECT SUM(importo_totale) FROM tabella_vendite WHERE SUBSTR(giorno_data, 1, 4) = ( SELECT SUBSTR(giorno_data, 1, 4) FROM tabella_vendite WHERE operazione = NEW.operazione ) ),
-    ( SELECT SUM(prezzo_totale) FROM tabella_vendite WHERE SUBSTR(giorno_data, 1, 4) = ( SELECT SUBSTR(giorno_data, 1, 4) FROM tabella_vendite WHERE operazione = NEW.operazione ) )
-  );
-
-END;
-
-----------------------------------------------------------------------------------------------------
-
--- update on change
+-- For data imported into tabella_vendite, propagation occurs when the 'operazione' field changes.
 CREATE TRIGGER update_vendite
   AFTER UPDATE ON tabella_vendite
-  WHEN ( OLD.operazione <> NEW.operazione )
+  WHEN ( OLD.operazione IS NOT NEW.operazione )
 BEGIN
 
   -----------------------------------------------------------------------------------------------
   -- 1. Update tabella_principale with the new vendite record
-  --
-  -- Insert a record into tabella_principale using values from the NEW row of tabella_vendite.
-  -- The field 'typo' is set to 'VENDITO' to denote a sale transaction.
   -----------------------------------------------------------------------------------------------
   INSERT INTO tabella_principale (
     operazione,
@@ -765,9 +453,6 @@ BEGIN
 
   -----------------------------------------------------------------------------------------------
   -- Purge outdated records from tabella_principale
-  --
-  -- Remove any records from tabella_principale whose id (i.e. operazione)
-  -- is not present in either tabella_acquisti or tabella_vendite.
   -----------------------------------------------------------------------------------------------
   DELETE FROM tabella_principale
   WHERE id NOT IN (
@@ -778,10 +463,6 @@ BEGIN
 
   -----------------------------------------------------------------------------------------------
   -- 2. Update tabella_sommario for the new vendite record (NEW.operazione)
-  --
-  -- Insert or replace the summary aggregates for the new operazione.
-  -- Sales aggregates are recalculated from tabella_vendite while purchase aggregates,
-  -- if present, are retained from the existing summary record.
   -----------------------------------------------------------------------------------------------
   INSERT OR REPLACE INTO tabella_sommario (
     numero,
@@ -804,10 +485,7 @@ BEGIN
   );
 
   -----------------------------------------------------------------------------------------------
-  -- 3. Update tabella_sommario for the old vendite record (OLD.operazione)
-  --
-  -- Recalculate the summary aggregates for the OLD operazione value,
-  -- ensuring that any transaction reassignments are correctly reflected.
+  -- 3. Update summary for the OLD vendite record (OLD.operazione)
   -----------------------------------------------------------------------------------------------
   INSERT OR REPLACE INTO tabella_sommario (
     numero,
@@ -831,8 +509,6 @@ BEGIN
 
   -----------------------------------------------------------------------------------------------
   -- Purge outdated records from tabella_sommario
-  --
-  -- Delete any summary rows (numero) that no longer exist in either tabella_acquisti or tabella_vendite.
   -----------------------------------------------------------------------------------------------
   DELETE FROM tabella_sommario
   WHERE numero NOT IN (
@@ -842,10 +518,7 @@ BEGIN
   );
 
   -----------------------------------------------------------------------------------------------
-  -- 4. Update tabella_mensile (Monthly Aggregation)
-  --
-  -- Insert new monthly aggregates for vendite. The month (YYYY-MM format) is extracted from giorno_data.
-  -- Purchase aggregates are retained from tabella_mensile while sale aggregates are freshly computed.
+  -- 4. Update monthly aggregations (tabella_mensile) for vendite
   -----------------------------------------------------------------------------------------------
   INSERT INTO tabella_mensile (
     mese_anno,
@@ -896,10 +569,7 @@ BEGIN
   );
 
   -----------------------------------------------------------------------------------------------
-  -- 5. Update tabella_annuale (Annual Aggregation)
-  --
-  -- Insert new annual aggregates for vendite. The year (YYYY) is extracted from giorno_data.
-  -- Some sales aggregates are freshly computed from tabella_vendite.
+  -- 5. Update annual aggregations (tabella_annuale) for vendite
   -----------------------------------------------------------------------------------------------
   INSERT INTO tabella_annuale (
     anno,
