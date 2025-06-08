@@ -1,11 +1,7 @@
 ----------------------------------------------------------------------------------------------------
-
 -- Tabella acquisti
-
 -- Tabella vendite
-
 -- Tabella sommario
-
 ----------------------------------------------------------------------------------------------------
 -- database architecture
 ----------------------------------------------------------------------------------------------------
@@ -54,7 +50,7 @@ CREATE TABLE IF NOT EXISTS tabella_principale
     ----------------------------------------
     typo TEXT                             -- type
     ----------------------------------------
-   );
+  );
 
 
 CREATE TABLE IF NOT EXISTS tabella_acquisti
@@ -148,49 +144,69 @@ CREATE TABLE IF NOT EXISTS tabella_vendite
     ----------------------------------------
   );
 
-
+----------------------------------------------------------------------------------------------------
+-- Tabella sommario
+-- This table aggregates day-by-day summary data.
+-- It includes details such as the date, descriptive fields for purchase and sale,
+-- and aggregated totals both including tax and excluding tax.
+----------------------------------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS tabella_sommario
   (
-    numero INTEGER PRIMARY KEY,
-    giorno_data TEXT,
-    acquisto TEXT,
-    vendita TEXT,
-    somma_mc_acquisto REAL,
-    somma_eur_acquisto REAL,
-    somma_eur_acquisto_no_iva REAL,
-    somma_mc_vendita REAL,
-    somma_mc_vendita_pefc REAL,
-    somma_eur_vendita REAL,
-    somma_eur_vendita_no_iva REAL,
-    pagamento TEXT
+    numero INTEGER PRIMARY KEY,           -- Unique identifier for the summary (manual assignment)
+    giorno_data TEXT,                     -- Date of the summary record (e.g., YYYY-MM-DD)
+    acquisto TEXT,                        -- Purchase details (general textual info)
+    vendita TEXT,                         -- Sale details (general textual info)
+    somma_mc_acquisto REAL,               -- Aggregated purchased quantity (measured in unit of measure)
+    somma_eur_acquisto REAL,              -- Aggregated purchase total (in Euros)
+    somma_eur_acquisto_no_iva REAL,       -- Aggregated purchase total without VAT
+    somma_mc_vendita REAL,                -- Aggregated sold quantity (in unit of measure)
+    somma_mc_vendita_pefc REAL,           -- Aggregated sold quantity (specific for PEFC, if applicable)
+    somma_eur_vendita REAL,               -- Aggregated sales total (in Euros)
+    somma_eur_vendita_no_iva REAL,        -- Aggregated sales total without VAT
+    pagamento TEXT                        -- Payment conditions or status (textual info)
   );
 
 
+----------------------------------------------------------------------------------------------------
+-- Tabella mensile
+-- This table aggregates monthly data.
+-- It summarizes key totals for each month (e.g., month and year) including:
+--   - Purchased and sold quantities,
+--   - Total Euro amounts,
+--   - Totals with and without VAT.
+----------------------------------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS tabella_mensile
   (
-    numero INTEGER PRIMARY KEY AUTOINCREMENT, -- automatic tracker
-    mese_anno TEXT,
-    somma_mc_acquisto REAL,
-    somma_eur_acquisto REAL,
-    somma_eur_acquisto_no_iva REAL,
-    somma_mc_vendita REAL,
-    somma_mc_vendita_pefc REAL,
-    somma_eur_vendita REAL,
-    somma_eur_vendita_no_iva REAL
+    numero INTEGER PRIMARY KEY AUTOINCREMENT,  -- Auto-increment unique identifier
+    mese_anno TEXT,                            -- Month and year (e.g., '06-2025')
+    somma_mc_acquisto REAL,                    -- Total quantity purchased during the month
+    somma_eur_acquisto REAL,                   -- Total purchase amount in Euros for the month
+    somma_eur_acquisto_no_iva REAL,            -- Purchase amount without VAT for the month
+    somma_mc_vendita REAL,                     -- Total quantity sold during the month
+    somma_mc_vendita_pefc REAL,                -- Total quantity sold (PEFC-specific count) during the month
+    somma_eur_vendita REAL,                    -- Total sales amount in Euros for the month
+    somma_eur_vendita_no_iva REAL              -- Sales amount without VAT for the month
   );
 
 
+----------------------------------------------------------------------------------------------------
+-- Tabella annuale
+-- This table aggregates annual data.
+-- It functions similarly to the monthly table, but summarizes the totals for the whole year.
+-- Columns represent aggregated totals for the year's purchased and sold quantities,
+-- total monetary values with and without VAT.
+----------------------------------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS tabella_annuale
   (
-    numero INTEGER PRIMARY KEY AUTOINCREMENT, -- automatic tracker
-    anno TEXT,
-    somma_mc_acquisto REAL,
-    somma_eur_acquisto REAL,
-    somma_eur_acquisto_no_iva REAL,
-    somma_mc_vendita REAL,
-    somma_mc_vendita_pefc REAL,
-    somma_eur_vendita REAL,
-    somma_eur_vendita_no_iva REAL
+    numero INTEGER PRIMARY KEY AUTOINCREMENT,  -- Auto-increment unique identifier
+    anno TEXT,                                 -- Year of the summary (e.g., '2025')
+    somma_mc_acquisto REAL,                    -- Total quantity purchased during the year
+    somma_eur_acquisto REAL,                   -- Total purchase amount in Euros for the year
+    somma_eur_acquisto_no_iva REAL,            -- Total purchase amount without VAT for the year
+    somma_mc_vendita REAL,                     -- Total quantity sold during the year
+    somma_mc_vendita_pefc REAL,                -- Total sold quantity (PEFC-specific count) during the year
+    somma_eur_vendita REAL,                    -- Total sales amount in Euros for the year
+    somma_eur_vendita_no_iva REAL              -- Total sales amount without VAT for the year
   );
 
 
