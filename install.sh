@@ -31,6 +31,11 @@ diesel setup
 
 ####################################################################################################
 
+# Link database
+ln -s $HOME/DSLegno/dallasanta.db $HOME
+
+####################################################################################################
+
 # Ensure directories $HOME/Desktop/Acquista and $HOME/Desktop/Vendita exist, create them if needed and log
 DIR1="$HOME/Desktop/Acquista"
 DIR2="$HOME/Desktop/Vendita"
