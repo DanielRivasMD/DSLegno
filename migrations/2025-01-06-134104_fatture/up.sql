@@ -398,6 +398,8 @@ BEGIN
 
 END;
 
+----------------------------------------------------------------------------------------------------
+
 -- update on change
 -- This trigger fires after an UPDATE on tabella_acquisti when the operazione value changes,
 -- meaning OLD.operazione is not equal to NEW.operazione.
@@ -435,9 +437,21 @@ BEGIN
   );
 
   -----------------------------------------------------------------------------------------------
+  -- Purge outdated records from tabella_principale
+  --
+  -- Remove any records whose id (i.e. operazione) no longer exists in tabella_acquisti or tabella_vendite.
+  -----------------------------------------------------------------------------------------------
+  DELETE FROM tabella_principale
+  WHERE id NOT IN (
+      SELECT operazione FROM tabella_acquisti
+      UNION
+      SELECT operazione FROM tabella_vendite
+  );
+
+  -----------------------------------------------------------------------------------------------
   -- 2. Update tabella_sommario for the NEW operazione (New Record)
   --
-  -- Insert or update the summary aggregations for the new operazione value.
+  -- Insert or update the summary aggregates for the new operazione value.
   -- Purchase data aggregates are recalculated based on the records from tabella_acquisti,
   -- while existing sales aggregates are preserved.
   -----------------------------------------------------------------------------------------------
@@ -464,7 +478,7 @@ BEGIN
   -----------------------------------------------------------------------------------------------
   -- 3. Update tabella_sommario for the OLD operazione (Old Record)
   --
-  -- Recalculate the summary aggregations associated with the OLD operazione in case data needs
+  -- Recalculate the summary aggregates associated with the OLD operazione in case data needs
   -- to be updated after the operazione change.
   -----------------------------------------------------------------------------------------------
   INSERT OR REPLACE INTO tabella_sommario (
@@ -485,6 +499,19 @@ BEGIN
     ( SELECT somma_mc_vendita_pefc FROM tabella_sommario WHERE numero = OLD.operazione ),
     ( SELECT somma_eur_vendita FROM tabella_sommario WHERE numero = OLD.operazione ),
     ( SELECT somma_eur_vendita_no_iva FROM tabella_sommario WHERE numero = OLD.operazione )
+  );
+
+  -----------------------------------------------------------------------------------------------
+  -- Purge outdated records from tabella_sommario
+  --
+  -- Remove any summary records where numero (i.e. operazione) is no longer present in
+  -- either tabella_acquisti or tabella_vendite.
+  -----------------------------------------------------------------------------------------------
+  DELETE FROM tabella_sommario
+  WHERE numero NOT IN (
+      SELECT operazione FROM tabella_acquisti
+      UNION
+      SELECT operazione FROM tabella_vendite
   );
 
   -----------------------------------------------------------------------------------------------
@@ -615,6 +642,7 @@ BEGIN
 
 END;
 
+----------------------------------------------------------------------------------------------------
 
 -- update on insert
 CREATE TRIGGER denovo_vendite
@@ -701,6 +729,7 @@ BEGIN
 
 END;
 
+----------------------------------------------------------------------------------------------------
 
 -- update on change
 CREATE TRIGGER update_vendite
