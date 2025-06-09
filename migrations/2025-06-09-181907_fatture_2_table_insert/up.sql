@@ -9,7 +9,7 @@ BEGIN
     WHEN EXISTS (
       SELECT 1 
       FROM tabella_acquisti
-      WHERE descripzione = NEW.descripzione
+      WHERE descrizione = NEW.descrizione
         AND numero_fattura = NEW.numero_fattura
     )
     THEN RAISE(IGNORE)
