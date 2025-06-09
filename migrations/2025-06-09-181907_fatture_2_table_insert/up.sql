@@ -143,17 +143,18 @@ BEGIN
   );
 END;
 
-----------------------------------------------------------------------------------------------------
 /* Trigger for Vendite:
    When a new row is inserted into tabella_vendite with operazione not NULL,
-   propagate the data into the main table and update the sales-related summary.
+   check if an identical record (comparing non-editable columns) exists in 
+   tabella_principale. If not, propagate the data into tabella_principale and update 
+   the sales-related summary tables.
 */
 CREATE TRIGGER insert_vendite
   AFTER INSERT ON tabella_vendite
   WHEN (NEW.operazione IS NOT NULL)
 BEGIN
   -----------------------------------------------------------------------------------------------
-  -- Propagate into tabella_principale (mark as VENDITO)
+  -- Propagate into tabella_principale (mark as VENDITO), if an identical record does NOT exist.
   -----------------------------------------------------------------------------------------------
   INSERT INTO tabella_principale (
     operazione,
@@ -164,7 +165,8 @@ BEGIN
     imponibile_importo, imposta, esigibilita_iva,
     data_riferimento_termini, data_scadenza_pagamento, importo_pagamento,
     typo
-  ) VALUES (
+  )
+  SELECT
     NEW.operazione,
     NEW.prestatore_denominazione, NEW.prestatore_indirizzo,
     NEW.committente_denominazione, NEW.committente_indirizzo,
@@ -173,6 +175,28 @@ BEGIN
     NEW.imponibile_importo, NEW.imposta, NEW.esigibilita_iva,
     NEW.data_riferimento_termini, NEW.data_scadenza_pagamento, NEW.importo_pagamento,
     'VENDITO'
+  WHERE NOT EXISTS (
+    SELECT 1 
+    FROM tabella_principale
+    WHERE 
+          prestatore_denominazione       = NEW.prestatore_denominazione 
+      AND prestatore_indirizzo           = NEW.prestatore_indirizzo
+      AND committente_denominazione      = NEW.committente_denominazione
+      AND committente_indirizzo          = NEW.committente_indirizzo
+      AND numero_fattura                 = NEW.numero_fattura
+      AND giorno_data                    = NEW.giorno_data
+      AND importo_totale                 = NEW.importo_totale
+      AND descrizione                    = NEW.descrizione
+      AND quantita                       = NEW.quantita
+      AND prezzo_unitario                = NEW.prezzo_unitario
+      AND prezzo_totale                  = NEW.prezzo_totale
+      AND aliquota_iva                   = NEW.aliquota_iva
+      AND imponibile_importo             = NEW.imponibile_importo
+      AND imposta                        = NEW.imposta
+      AND esigibilita_iva                = NEW.esigibilita_iva
+      AND data_riferimento_termini       = NEW.data_riferimento_termini
+      AND data_scadenza_pagamento        = NEW.data_scadenza_pagamento
+      AND importo_pagamento              = NEW.importo_pagamento
   );
 
   -----------------------------------------------------------------------------------------------
@@ -249,20 +273,24 @@ BEGIN
     NULL, NULL, NULL,  -- purchase aggregates remain NULL
     ( SELECT SUM(quantita) FROM tabella_vendite
       WHERE operazione = NEW.operazione
-      AND SUBSTR(giorno_data, 1, 4) = ( SELECT SUBSTR(giorno_data, 1, 4) FROM tabella_vendite WHERE operazione = NEW.operazione )
+      AND SUBSTR(giorno_data, 1, 4) = 
+          ( SELECT SUBSTR(giorno_data, 1, 4) FROM tabella_vendite WHERE operazione = NEW.operazione )
     ),
     ( SELECT SUM(quantita) FROM tabella_vendite
       WHERE operazione = NEW.operazione
-      AND SUBSTR(giorno_data, 1, 4) = ( SELECT SUBSTR(giorno_data, 1, 4) FROM tabella_vendite WHERE operazione = NEW.operazione )
+      AND SUBSTR(giorno_data, 1, 4) = 
+          ( SELECT SUBSTR(giorno_data, 1, 4) FROM tabella_vendite WHERE operazione = NEW.operazione )
       AND pefc = 'si'
     ),
     ( SELECT SUM(importo_totale) FROM tabella_vendite
       WHERE operazione = NEW.operazione
-      AND SUBSTR(giorno_data, 1, 4) = ( SELECT SUBSTR(giorno_data, 1, 4) FROM tabella_vendite WHERE operazione = NEW.operazione )
+      AND SUBSTR(giorno_data, 1, 4) = 
+          ( SELECT SUBSTR(giorno_data, 1, 4) FROM tabella_vendite WHERE operazione = NEW.operazione )
     ),
     ( SELECT SUM(prezzo_totale) FROM tabella_vendite
       WHERE operazione = NEW.operazione
-      AND SUBSTR(giorno_data, 1, 4) = ( SELECT SUBSTR(giorno_data, 1, 4) FROM tabella_vendite WHERE operazione = NEW.operazione )
+      AND SUBSTR(giorno_data, 1, 4) = 
+          ( SELECT SUBSTR(giorno_data, 1, 4) FROM tabella_vendite WHERE operazione = NEW.operazione )
     )
   );
 END;
