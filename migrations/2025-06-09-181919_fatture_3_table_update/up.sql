@@ -279,16 +279,13 @@ END;
 
 ----------------------------------------------------------------------------------------------------
 
-/* Trigger for Vendite:
-   Fires after an UPDATE on tabella_vendite when the operazione value changes.
-*/
 CREATE TRIGGER update_vendite
   AFTER UPDATE ON tabella_vendite
-  WHEN (OLD.operazione <> NEW.operazione)
+  WHEN ( COALESCE(OLD.operazione, 0) <> COALESCE(NEW.operazione, 0) )
 BEGIN
-  -----------------------------------------------------------------------------------------------
-  -- Propagate new vendite data into tabella_principale (mark as VENDITO)
-  -----------------------------------------------------------------------------------------------
+  ------------------------------------------------------------------------------
+  -- 1. Propagate updated vendite data into tabella_principale (mark as VENDITO)
+  ------------------------------------------------------------------------------
   INSERT INTO tabella_principale (
     operazione,
     prestatore_denominazione, prestatore_indirizzo,
@@ -298,7 +295,8 @@ BEGIN
     imponibile_importo, imposta, esigibilita_iva,
     data_riferimento_termini, data_scadenza_pagamento, importo_pagamento,
     typo
-  ) VALUES (
+  )
+  VALUES (
     NEW.operazione,
     NEW.prestatore_denominazione, NEW.prestatore_indirizzo,
     NEW.committente_denominazione, NEW.committente_indirizzo,
@@ -309,50 +307,52 @@ BEGIN
     'VENDITO'
   );
 
-  -----------------------------------------------------------------------------------------------
-  -- Purge outdated records from tabella_principale
-  -----------------------------------------------------------------------------------------------
+  ------------------------------------------------------------------------------
+  -- 2. Purge from tabella_principale any record whose operazione no longer exists
+  ------------------------------------------------------------------------------
   DELETE FROM tabella_principale
-  WHERE id NOT IN (
+  WHERE operazione NOT IN (
       SELECT operazione FROM tabella_acquisti
       UNION
       SELECT operazione FROM tabella_vendite
   );
 
-  -----------------------------------------------------------------------------------------------
-  -- Update tabella_sommario for new vendite data
-  -----------------------------------------------------------------------------------------------
+  ------------------------------------------------------------------------------
+  -- 3. Update tabella_sommario for NEW.operazione (vendite aggregates)
+  ------------------------------------------------------------------------------
   INSERT OR REPLACE INTO tabella_sommario (
     numero,
-    somma_mc_acquisto,
-    somma_eur_acquisto,
-    somma_eur_acquisto_no_iva,
+    somma_mc_acquisto,         -- purchase aggregates (NULL for vendite)
+    somma_eur_acquisto,        -- purchase aggregates
+    somma_eur_acquisto_no_iva,   -- purchase aggregates
     somma_mc_vendita,
     somma_mc_vendita_pefc,
     somma_eur_vendita,
     somma_eur_vendita_no_iva
-  ) VALUES (
+  )
+  VALUES (
     NEW.operazione,
-    NULL, NULL, NULL,  -- purchase aggregates remain NULL
+    NULL, NULL, NULL,
     ( SELECT SUM(quantita) FROM tabella_vendite WHERE operazione = NEW.operazione ),
     ( SELECT SUM(quantita) FROM tabella_vendite WHERE operazione = NEW.operazione AND pefc = 'si' ),
     ( SELECT SUM(importo_totale) FROM tabella_vendite WHERE operazione = NEW.operazione ),
     ( SELECT SUM(prezzo_totale) FROM tabella_vendite WHERE operazione = NEW.operazione )
   );
 
-  -----------------------------------------------------------------------------------------------
-  -- Update tabella_sommario for the OLD vendite record (purging outdated info)
-  -----------------------------------------------------------------------------------------------
+  ------------------------------------------------------------------------------
+  -- 4. Update tabella_sommario for OLD.operazione (vendite aggregates)
+  ------------------------------------------------------------------------------
   INSERT OR REPLACE INTO tabella_sommario (
     numero,
-    somma_mc_acquisto,
+    somma_mc_acquisto,         
     somma_eur_acquisto,
     somma_eur_acquisto_no_iva,
     somma_mc_vendita,
     somma_mc_vendita_pefc,
     somma_eur_vendita,
     somma_eur_vendita_no_iva
-  ) VALUES (
+  )
+  VALUES (
     OLD.operazione,
     NULL, NULL, NULL,
     ( SELECT SUM(quantita) FROM tabella_vendite WHERE operazione = OLD.operazione ),
@@ -361,9 +361,9 @@ BEGIN
     ( SELECT SUM(prezzo_totale) FROM tabella_vendite WHERE operazione = OLD.operazione )
   );
 
-  -----------------------------------------------------------------------------------------------
-  -- Purge outdated records from tabella_sommario
-  -----------------------------------------------------------------------------------------------
+  ------------------------------------------------------------------------------
+  -- 5. Purge outdated summary records from tabella_sommario
+  ------------------------------------------------------------------------------
   DELETE FROM tabella_sommario
   WHERE numero NOT IN (
       SELECT operazione FROM tabella_acquisti
@@ -371,9 +371,35 @@ BEGIN
       SELECT operazione FROM tabella_vendite
   );
 
-  -----------------------------------------------------------------------------------------------
-  -- Update monthly aggregations for vendite
-  -----------------------------------------------------------------------------------------------
+  ------------------------------------------------------------------------------
+  -- 6. Update monthly aggregations for NEW.operazione from vendite
+  ------------------------------------------------------------------------------
+  INSERT OR REPLACE INTO tabella_mensile (
+    mese_anno,
+    somma_mc_acquisto,         -- purchase aggregates (NULL for vendite)
+    somma_eur_acquisto,        -- purchase aggregates
+    somma_eur_acquisto_no_iva,   -- purchase aggregates
+    somma_mc_vendita,
+    somma_mc_vendita_pefc,
+    somma_eur_vendita,
+    somma_eur_vendita_no_iva
+  )
+  VALUES (
+    ( SELECT SUBSTR(giorno_data, 1, 7)
+      FROM tabella_vendite
+      WHERE operazione = NEW.operazione
+      LIMIT 1
+    ),
+    NULL, NULL, NULL,
+    ( SELECT SUM(quantita) FROM tabella_vendite WHERE operazione = NEW.operazione ),
+    ( SELECT SUM(quantita) FROM tabella_vendite WHERE operazione = NEW.operazione AND pefc = 'si' ),
+    ( SELECT SUM(importo_totale) FROM tabella_vendite WHERE operazione = NEW.operazione ),
+    ( SELECT SUM(prezzo_totale) FROM tabella_vendite WHERE operazione = NEW.operazione )
+  );
+
+  ------------------------------------------------------------------------------
+  -- 7. Update monthly aggregations for OLD.operazione (grouping by month)
+  ------------------------------------------------------------------------------
   INSERT OR REPLACE INTO tabella_mensile (
     mese_anno,
     somma_mc_acquisto,
@@ -384,31 +410,32 @@ BEGIN
     somma_eur_vendita,
     somma_eur_vendita_no_iva
   )
-  VALUES (
-    ( SELECT SUBSTR(giorno_data, 1, 7) FROM tabella_vendite WHERE operazione = NEW.operazione ),
+  SELECT
+    SUBSTR(giorno_data, 1, 7),
     NULL, NULL, NULL,
-    ( SELECT SUM(quantita) FROM tabella_vendite
-      WHERE SUBSTR(giorno_data, 1, 7) =
-            ( SELECT SUBSTR(giorno_data, 1, 7) FROM tabella_vendite WHERE operazione = NEW.operazione )
-    ),
-    ( SELECT SUM(quantita) FROM tabella_vendite
-      WHERE SUBSTR(giorno_data, 1, 7) =
-            ( SELECT SUBSTR(giorno_data, 1, 7) FROM tabella_vendite WHERE operazione = NEW.operazione )
-      AND pefc = 'si'
-    ),
-    ( SELECT SUM(importo_totale) FROM tabella_vendite
-      WHERE SUBSTR(giorno_data, 1, 7) =
-            ( SELECT SUBSTR(giorno_data, 1, 7) FROM tabella_vendite WHERE operazione = NEW.operazione )
-    ),
-    ( SELECT SUM(prezzo_totale) FROM tabella_vendite
-      WHERE SUBSTR(giorno_data, 1, 7) =
-            ( SELECT SUBSTR(giorno_data, 1, 7) FROM tabella_vendite WHERE operazione = NEW.operazione )
-    )
+    SUM(quantita),
+    SUM(CASE WHEN pefc = 'si' THEN quantita ELSE 0 END),
+    SUM(importo_totale),
+    SUM(prezzo_totale)
+  FROM tabella_vendite
+  WHERE operazione = OLD.operazione
+  GROUP BY SUBSTR(giorno_data, 1, 7);
+
+  ------------------------------------------------------------------------------
+  -- 8. Purge outdated monthly records from tabella_mensile
+  ------------------------------------------------------------------------------
+  DELETE FROM tabella_mensile
+  WHERE mese_anno NOT IN (
+      SELECT DISTINCT SUBSTR(giorno_data, 1, 7)
+      FROM tabella_acquisti WHERE operazione IS NOT NULL
+      UNION
+      SELECT DISTINCT SUBSTR(giorno_data, 1, 7)
+      FROM tabella_vendite WHERE operazione IS NOT NULL
   );
 
-  -----------------------------------------------------------------------------------------------
-  -- Update annual aggregations for vendite
-  -----------------------------------------------------------------------------------------------
+  ------------------------------------------------------------------------------
+  -- 9. Update annual aggregations for NEW.operazione from vendite
+  ------------------------------------------------------------------------------
   INSERT OR REPLACE INTO tabella_annuale (
     anno,
     somma_mc_acquisto,
@@ -420,29 +447,52 @@ BEGIN
     somma_eur_vendita_no_iva
   )
   VALUES (
-    ( SELECT SUBSTR(giorno_data, 1, 4) FROM tabella_vendite WHERE operazione = NEW.operazione ),
+    ( SELECT SUBSTR(giorno_data, 1, 4)
+      FROM tabella_vendite
+      WHERE operazione = NEW.operazione
+      LIMIT 1
+    ),
     NULL, NULL, NULL,
-    ( SELECT SUM(quantita) FROM tabella_vendite
-      WHERE SUBSTR(giorno_data, 1, 4) =
-            ( SELECT SUBSTR(giorno_data, 1, 4)
-              FROM tabella_vendite WHERE operazione = NEW.operazione )
-    ),
-    ( SELECT SUM(quantita) FROM tabella_vendite
-      WHERE SUBSTR(giorno_data, 1, 4) =
-            ( SELECT SUBSTR(giorno_data, 1, 4)
-              FROM tabella_vendite WHERE operazione = NEW.operazione )
-      AND pefc = 'si'
-    ),
-    ( SELECT SUM(importo_totale) FROM tabella_vendite
-      WHERE SUBSTR(giorno_data, 1, 4) =
-            ( SELECT SUBSTR(giorno_data, 1, 4)
-              FROM tabella_vendite WHERE operazione = NEW.operazione )
-    ),
-    ( SELECT SUM(prezzo_totale) FROM tabella_vendite
-      WHERE SUBSTR(giorno_data, 1, 4) =
-            ( SELECT SUBSTR(giorno_data, 1, 4)
-              FROM tabella_vendite WHERE operazione = NEW.operazione )
-    )
+    ( SELECT SUM(quantita) FROM tabella_vendite WHERE operazione = NEW.operazione ),
+    ( SELECT SUM(quantita) FROM tabella_vendite WHERE operazione = NEW.operazione AND pefc = 'si' ),
+    ( SELECT SUM(importo_totale) FROM tabella_vendite WHERE operazione = NEW.operazione ),
+    ( SELECT SUM(prezzo_totale) FROM tabella_vendite WHERE operazione = NEW.operazione )
+  );
+
+  ------------------------------------------------------------------------------
+  -- 10. Update annual aggregations for OLD.operazione (grouping by year)
+  ------------------------------------------------------------------------------
+  INSERT OR REPLACE INTO tabella_annuale (
+    anno,
+    somma_mc_acquisto,
+    somma_eur_acquisto,
+    somma_eur_acquisto_no_iva,
+    somma_mc_vendita,
+    somma_mc_vendita_pefc,
+    somma_eur_vendita,
+    somma_eur_vendita_no_iva
+  )
+  SELECT
+    SUBSTR(giorno_data, 1, 4),
+    NULL, NULL, NULL,
+    SUM(quantita),
+    SUM(CASE WHEN pefc = 'si' THEN quantita ELSE 0 END),
+    SUM(importo_totale),
+    SUM(prezzo_totale)
+  FROM tabella_vendite
+  WHERE operazione = OLD.operazione
+  GROUP BY SUBSTR(giorno_data, 1, 4);
+
+  ------------------------------------------------------------------------------
+  -- 11. Purge outdated annual records from tabella_annuale
+  ------------------------------------------------------------------------------
+  DELETE FROM tabella_annuale
+  WHERE anno NOT IN (
+      SELECT DISTINCT SUBSTR(giorno_data, 1, 4)
+      FROM tabella_acquisti WHERE operazione IS NOT NULL
+      UNION
+      SELECT DISTINCT SUBSTR(giorno_data, 1, 4)
+      FROM tabella_vendite WHERE operazione IS NOT NULL
   );
 END;
 
