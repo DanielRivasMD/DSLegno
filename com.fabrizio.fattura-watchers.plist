@@ -7,7 +7,11 @@
     <key>Label</key>
     <string>com.fabrizio.fattura.watchers</string>
 
-    <!-- Command to execute: the shell script created above -->
+    <!-- Set the working directory to /Users/fabrizio -->
+    <key>WorkingDirectory</key>
+    <string>/Users/fabrizio</string>
+
+    <!-- Command to execute: the shell script to run -->
     <key>ProgramArguments</key>
     <array>
       <string>/Users/fabrizio/DSLegno/fattura-watchers.sh</string>
@@ -21,13 +25,13 @@
     <key>KeepAlive</key>
     <true/>
 
-    <!-- Log files for debugging purposes -->
+    <!-- Log output to a single file for debugging purposes -->
     <key>StandardOutPath</key>
-    <string>/Users/fabrizio/Library/Logs/fattura-watchers.out.log</string>
+    <string>/Users/fabrizio/log.txt</string>
     <key>StandardErrorPath</key>
-    <string>/Users/fabrizio/Library/Logs/fattura-watchers.err.log</string>
+    <string>/Users/fabrizio/log.txt</string>
 
-    <!-- (Optional) Set any needed environment variables -->
+    <!-- Environment variables -->
     <key>EnvironmentVariables</key>
     <dict>
       <key>HOME</key>
@@ -38,4 +42,3 @@
     </dict>
   </dict>
 </plist>
-
