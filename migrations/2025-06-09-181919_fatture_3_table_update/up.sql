@@ -74,17 +74,15 @@ END;
 
 ----------------------------------------------------------------------------------------------------
 
-CREATE TRIGGER recalc_targets
-  AFTER UPDATE ON tabella_principale
+CREATE TRIGGER recalc_targets_after_insert
+  AFTER INSERT ON tabella_principale
 BEGIN
-  -- Remove all current aggregates from the target tables.
+  -- Purge existing aggregates
   DELETE FROM tabella_sommario;
   DELETE FROM tabella_mensile;
   DELETE FROM tabella_annuale;
 
-  ---------------------------------------------------------------------
   -- Recalculate summary aggregates grouped by operazione.
-  ---------------------------------------------------------------------
   INSERT INTO tabella_sommario (
     numero,
     somma_mc_acquisto,
@@ -97,19 +95,17 @@ BEGIN
   )
   SELECT 
     operazione AS numero,
-    SUM(CASE WHEN typo = 'ACQUISTO' THEN quantita ELSE 0 END) AS somma_mc_acquisto,
-    SUM(CASE WHEN typo = 'ACQUISTO' THEN importo_totale ELSE 0 END) AS somma_eur_acquisto,
-    SUM(CASE WHEN typo = 'ACQUISTO' THEN prezzo_totale ELSE 0 END) AS somma_eur_acquisto_no_iva,
-    SUM(CASE WHEN typo = 'VENDUTO' THEN quantita ELSE 0 END) AS somma_mc_vendita,
-    SUM(CASE WHEN typo = 'VENDUTO' THEN quantita ELSE 0 END) AS somma_mc_vendita_pefc,
-    SUM(CASE WHEN typo = 'VENDUTO' THEN importo_totale ELSE 0 END) AS somma_eur_vendita,
-    SUM(CASE WHEN typo = 'VENDUTO' THEN prezzo_totale ELSE 0 END) AS somma_eur_vendita_no_iva
+    SUM(CASE WHEN typo = 'ACQUISTO' THEN quantita ELSE 0 END),
+    SUM(CASE WHEN typo = 'ACQUISTO' THEN importo_totale ELSE 0 END),
+    SUM(CASE WHEN typo = 'ACQUISTO' THEN prezzo_totale ELSE 0 END),
+    SUM(CASE WHEN typo = 'VENDUTO' THEN quantita ELSE 0 END),
+    SUM(CASE WHEN typo = 'VENDUTO' THEN quantita ELSE 0 END),
+    SUM(CASE WHEN typo = 'VENDUTO' THEN importo_totale ELSE 0 END),
+    SUM(CASE WHEN typo = 'VENDUTO' THEN prezzo_totale ELSE 0 END)
   FROM tabella_principale
   GROUP BY operazione;
 
-  ---------------------------------------------------------------------
-  -- Recalculate monthly aggregates grouped by month (from giorno_data).
-  ---------------------------------------------------------------------
+  -- Recalculate monthly aggregates (group by year-month from giorno_data)
   INSERT INTO tabella_mensile (
     mese_anno,
     somma_mc_acquisto,
@@ -122,19 +118,17 @@ BEGIN
   )
   SELECT 
     SUBSTR(giorno_data, 1, 7) AS mese_anno,
-    SUM(CASE WHEN typo = 'ACQUISTO' THEN quantita ELSE 0 END) AS somma_mc_acquisto,
-    SUM(CASE WHEN typo = 'ACQUISTO' THEN importo_totale ELSE 0 END) AS somma_eur_acquisto,
-    SUM(CASE WHEN typo = 'ACQUISTO' THEN prezzo_totale ELSE 0 END) AS somma_eur_acquisto_no_iva,
-    SUM(CASE WHEN typo = 'VENDUTO' THEN quantita ELSE 0 END) AS somma_mc_vendita,
-    SUM(CASE WHEN typo = 'VENDUTO' THEN quantita ELSE 0 END) AS somma_mc_vendita_pefc,
-    SUM(CASE WHEN typo = 'VENDUTO' THEN importo_totale ELSE 0 END) AS somma_eur_vendita,
-    SUM(CASE WHEN typo = 'VENDUTO' THEN prezzo_totale ELSE 0 END) AS somma_eur_vendita_no_iva
+    SUM(CASE WHEN typo = 'ACQUISTO' THEN quantita ELSE 0 END),
+    SUM(CASE WHEN typo = 'ACQUISTO' THEN importo_totale ELSE 0 END),
+    SUM(CASE WHEN typo = 'ACQUISTO' THEN prezzo_totale ELSE 0 END),
+    SUM(CASE WHEN typo = 'VENDUTO' THEN quantita ELSE 0 END),
+    SUM(CASE WHEN typo = 'VENDUTO' THEN quantita ELSE 0 END),
+    SUM(CASE WHEN typo = 'VENDUTO' THEN importo_totale ELSE 0 END),
+    SUM(CASE WHEN typo = 'VENDUTO' THEN prezzo_totale ELSE 0 END)
   FROM tabella_principale
   GROUP BY SUBSTR(giorno_data, 1, 7);
 
-  ---------------------------------------------------------------------
-  -- Recalculate annual aggregates grouped by year (from giorno_data).
-  ---------------------------------------------------------------------
+  -- Recalculate annual aggregates (group by year from giorno_data)
   INSERT INTO tabella_annuale (
     anno,
     somma_mc_acquisto,
@@ -147,13 +141,167 @@ BEGIN
   )
   SELECT 
     SUBSTR(giorno_data, 1, 4) AS anno,
-    SUM(CASE WHEN typo = 'ACQUISTO' THEN quantita ELSE 0 END) AS somma_mc_acquisto,
-    SUM(CASE WHEN typo = 'ACQUISTO' THEN importo_totale ELSE 0 END) AS somma_eur_acquisto,
-    SUM(CASE WHEN typo = 'ACQUISTO' THEN prezzo_totale ELSE 0 END) AS somma_eur_acquisto_no_iva,
-    SUM(CASE WHEN typo = 'VENDUTO' THEN quantita ELSE 0 END) AS somma_mc_vendita,
-    SUM(CASE WHEN typo = 'VENDUTO' THEN quantita ELSE 0 END) AS somma_mc_vendita_pefc,
-    SUM(CASE WHEN typo = 'VENDUTO' THEN importo_totale ELSE 0 END) AS somma_eur_vendita,
-    SUM(CASE WHEN typo = 'VENDUTO' THEN prezzo_totale ELSE 0 END) AS somma_eur_vendita_no_iva
+    SUM(CASE WHEN typo = 'ACQUISTO' THEN quantita ELSE 0 END),
+    SUM(CASE WHEN typo = 'ACQUISTO' THEN importo_totale ELSE 0 END),
+    SUM(CASE WHEN typo = 'ACQUISTO' THEN prezzo_totale ELSE 0 END),
+    SUM(CASE WHEN typo = 'VENDUTO' THEN quantita ELSE 0 END),
+    SUM(CASE WHEN typo = 'VENDUTO' THEN quantita ELSE 0 END),
+    SUM(CASE WHEN typo = 'VENDUTO' THEN importo_totale ELSE 0 END),
+    SUM(CASE WHEN typo = 'VENDUTO' THEN prezzo_totale ELSE 0 END)
+  FROM tabella_principale
+  GROUP BY SUBSTR(giorno_data, 1, 4);
+END;
+
+----------------------------------------------------------------------------------------------------
+
+CREATE TRIGGER recalc_targets_after_update
+  AFTER UPDATE ON tabella_principale
+BEGIN
+  -- Same code as above.
+  DELETE FROM tabella_sommario;
+  DELETE FROM tabella_mensile;
+  DELETE FROM tabella_annuale;
+
+  INSERT INTO tabella_sommario (
+    numero,
+    somma_mc_acquisto,
+    somma_eur_acquisto,
+    somma_eur_acquisto_no_iva,
+    somma_mc_vendita,
+    somma_mc_vendita_pefc,
+    somma_eur_vendita,
+    somma_eur_vendita_no_iva
+  )
+  SELECT 
+    operazione AS numero,
+    SUM(CASE WHEN typo = 'ACQUISTO' THEN quantita ELSE 0 END),
+    SUM(CASE WHEN typo = 'ACQUISTO' THEN importo_totale ELSE 0 END),
+    SUM(CASE WHEN typo = 'ACQUISTO' THEN prezzo_totale ELSE 0 END),
+    SUM(CASE WHEN typo = 'VENDUTO' THEN quantita ELSE 0 END),
+    SUM(CASE WHEN typo = 'VENDUTO' THEN quantita ELSE 0 END),
+    SUM(CASE WHEN typo = 'VENDUTO' THEN importo_totale ELSE 0 END),
+    SUM(CASE WHEN typo = 'VENDUTO' THEN prezzo_totale ELSE 0 END)
+  FROM tabella_principale
+  GROUP BY operazione;
+
+  INSERT INTO tabella_mensile (
+    mese_anno,
+    somma_mc_acquisto,
+    somma_eur_acquisto,
+    somma_eur_acquisto_no_iva,
+    somma_mc_vendita,
+    somma_mc_vendita_pefc,
+    somma_eur_vendita,
+    somma_eur_vendita_no_iva
+  )
+  SELECT 
+    SUBSTR(giorno_data, 1, 7) AS mese_anno,
+    SUM(CASE WHEN typo = 'ACQUISTO' THEN quantita ELSE 0 END),
+    SUM(CASE WHEN typo = 'ACQUISTO' THEN importo_totale ELSE 0 END),
+    SUM(CASE WHEN typo = 'ACQUISTO' THEN prezzo_totale ELSE 0 END),
+    SUM(CASE WHEN typo = 'VENDUTO' THEN quantita ELSE 0 END),
+    SUM(CASE WHEN typo = 'VENDUTO' THEN quantita ELSE 0 END),
+    SUM(CASE WHEN typo = 'VENDUTO' THEN importo_totale ELSE 0 END),
+    SUM(CASE WHEN typo = 'VENDUTO' THEN prezzo_totale ELSE 0 END)
+  FROM tabella_principale
+  GROUP BY SUBSTR(giorno_data, 1, 7);
+
+  INSERT INTO tabella_annuale (
+    anno,
+    somma_mc_acquisto,
+    somma_eur_acquisto,
+    somma_eur_acquisto_no_iva,
+    somma_mc_vendita,
+    somma_mc_vendita_pefc,
+    somma_eur_vendita,
+    somma_eur_vendita_no_iva
+  )
+  SELECT 
+    SUBSTR(giorno_data, 1, 4) AS anno,
+    SUM(CASE WHEN typo = 'ACQUISTO' THEN quantita ELSE 0 END),
+    SUM(CASE WHEN typo = 'ACQUISTO' THEN importo_totale ELSE 0 END),
+    SUM(CASE WHEN typo = 'ACQUISTO' THEN prezzo_totale ELSE 0 END),
+    SUM(CASE WHEN typo = 'VENDUTO' THEN quantita ELSE 0 END),
+    SUM(CASE WHEN typo = 'VENDUTO' THEN quantita ELSE 0 END),
+    SUM(CASE WHEN typo = 'VENDUTO' THEN importo_totale ELSE 0 END),
+    SUM(CASE WHEN typo = 'VENDUTO' THEN prezzo_totale ELSE 0 END)
+  FROM tabella_principale
+  GROUP BY SUBSTR(giorno_data, 1, 4);
+END;
+
+----------------------------------------------------------------------------------------------------
+
+CREATE TRIGGER recalc_targets_after_delete
+  AFTER DELETE ON tabella_principale
+BEGIN
+  -- The same full recalculation.
+  DELETE FROM tabella_sommario;
+  DELETE FROM tabella_mensile;
+  DELETE FROM tabella_annuale;
+
+  INSERT INTO tabella_sommario (
+    numero,
+    somma_mc_acquisto,
+    somma_eur_acquisto,
+    somma_eur_acquisto_no_iva,
+    somma_mc_vendita,
+    somma_mc_vendita_pefc,
+    somma_eur_vendita,
+    somma_eur_vendita_no_iva
+  )
+  SELECT 
+    operazione AS numero,
+    SUM(CASE WHEN typo = 'ACQUISTO' THEN quantita ELSE 0 END),
+    SUM(CASE WHEN typo = 'ACQUISTO' THEN importo_totale ELSE 0 END),
+    SUM(CASE WHEN typo = 'ACQUISTO' THEN prezzo_totale ELSE 0 END),
+    SUM(CASE WHEN typo = 'VENDUTO' THEN quantita ELSE 0 END),
+    SUM(CASE WHEN typo = 'VENDUTO' THEN quantita ELSE 0 END),
+    SUM(CASE WHEN typo = 'VENDUTO' THEN importo_totale ELSE 0 END),
+    SUM(CASE WHEN typo = 'VENDUTO' THEN prezzo_totale ELSE 0 END)
+  FROM tabella_principale
+  GROUP BY operazione;
+
+  INSERT INTO tabella_mensile (
+    mese_anno,
+    somma_mc_acquisto,
+    somma_eur_acquisto,
+    somma_eur_acquisto_no_iva,
+    somma_mc_vendita,
+    somma_mc_vendita_pefc,
+    somma_eur_vendita,
+    somma_eur_vendita_no_iva
+  )
+  SELECT 
+    SUBSTR(giorno_data, 1, 7) AS mese_anno,
+    SUM(CASE WHEN typo = 'ACQUISTO' THEN quantita ELSE 0 END),
+    SUM(CASE WHEN typo = 'ACQUISTO' THEN importo_totale ELSE 0 END),
+    SUM(CASE WHEN typo = 'ACQUISTO' THEN prezzo_totale ELSE 0 END),
+    SUM(CASE WHEN typo = 'VENDUTO' THEN quantita ELSE 0 END),
+    SUM(CASE WHEN typo = 'VENDUTO' THEN quantita ELSE 0 END),
+    SUM(CASE WHEN typo = 'VENDUTO' THEN importo_totale ELSE 0 END),
+    SUM(CASE WHEN typo = 'VENDUTO' THEN prezzo_totale ELSE 0 END)
+  FROM tabella_principale
+  GROUP BY SUBSTR(giorno_data, 1, 7);
+
+  INSERT INTO tabella_annuale (
+    anno,
+    somma_mc_acquisto,
+    somma_eur_acquisto,
+    somma_eur_acquisto_no_iva,
+    somma_mc_vendita,
+    somma_mc_vendita_pefc,
+    somma_eur_vendita,
+    somma_eur_vendita_no_iva
+  )
+  SELECT 
+    SUBSTR(giorno_data, 1, 4) AS anno,
+    SUM(CASE WHEN typo = 'ACQUISTO' THEN quantita ELSE 0 END),
+    SUM(CASE WHEN typo = 'ACQUISTO' THEN importo_totale ELSE 0 END),
+    SUM(CASE WHEN typo = 'ACQUISTO' THEN prezzo_totale ELSE 0 END),
+    SUM(CASE WHEN typo = 'VENDUTO' THEN quantita ELSE 0 END),
+    SUM(CASE WHEN typo = 'VENDUTO' THEN quantita ELSE 0 END),
+    SUM(CASE WHEN typo = 'VENDUTO' THEN importo_totale ELSE 0 END),
+    SUM(CASE WHEN typo = 'VENDUTO' THEN prezzo_totale ELSE 0 END)
   FROM tabella_principale
   GROUP BY SUBSTR(giorno_data, 1, 4);
 END;
