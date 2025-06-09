@@ -35,7 +35,7 @@ diesel setup
 ln -s $HOME/DSLegno/dallasanta.db $HOME
 
 # Link launcher
-ln -s $HOME/DSLegno/launch.command $HOME
+ln -s $HOME/DSLegno/launch.command $HOME/Desktop
 
 ####################################################################################################
 
