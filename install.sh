@@ -34,6 +34,9 @@ diesel setup
 # Link database
 ln -s $HOME/DSLegno/dallasanta.db $HOME
 
+# Link launcher
+ln -s $HOME/DSLegno/launch.command $HOME
+
 ####################################################################################################
 
 # Ensure directories $HOME/Desktop/Acquista and $HOME/Desktop/Vendita exist, create them if needed and log
