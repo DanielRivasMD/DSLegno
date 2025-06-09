@@ -2,19 +2,13 @@
 -- TRIGGERS WHEN UPDATING DATA (Propagation on Change)
 ----------------------------------------------------------------------------------------------------
 
-/* Trigger for Acquisti:
-   Fires after an UPDATE on tabella_acquisti when either "operazione" or "progetto_di_taglio" changes.
-*/
 CREATE TRIGGER update_acquisti
   AFTER UPDATE ON tabella_acquisti
-  WHEN (
-       COALESCE(OLD.operazione, 0) <> COALESCE(NEW.operazione, 0)
-    OR COALESCE(OLD.progetto_di_taglio, '') <> COALESCE(NEW.progetto_di_taglio, '')
-  )
+  WHEN ( COALESCE(OLD.operazione, 0) <> COALESCE(NEW.operazione, 0) )
 BEGIN
-  -----------------------------------------------------------------------------------------------
-  -- Propagate new acquisti data into tabella_principale (mark as ACQUISTO)
-  -----------------------------------------------------------------------------------------------
+  ------------------------------------------------------------------------------
+  -- 1. Propagate updated acquisti data into tabella_principale (mark as ACQUISTO).
+  ------------------------------------------------------------------------------
   INSERT INTO tabella_principale (
     operazione,
     prestatore_denominazione, prestatore_indirizzo,
@@ -36,19 +30,19 @@ BEGIN
     'ACQUISTO'
   );
 
-  -----------------------------------------------------------------------------------------------
-  -- Purge outdated records from tabella_principale
-  -----------------------------------------------------------------------------------------------
+  ------------------------------------------------------------------------------
+  -- 2. Purge from tabella_principale any record whose key (operazione) no longer exists in either source.
+  ------------------------------------------------------------------------------
   DELETE FROM tabella_principale
-  WHERE id NOT IN (
+  WHERE operazione NOT IN (
       SELECT operazione FROM tabella_acquisti
       UNION
       SELECT operazione FROM tabella_vendite
   );
 
-  -----------------------------------------------------------------------------------------------
-  -- Update tabella_sommario for new acquisti data
-  -----------------------------------------------------------------------------------------------
+  ------------------------------------------------------------------------------
+  -- 3. Update the summary table (tabella_sommario) for NEW.operazione.
+  ------------------------------------------------------------------------------
   INSERT OR REPLACE INTO tabella_sommario (
     numero,
     somma_mc_acquisto,
@@ -58,7 +52,8 @@ BEGIN
     somma_mc_vendita_pefc,
     somma_eur_vendita,
     somma_eur_vendita_no_iva
-  ) VALUES (
+  )
+  VALUES (
     NEW.operazione,
     ( SELECT SUM(quantita) FROM tabella_acquisti WHERE operazione = NEW.operazione ),
     ( SELECT SUM(importo_totale) FROM tabella_acquisti WHERE operazione = NEW.operazione ),
@@ -69,9 +64,9 @@ BEGIN
     ( SELECT somma_eur_vendita_no_iva FROM tabella_sommario WHERE numero = NEW.operazione )
   );
 
-  -----------------------------------------------------------------------------------------------
-  -- Update tabella_sommario for the OLD acquisti record (purging outdated info)
-  -----------------------------------------------------------------------------------------------
+  ------------------------------------------------------------------------------
+  -- 4. Update the summary table for OLD.operazione (purging outdated info).
+  ------------------------------------------------------------------------------
   INSERT OR REPLACE INTO tabella_sommario (
     numero,
     somma_mc_acquisto,
@@ -81,7 +76,8 @@ BEGIN
     somma_mc_vendita_pefc,
     somma_eur_vendita,
     somma_eur_vendita_no_iva
-  ) VALUES (
+  )
+  VALUES (
     OLD.operazione,
     ( SELECT SUM(quantita) FROM tabella_acquisti WHERE operazione = OLD.operazione ),
     ( SELECT SUM(importo_totale) FROM tabella_acquisti WHERE operazione = OLD.operazione ),
@@ -92,9 +88,9 @@ BEGIN
     ( SELECT somma_eur_vendita_no_iva FROM tabella_sommario WHERE numero = OLD.operazione )
   );
 
-  -----------------------------------------------------------------------------------------------
-  -- Purge outdated summary records from tabella_sommario
-  -----------------------------------------------------------------------------------------------
+  ------------------------------------------------------------------------------
+  -- 5. Purge outdated records from tabella_sommario.
+  ------------------------------------------------------------------------------
   DELETE FROM tabella_sommario
   WHERE numero NOT IN (
       SELECT operazione FROM tabella_acquisti
@@ -102,9 +98,9 @@ BEGIN
       SELECT operazione FROM tabella_vendite
   );
 
-  -----------------------------------------------------------------------------------------------
-  -- Update monthly aggregations from acquisti
-  -----------------------------------------------------------------------------------------------
+  ------------------------------------------------------------------------------
+  -- 6. Update monthly aggregations for NEW.operazione.
+  ------------------------------------------------------------------------------
   INSERT OR REPLACE INTO tabella_mensile (
     mese_anno,
     somma_mc_acquisto,
@@ -114,49 +110,90 @@ BEGIN
     somma_mc_vendita_pefc,
     somma_eur_vendita,
     somma_eur_vendita_no_iva
-  ) VALUES (
+  )
+  VALUES (
     ( SELECT SUBSTR(giorno_data, 1, 7)
-      FROM tabella_acquisti WHERE operazione = NEW.operazione ),
-    ( SELECT SUM(quantita) FROM tabella_acquisti
-      WHERE SUBSTR(giorno_data, 1, 7) =
-            ( SELECT SUBSTR(giorno_data, 1, 7)
-              FROM tabella_acquisti WHERE operazione = NEW.operazione )
+      FROM tabella_acquisti
+      WHERE operazione = NEW.operazione
+      LIMIT 1
     ),
-    ( SELECT SUM(importo_totale) FROM tabella_acquisti
-      WHERE SUBSTR(giorno_data, 1, 7) =
-            ( SELECT SUBSTR(giorno_data, 1, 7)
-              FROM tabella_acquisti WHERE operazione = NEW.operazione )
-    ),
-    ( SELECT SUM(prezzo_totale) FROM tabella_acquisti
-      WHERE SUBSTR(giorno_data, 1, 7) =
-            ( SELECT SUBSTR(giorno_data, 1, 7)
-              FROM tabella_acquisti WHERE operazione = NEW.operazione )
-    ),
+    ( SELECT SUM(quantita) FROM tabella_acquisti WHERE operazione = NEW.operazione ),
+    ( SELECT SUM(importo_totale) FROM tabella_acquisti WHERE operazione = NEW.operazione ),
+    ( SELECT SUM(prezzo_totale) FROM tabella_acquisti WHERE operazione = NEW.operazione ),
     ( SELECT somma_mc_vendita FROM tabella_mensile
       WHERE mese_anno =
             ( SELECT SUBSTR(giorno_data, 1, 7)
-              FROM tabella_acquisti WHERE operazione = NEW.operazione )
+              FROM tabella_acquisti
+              WHERE operazione = NEW.operazione
+              LIMIT 1
+            )
     ),
     ( SELECT somma_mc_vendita_pefc FROM tabella_mensile
       WHERE mese_anno =
             ( SELECT SUBSTR(giorno_data, 1, 7)
-              FROM tabella_acquisti WHERE operazione = NEW.operazione )
+              FROM tabella_acquisti
+              WHERE operazione = NEW.operazione
+              LIMIT 1
+            )
     ),
     ( SELECT somma_eur_vendita FROM tabella_mensile
       WHERE mese_anno =
             ( SELECT SUBSTR(giorno_data, 1, 7)
-              FROM tabella_acquisti WHERE operazione = NEW.operazione )
+              FROM tabella_acquisti
+              WHERE operazione = NEW.operazione
+              LIMIT 1
+            )
     ),
     ( SELECT somma_eur_vendita_no_iva FROM tabella_mensile
       WHERE mese_anno =
             ( SELECT SUBSTR(giorno_data, 1, 7)
-              FROM tabella_acquisti WHERE operazione = NEW.operazione )
+              FROM tabella_acquisti
+              WHERE operazione = NEW.operazione
+              LIMIT 1
+            )
     )
   );
 
-  -----------------------------------------------------------------------------------------------
-  -- Update annual aggregations from acquisti
-  -----------------------------------------------------------------------------------------------
+  ------------------------------------------------------------------------------
+  -- 7. Update monthly aggregations for OLD.operazione, grouping by the month.
+  ------------------------------------------------------------------------------
+  INSERT OR REPLACE INTO tabella_mensile (
+    mese_anno,
+    somma_mc_acquisto,
+    somma_eur_acquisto,
+    somma_eur_acquisto_no_iva,
+    somma_mc_vendita,
+    somma_mc_vendita_pefc,
+    somma_eur_vendita,
+    somma_eur_vendita_no_iva
+  )
+  SELECT
+    SUBSTR(giorno_data, 1, 7),
+    SUM(quantita),
+    SUM(importo_totale),
+    SUM(prezzo_totale),
+    NULL, NULL, NULL, NULL
+  FROM tabella_acquisti
+  WHERE operazione = OLD.operazione
+  GROUP BY SUBSTR(giorno_data, 1, 7);
+
+  ------------------------------------------------------------------------------
+  -- 8. Purge from tabella_mensile any month that no longer appears in source tables.
+  ------------------------------------------------------------------------------
+  DELETE FROM tabella_mensile
+  WHERE mese_anno NOT IN (
+      SELECT DISTINCT SUBSTR(giorno_data, 1, 7)
+      FROM tabella_acquisti
+      WHERE operazione IS NOT NULL
+      UNION
+      SELECT DISTINCT SUBSTR(giorno_data, 1, 7)
+      FROM tabella_vendite
+      WHERE operazione IS NOT NULL
+  );
+
+  ------------------------------------------------------------------------------
+  -- 9. Update annual aggregations for NEW.operazione.
+  ------------------------------------------------------------------------------
   INSERT OR REPLACE INTO tabella_annuale (
     anno,
     somma_mc_acquisto,
@@ -166,46 +203,81 @@ BEGIN
     somma_mc_vendita_pefc,
     somma_eur_vendita,
     somma_eur_vendita_no_iva
-  ) VALUES (
+  )
+  VALUES (
     ( SELECT SUBSTR(giorno_data, 1, 4)
-      FROM tabella_acquisti WHERE operazione = NEW.operazione ),
-    ( SELECT SUM(quantita) FROM tabella_acquisti
-      WHERE SUBSTR(giorno_data, 1, 4) =
-            ( SELECT SUBSTR(giorno_data, 1, 4)
-              FROM tabella_acquisti WHERE operazione = NEW.operazione )
+      FROM tabella_acquisti
+      WHERE operazione = NEW.operazione
+      LIMIT 1
     ),
-    ( SELECT SUM(importo_totale) FROM tabella_acquisti
-      WHERE SUBSTR(giorno_data, 1, 4) =
-            ( SELECT SUBSTR(giorno_data, 1, 4)
-              FROM tabella_acquisti WHERE operazione = NEW.operazione )
-    ),
-    ( SELECT SUM(prezzo_totale) FROM tabella_acquisti
-      WHERE SUBSTR(giorno_data, 1, 4) =
-            ( SELECT SUBSTR(giorno_data, 1, 4)
-              FROM tabella_acquisti WHERE operazione = NEW.operazione )
-    ),
+    ( SELECT SUM(quantita) FROM tabella_acquisti WHERE operazione = NEW.operazione ),
+    ( SELECT SUM(importo_totale) FROM tabella_acquisti WHERE operazione = NEW.operazione ),
+    ( SELECT SUM(prezzo_totale) FROM tabella_acquisti WHERE operazione = NEW.operazione ),
     ( SELECT somma_mc_vendita FROM tabella_annuale
-      WHERE anno =
-            ( SELECT SUBSTR(giorno_data, 1, 4)
-              FROM tabella_acquisti WHERE operazione = NEW.operazione )
+      WHERE anno = ( SELECT SUBSTR(giorno_data, 1, 4)
+                     FROM tabella_acquisti
+                     WHERE operazione = NEW.operazione
+                     LIMIT 1 )
     ),
     ( SELECT somma_mc_vendita_pefc FROM tabella_annuale
-      WHERE anno =
-            ( SELECT SUBSTR(giorno_data, 1, 4)
-              FROM tabella_acquisti WHERE operazione = NEW.operazione )
+      WHERE anno = ( SELECT SUBSTR(giorno_data, 1, 4)
+                     FROM tabella_acquisti
+                     WHERE operazione = NEW.operazione
+                     LIMIT 1 )
     ),
     ( SELECT somma_eur_vendita FROM tabella_annuale
-      WHERE anno =
-            ( SELECT SUBSTR(giorno_data, 1, 4)
-              FROM tabella_acquisti WHERE operazione = NEW.operazione )
+      WHERE anno = ( SELECT SUBSTR(giorno_data, 1, 4)
+                     FROM tabella_acquisti
+                     WHERE operazione = NEW.operazione
+                     LIMIT 1 )
     ),
     ( SELECT somma_eur_vendita_no_iva FROM tabella_annuale
-      WHERE anno =
-            ( SELECT SUBSTR(giorno_data, 1, 4)
-              FROM tabella_acquisti WHERE operazione = NEW.operazione )
+      WHERE anno = ( SELECT SUBSTR(giorno_data, 1, 4)
+                     FROM tabella_acquisti
+                     WHERE operazione = NEW.operazione
+                     LIMIT 1 )
     )
   );
+
+  ------------------------------------------------------------------------------
+  -- 10. Update annual aggregations for OLD.operazione, grouping by year.
+  ------------------------------------------------------------------------------
+  INSERT OR REPLACE INTO tabella_annuale (
+    anno,
+    somma_mc_acquisto,
+    somma_eur_acquisto,
+    somma_eur_acquisto_no_iva,
+    somma_mc_vendita,
+    somma_mc_vendita_pefc,
+    somma_eur_vendita,
+    somma_eur_vendita_no_iva
+  )
+  SELECT
+    SUBSTR(giorno_data, 1, 4),
+    SUM(quantita),
+    SUM(importo_totale),
+    SUM(prezzo_totale),
+    NULL, NULL, NULL, NULL
+  FROM tabella_acquisti
+  WHERE operazione = OLD.operazione
+  GROUP BY SUBSTR(giorno_data, 1, 4);
+
+  ------------------------------------------------------------------------------
+  -- 11. Purge from tabella_annuale any year that no longer appears in source tables.
+  ------------------------------------------------------------------------------
+  DELETE FROM tabella_annuale
+  WHERE anno NOT IN (
+      SELECT DISTINCT SUBSTR(giorno_data, 1, 4)
+      FROM tabella_acquisti
+      WHERE operazione IS NOT NULL
+      UNION
+      SELECT DISTINCT SUBSTR(giorno_data, 1, 4)
+      FROM tabella_vendite
+      WHERE operazione IS NOT NULL
+  );
 END;
+
+----------------------------------------------------------------------------------------------------
 
 /* Trigger for Vendite:
    Fires after an UPDATE on tabella_vendite when the operazione value changes.
