@@ -6,8 +6,14 @@ CREATE TRIGGER update_acquisti_operazione
   AFTER UPDATE ON tabella_acquisti
   WHEN COALESCE(OLD.operazione, 0) <> COALESCE(NEW.operazione, 0)
 BEGIN
-  -- When operazione changes (NULL->Integer OR Integer->Integer) in acquisti,
-  -- import/update the corresponding data into tabella_principale.
+  -- Purge the old record (only if OLD.operazione is not NULL)
+  DELETE FROM tabella_principale
+  WHERE operazione = OLD.operazione
+    AND descrizione = OLD.descrizione
+    AND numero_fattura = OLD.numero_fattura
+    AND typo = 'ACQUISTO';
+
+  -- Import/update the new data into tabella_principale
   INSERT OR REPLACE INTO tabella_principale (
     operazione,
     prestatore_denominazione, prestatore_indirizzo,
@@ -36,8 +42,14 @@ CREATE TRIGGER update_vendite_operazione
   AFTER UPDATE ON tabella_vendite
   WHEN COALESCE(OLD.operazione, 0) <> COALESCE(NEW.operazione, 0)
 BEGIN
-  -- When operazione changes (NULL->Integer OR Integer->Integer) in vendite,
-  -- import/update the corresponding data into tabella_principale.
+  -- Purge the old record (only if OLD.operazione is not NULL)
+  DELETE FROM tabella_principale
+  WHERE operazione = OLD.operazione
+    AND descrizione = OLD.descrizione
+    AND numero_fattura = OLD.numero_fattura
+    AND typo = 'VENDUTO';
+
+  -- Import/update the new data into tabella_principale
   INSERT OR REPLACE INTO tabella_principale (
     operazione,
     prestatore_denominazione, prestatore_indirizzo,
