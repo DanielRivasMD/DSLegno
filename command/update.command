@@ -1,6 +1,16 @@
 #!/bin/bash
 ####################################################################################################
 
+# Backup database
+cp "$HOME/DSLegno/dallasanta.db" "$HOME/DSLegno/backup_dallasanta.db"
+
+####################################################################################################
+
+# Set up database
+diesel migration run
+
+####################################################################################################
+
 # Download the latest release executable ("fattura") from GitHub (DanielRivasMD/DSLegno)
 #
 # This section fetches the latest release from the GitHub API, filters for an asset named "fattura",
