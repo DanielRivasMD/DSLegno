@@ -37,6 +37,9 @@ ln -s $HOME/DSLegno/dallasanta.db $HOME
 # Link launcher
 ln -s $HOME/DSLegno/command/launch.command $HOME/Desktop
 
+# Link update
+ln -s $HOME/DSLegno/command/update.command $HOME/Desktop
+
 ####################################################################################################
 
 # Ensure directories $HOME/Desktop/Acquista and $HOME/Desktop/Vendita exist, create them if needed and log
