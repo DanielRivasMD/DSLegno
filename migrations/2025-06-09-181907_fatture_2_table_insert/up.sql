@@ -34,14 +34,19 @@ CREATE TRIGGER insert_acquisti_operazione
   AFTER UPDATE ON tabella_acquisti
   WHEN COALESCE(OLD.operazione, 0) <> COALESCE(NEW.operazione, 0)
 BEGIN
-  -- Purge the outdated record
+  -- Delete any record in tabella_principale that matches either the OLD key or the NEW key.
   DELETE FROM tabella_principale
-  WHERE operazione = OLD.operazione
-    AND descrizione = OLD.descrizione
-    AND numero_fattura = OLD.numero_fattura
+  WHERE (
+         (operazione = OLD.operazione 
+          AND descrizione = OLD.descrizione 
+          AND numero_fattura = OLD.numero_fattura)
+      OR (operazione = NEW.operazione
+          AND descrizione = NEW.descrizione
+          AND numero_fattura = NEW.numero_fattura)
+        )
     AND typo = 'ACQUISTO';
-
-  -- Import/update the new record into tabella_principale
+  
+  -- Insert or replace the new record into tabella_principale.
   INSERT OR REPLACE INTO tabella_principale (
     operazione,
     prestatore_denominazione,
@@ -118,18 +123,22 @@ BEGIN
 END;
 
 -- When the column "operazione" is updated on tabella_vendite,
--- first purge the outdated corresponding record in tabella_principale
--- (matching on operazione, descrizione, and numero_fattura, with typo = 'VENDUTO'),
--- then import/update the new vendite record with marker 'VENDUTO'.
+-- first purge any record in tabella_principale that matches either the OLD or the NEW key,
+-- then insert or replace the updated vendite record into tabella_principale with typo = 'VENDUTO'.
 CREATE TRIGGER insert_vendite_operazione
   AFTER UPDATE ON tabella_vendite
   WHEN COALESCE(OLD.operazione, 0) <> COALESCE(NEW.operazione, 0)
 BEGIN
-  -- Purge the old record
+  -- Purge any record that matches either the old key or the new key
   DELETE FROM tabella_principale
-  WHERE operazione = OLD.operazione
-    AND descrizione = OLD.descrizione
-    AND numero_fattura = OLD.numero_fattura
+  WHERE (
+          (operazione = OLD.operazione
+           AND descrizione = OLD.descrizione
+           AND numero_fattura = OLD.numero_fattura)
+       OR (operazione = NEW.operazione
+           AND descrizione = NEW.descrizione
+           AND numero_fattura = NEW.numero_fattura)
+        )
     AND typo = 'VENDUTO';
 
   -- Import/update the new record into tabella_principale
