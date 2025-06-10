@@ -3,7 +3,7 @@
 diesel::table! {
     tabella_acquisti (id) {
         id -> Nullable<Integer>,
-        operazione -> Nullable<Integer>,
+        lotto -> Nullable<Integer>,
         progetto_di_taglio -> Nullable<Text>,
         descrizione -> Nullable<Text>,
         quantita -> Nullable<Float>,
@@ -57,7 +57,7 @@ diesel::table! {
 diesel::table! {
     tabella_principale (id) {
         id -> Nullable<Integer>,
-        operazione -> Nullable<Integer>,
+        lotto -> Nullable<Integer>,
         descrizione -> Nullable<Text>,
         quantita -> Nullable<Float>,
         prezzo_unitario -> Nullable<Float>,
@@ -100,7 +100,7 @@ diesel::table! {
 diesel::table! {
     tabella_vendite (id) {
         id -> Nullable<Integer>,
-        operazione -> Nullable<Integer>,
+        lotto -> Nullable<Integer>,
         pefc -> Nullable<Text>,
         descrizione -> Nullable<Text>,
         quantita -> Nullable<Float>,
