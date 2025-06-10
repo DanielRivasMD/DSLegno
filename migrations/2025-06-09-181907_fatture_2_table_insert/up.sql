@@ -17,30 +17,30 @@ BEGIN
   END;
 END;
 
-CREATE TRIGGER delete_acquisti_operazione
+CREATE TRIGGER delete_acquisti_lotto
   AFTER DELETE ON tabella_acquisti
 BEGIN
   DELETE FROM tabella_principale
-  WHERE operazione = OLD.operazione
+  WHERE lotto = OLD.lotto
     AND descrizione = OLD.descrizione
     AND numero_fattura = OLD.numero_fattura
     AND typo = 'ACQUISTO';
 END;
 
--- When the column "operazione" is updated (from NULL to an integer or from one integer to another),
--- first purge the old record in tabella_principale (using the key combination: operazione, descrizione, and numero_fattura)
+-- When the column "lotto" is updated (from NULL to an integer or from one integer to another),
+-- first purge the old record in tabella_principale (using the key combination: lotto, descrizione, and numero_fattura)
 -- and then import/update the new acquisti record (with 'ACQUISTO').
-CREATE TRIGGER insert_acquisti_operazione
+CREATE TRIGGER insert_acquisti_lotto
   AFTER UPDATE ON tabella_acquisti
-  WHEN COALESCE(OLD.operazione, 0) <> COALESCE(NEW.operazione, 0)
+  WHEN COALESCE(OLD.lotto, 0) <> COALESCE(NEW.lotto, 0)
 BEGIN
   -- Delete any record in tabella_principale that matches either the OLD key or the NEW key.
   DELETE FROM tabella_principale
   WHERE (
-         (operazione = OLD.operazione 
+         (lotto = OLD.lotto 
           AND descrizione = OLD.descrizione 
           AND numero_fattura = OLD.numero_fattura)
-      OR (operazione = NEW.operazione
+      OR (lotto = NEW.lotto
           AND descrizione = NEW.descrizione
           AND numero_fattura = NEW.numero_fattura)
         )
@@ -48,7 +48,7 @@ BEGIN
   
   -- Insert or replace the new record into tabella_principale.
   INSERT OR REPLACE INTO tabella_principale (
-    operazione,
+    lotto,
     prestatore_denominazione,
     prestatore_indirizzo,
     committente_denominazione,
@@ -70,7 +70,7 @@ BEGIN
     typo
   )
   VALUES (
-    NEW.operazione,
+    NEW.lotto,
     NEW.prestatore_denominazione,
     NEW.prestatore_indirizzo,
     NEW.committente_denominazione,
@@ -111,31 +111,31 @@ BEGIN
 END;
 
 -- When a vendite record is deleted, remove the corresponding entry from tabella_principale,
--- matching on operazione, descrizione, and numero_fattura with typo = 'VENDUTO'.
-CREATE TRIGGER delete_vendite_operazione
+-- matching on lotto, descrizione, and numero_fattura with typo = 'VENDUTO'.
+CREATE TRIGGER delete_vendite_lotto
   AFTER DELETE ON tabella_vendite
 BEGIN
   DELETE FROM tabella_principale
-  WHERE operazione = OLD.operazione
+  WHERE lotto = OLD.lotto
     AND descrizione = OLD.descrizione
     AND numero_fattura = OLD.numero_fattura
     AND typo = 'VENDUTO';
 END;
 
--- When the column "operazione" is updated on tabella_vendite,
+-- When the column "lotto" is updated on tabella_vendite,
 -- first purge any record in tabella_principale that matches either the OLD or the NEW key,
 -- then insert or replace the updated vendite record into tabella_principale with typo = 'VENDUTO'.
-CREATE TRIGGER insert_vendite_operazione
+CREATE TRIGGER insert_vendite_lotto
   AFTER UPDATE ON tabella_vendite
-  WHEN COALESCE(OLD.operazione, 0) <> COALESCE(NEW.operazione, 0)
+  WHEN COALESCE(OLD.lotto, 0) <> COALESCE(NEW.lotto, 0)
 BEGIN
   -- Purge any record that matches either the old key or the new key
   DELETE FROM tabella_principale
   WHERE (
-          (operazione = OLD.operazione
+          (lotto = OLD.lotto
            AND descrizione = OLD.descrizione
            AND numero_fattura = OLD.numero_fattura)
-       OR (operazione = NEW.operazione
+       OR (lotto = NEW.lotto
            AND descrizione = NEW.descrizione
            AND numero_fattura = NEW.numero_fattura)
         )
@@ -143,7 +143,7 @@ BEGIN
 
   -- Import/update the new record into tabella_principale
   INSERT OR REPLACE INTO tabella_principale (
-    operazione,
+    lotto,
     prestatore_denominazione,
     prestatore_indirizzo,
     committente_denominazione,
@@ -165,7 +165,7 @@ BEGIN
     typo
   )
   VALUES (
-    NEW.operazione,
+    NEW.lotto,
     NEW.prestatore_denominazione,
     NEW.prestatore_indirizzo,
     NEW.committente_denominazione,

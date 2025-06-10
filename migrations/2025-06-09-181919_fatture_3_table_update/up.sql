@@ -2,20 +2,20 @@
 -- TRIGGERS WHEN UPDATING DATA (Propagation on Change)
 ----------------------------------------------------------------------------------------------------
 
-CREATE TRIGGER update_acquisti_operazione
+CREATE TRIGGER update_acquisti_lotto
   AFTER UPDATE ON tabella_acquisti
-  WHEN COALESCE(OLD.operazione, 0) <> COALESCE(NEW.operazione, 0)
+  WHEN COALESCE(OLD.lotto, 0) <> COALESCE(NEW.lotto, 0)
 BEGIN
-  -- Purge the old record (only if OLD.operazione is not NULL)
+  -- Purge the old record (only if OLD.lotto is not NULL)
   DELETE FROM tabella_principale
-  WHERE operazione = OLD.operazione
+  WHERE lotto = OLD.lotto
     AND descrizione = OLD.descrizione
     AND numero_fattura = OLD.numero_fattura
     AND typo = 'ACQUISTO';
 
   -- Import/update the new data into tabella_principale
   INSERT OR REPLACE INTO tabella_principale (
-    operazione,
+    lotto,
     prestatore_denominazione, prestatore_indirizzo,
     committente_denominazione, committente_indirizzo,
     numero_fattura, giorno_data, importo_totale,
@@ -25,7 +25,7 @@ BEGIN
     typo
   )
   VALUES (
-    NEW.operazione,
+    NEW.lotto,
     NEW.prestatore_denominazione, NEW.prestatore_indirizzo,
     NEW.committente_denominazione, NEW.committente_indirizzo,
     NEW.numero_fattura, NEW.giorno_data, NEW.importo_totale,
@@ -38,20 +38,20 @@ END;
 
 ----------------------------------------------------------------------------------------------------
 
-CREATE TRIGGER update_vendite_operazione
+CREATE TRIGGER update_vendite_lotto
   AFTER UPDATE ON tabella_vendite
-  WHEN COALESCE(OLD.operazione, 0) <> COALESCE(NEW.operazione, 0)
+  WHEN COALESCE(OLD.lotto, 0) <> COALESCE(NEW.lotto, 0)
 BEGIN
-  -- Purge the old record (only if OLD.operazione is not NULL)
+  -- Purge the old record (only if OLD.lotto is not NULL)
   DELETE FROM tabella_principale
-  WHERE operazione = OLD.operazione
+  WHERE lotto = OLD.lotto
     AND descrizione = OLD.descrizione
     AND numero_fattura = OLD.numero_fattura
     AND typo = 'VENDUTO';
 
   -- Import/update the new data into tabella_principale
   INSERT OR REPLACE INTO tabella_principale (
-    operazione,
+    lotto,
     prestatore_denominazione, prestatore_indirizzo,
     committente_denominazione, committente_indirizzo,
     numero_fattura, giorno_data, importo_totale,
@@ -61,7 +61,7 @@ BEGIN
     typo
   )
   VALUES (
-    NEW.operazione,
+    NEW.lotto,
     NEW.prestatore_denominazione, NEW.prestatore_indirizzo,
     NEW.committente_denominazione, NEW.committente_indirizzo,
     NEW.numero_fattura, NEW.giorno_data, NEW.importo_totale,
@@ -82,7 +82,7 @@ BEGIN
   DELETE FROM tabella_mensile;
   DELETE FROM tabella_annuale;
 
-  -- Recalculate summary aggregates grouped by operazione.
+  -- Recalculate summary aggregates grouped by lotto.
   INSERT INTO tabella_sommario (
     numero,
     somma_mc_acquisto,
@@ -94,7 +94,7 @@ BEGIN
     somma_eur_vendita_no_iva
   )
   SELECT 
-    operazione AS numero,
+    lotto AS numero,
     SUM(CASE WHEN typo = 'ACQUISTO' THEN quantita ELSE 0 END),
     SUM(CASE WHEN typo = 'ACQUISTO' THEN importo_totale ELSE 0 END),
     SUM(CASE WHEN typo = 'ACQUISTO' THEN prezzo_totale ELSE 0 END),
@@ -103,7 +103,7 @@ BEGIN
     SUM(CASE WHEN typo = 'VENDUTO' THEN importo_totale ELSE 0 END),
     SUM(CASE WHEN typo = 'VENDUTO' THEN prezzo_totale ELSE 0 END)
   FROM tabella_principale
-  GROUP BY operazione;
+  GROUP BY lotto;
 
   -- Recalculate monthly aggregates (group by year-month from giorno_data)
   INSERT INTO tabella_mensile (
@@ -173,7 +173,7 @@ BEGIN
     somma_eur_vendita_no_iva
   )
   SELECT 
-    operazione AS numero,
+    lotto AS numero,
     SUM(CASE WHEN typo = 'ACQUISTO' THEN quantita ELSE 0 END),
     SUM(CASE WHEN typo = 'ACQUISTO' THEN importo_totale ELSE 0 END),
     SUM(CASE WHEN typo = 'ACQUISTO' THEN prezzo_totale ELSE 0 END),
@@ -182,7 +182,7 @@ BEGIN
     SUM(CASE WHEN typo = 'VENDUTO' THEN importo_totale ELSE 0 END),
     SUM(CASE WHEN typo = 'VENDUTO' THEN prezzo_totale ELSE 0 END)
   FROM tabella_principale
-  GROUP BY operazione;
+  GROUP BY lotto;
 
   INSERT INTO tabella_mensile (
     mese_anno,
@@ -250,7 +250,7 @@ BEGIN
     somma_eur_vendita_no_iva
   )
   SELECT 
-    operazione AS numero,
+    lotto AS numero,
     SUM(CASE WHEN typo = 'ACQUISTO' THEN quantita ELSE 0 END),
     SUM(CASE WHEN typo = 'ACQUISTO' THEN importo_totale ELSE 0 END),
     SUM(CASE WHEN typo = 'ACQUISTO' THEN prezzo_totale ELSE 0 END),
@@ -259,7 +259,7 @@ BEGIN
     SUM(CASE WHEN typo = 'VENDUTO' THEN importo_totale ELSE 0 END),
     SUM(CASE WHEN typo = 'VENDUTO' THEN prezzo_totale ELSE 0 END)
   FROM tabella_principale
-  GROUP BY operazione;
+  GROUP BY lotto;
 
   INSERT INTO tabella_mensile (
     mese_anno,

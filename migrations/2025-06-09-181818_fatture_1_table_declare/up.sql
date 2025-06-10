@@ -5,7 +5,7 @@
 -- Main combined table for both purchases and sales
 CREATE TABLE IF NOT EXISTS tabella_principale (
   id INTEGER PRIMARY KEY AUTOINCREMENT, -- automatic tracker
-  operazione INTEGER,                   -- correlation number (to be updated by user)
+  lotto INTEGER,                        -- correlation number (to be updated by user)
   descrizione TEXT,                     -- description
   quantita REAL,                        -- amount
   prezzo_unitario REAL,                 -- unit price
@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS tabella_principale (
 ----------------------------------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS tabella_acquisti (
   id INTEGER PRIMARY KEY AUTOINCREMENT, -- automatic tracker
-  operazione INTEGER,                   -- correlation number (initially NULL)
+  lotto INTEGER,                        -- correlation number (initially NULL)
   progetto_di_taglio TEXT,              -- cutting project (initially NULL)
   descrizione TEXT,                     -- description
   quantita REAL,                        -- amount
@@ -59,7 +59,7 @@ CREATE TABLE IF NOT EXISTS tabella_acquisti (
 ----------------------------------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS tabella_vendite (
   id INTEGER PRIMARY KEY AUTOINCREMENT, -- automatic tracker
-  operazione INTEGER,                   -- correlation number (initially NULL)
+  lotto INTEGER,                        -- correlation number (initially NULL)
   pefc TEXT,                            -- PEFC flag (e.g., "si")
   descrizione TEXT,                     -- description
   quantita REAL,                        -- amount
@@ -85,7 +85,7 @@ CREATE TABLE IF NOT EXISTS tabella_vendite (
 -- Daily/Operative Summary Table (sommario)
 ----------------------------------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS tabella_sommario (
-  numero INTEGER PRIMARY KEY,           -- key (operazione)
+  numero INTEGER PRIMARY KEY,           -- key (lotto)
   giorno_data TEXT,                     -- date of record
   acquisto TEXT,                        -- placeholder for purchase info
   vendita TEXT,                         -- placeholder for sales info
