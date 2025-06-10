@@ -11,13 +11,13 @@
 # Check for exactly one argument and ensure it's either "acquista" or "vendita".
 if [ "$#" -ne 1 ]; then
   echo "Usage: $0 [acquista|vendita]"
-  # exit 1
+  return 1
 fi
 
 type="$1"
 if [ "$type" != "acquista" ] && [ "$type" != "vendita" ]; then
   echo "Invalid type provided. Please use 'acquista' or 'vendita'."
-  # exit 1
+  return 1
 fi
 
 # Create output directory if it doesn't exist
