@@ -2,6 +2,7 @@
 -- TRIGGERS WHEN INSERTING DATA
 ----------------------------------------------------------------------------------------------------
 
+-- Prevent duplicate rows in tabella_acquisti based on descrizione and numero_fattura
 CREATE TRIGGER prevent_duplicate_acquisti
   BEFORE INSERT ON tabella_acquisti
 BEGIN
@@ -16,123 +17,80 @@ BEGIN
   END;
 END;
 
-
-CREATE TRIGGER update_acquisti_aggregates
-  AFTER INSERT ON tabella_acquisti
-  WHEN (NEW.operazione IS NOT NULL OR NEW.progetto_di_taglio IS NOT NULL)
+CREATE TRIGGER delete_acquisti_operazione
+  AFTER DELETE ON tabella_acquisti
 BEGIN
-  -----------------------------------------------------------------------------------------------
-  -- Update tabella_sommario using acquisti data (for purchase aggregates)
-  -----------------------------------------------------------------------------------------------
-  INSERT OR REPLACE INTO tabella_sommario (
-    numero,
-    somma_mc_acquisto,
-    somma_eur_acquisto,
-    somma_eur_acquisto_no_iva,
-    somma_mc_vendita,
-    somma_mc_vendita_pefc,
-    somma_eur_vendita,
-    somma_eur_vendita_no_iva
+  DELETE FROM tabella_principale
+  WHERE operazione = OLD.operazione
+    AND descrizione = OLD.descrizione
+    AND numero_fattura = OLD.numero_fattura
+    AND typo = 'ACQUISTO';
+END;
+
+-- When the column "operazione" is updated (from NULL to an integer or from one integer to another),
+-- first purge the old record in tabella_principale (using the key combination: operazione, descrizione, and numero_fattura)
+-- and then import/update the new acquisti record (with 'ACQUISTO').
+CREATE TRIGGER update_acquisti_operazione
+  AFTER UPDATE ON tabella_acquisti
+  WHEN COALESCE(OLD.operazione, 0) <> COALESCE(NEW.operazione, 0)
+BEGIN
+  -- Purge the outdated record
+  DELETE FROM tabella_principale
+  WHERE operazione = OLD.operazione
+    AND descrizione = OLD.descrizione
+    AND numero_fattura = OLD.numero_fattura
+    AND typo = 'ACQUISTO';
+
+  -- Import/update the new record into tabella_principale
+  INSERT OR REPLACE INTO tabella_principale (
+    operazione,
+    prestatore_denominazione,
+    prestatore_indirizzo,
+    committente_denominazione,
+    committente_indirizzo,
+    numero_fattura,
+    giorno_data,
+    importo_totale,
+    descrizione,
+    quantita,
+    prezzo_unitario,
+    prezzo_totale,
+    aliquota_iva,
+    imponibile_importo,
+    imposta,
+    esigibilita_iva,
+    data_riferimento_termini,
+    data_scadenza_pagamento,
+    importo_pagamento,
+    typo
   )
   VALUES (
     NEW.operazione,
-    ( SELECT SUM(quantita)
-      FROM tabella_acquisti
-      WHERE operazione = NEW.operazione ),
-    ( SELECT SUM(importo_totale)
-      FROM tabella_acquisti
-      WHERE operazione = NEW.operazione ),
-    ( SELECT SUM(prezzo_totale)
-      FROM tabella_acquisti
-      WHERE operazione = NEW.operazione ),
-    NULL, NULL, NULL, NULL
-  );
-
-  -----------------------------------------------------------------------------------------------
-  -- Update monthly aggregations from acquisti
-  -----------------------------------------------------------------------------------------------
-  INSERT OR REPLACE INTO tabella_mensile (
-    mese_anno,
-    somma_mc_acquisto,
-    somma_eur_acquisto,
-    somma_eur_acquisto_no_iva,
-    somma_mc_vendita,
-    somma_mc_vendita_pefc,
-    somma_eur_vendita,
-    somma_eur_vendita_no_iva
-  )
-  VALUES (
-    ( SELECT SUBSTR(giorno_data, 1, 7)
-      FROM tabella_acquisti
-      WHERE operazione = NEW.operazione ),
-    ( SELECT SUM(quantita)
-      FROM tabella_acquisti
-      WHERE SUBSTR(giorno_data, 1, 7) =
-            ( SELECT SUBSTR(giorno_data, 1, 7)
-              FROM tabella_acquisti
-              WHERE operazione = NEW.operazione )
-    ),
-    ( SELECT SUM(importo_totale)
-      FROM tabella_acquisti
-      WHERE SUBSTR(giorno_data, 1, 7) =
-            ( SELECT SUBSTR(giorno_data, 1, 7)
-              FROM tabella_acquisti
-              WHERE operazione = NEW.operazione )
-    ),
-    ( SELECT SUM(prezzo_totale)
-      FROM tabella_acquisti
-      WHERE SUBSTR(giorno_data, 1, 7) =
-            ( SELECT SUBSTR(giorno_data, 1, 7)
-              FROM tabella_acquisti
-              WHERE operazione = NEW.operazione )
-    ),
-    NULL, NULL, NULL, NULL
-  );
-
-  -----------------------------------------------------------------------------------------------
-  -- Update annual aggregations from acquisti
-  -----------------------------------------------------------------------------------------------
-  INSERT OR REPLACE INTO tabella_annuale (
-    anno,
-    somma_mc_acquisto,
-    somma_eur_acquisto,
-    somma_eur_acquisto_no_iva,
-    somma_mc_vendita,
-    somma_mc_vendita_pefc,
-    somma_eur_vendita,
-    somma_eur_vendita_no_iva
-  )
-  VALUES (
-    ( SELECT SUBSTR(giorno_data, 1, 4)
-      FROM tabella_acquisti
-      WHERE operazione = NEW.operazione ),
-    ( SELECT SUM(quantita)
-      FROM tabella_acquisti
-      WHERE SUBSTR(giorno_data, 1, 4) =
-            ( SELECT SUBSTR(giorno_data, 1, 4)
-              FROM tabella_acquisti
-              WHERE operazione = NEW.operazione )
-    ),
-    ( SELECT SUM(importo_totale)
-      FROM tabella_acquisti
-      WHERE SUBSTR(giorno_data, 1, 4) =
-            ( SELECT SUBSTR(giorno_data, 1, 4)
-              FROM tabella_acquisti
-              WHERE operazione = NEW.operazione )
-    ),
-    ( SELECT SUM(prezzo_totale)
-      FROM tabella_acquisti
-      WHERE SUBSTR(giorno_data, 1, 4) =
-            ( SELECT SUBSTR(giorno_data, 1, 4)
-              FROM tabella_acquisti
-              WHERE operazione = NEW.operazione )
-    ),
-    NULL, NULL, NULL, NULL
+    NEW.prestatore_denominazione,
+    NEW.prestatore_indirizzo,
+    NEW.committente_denominazione,
+    NEW.committente_indirizzo,
+    NEW.numero_fattura,
+    NEW.giorno_data,
+    NEW.importo_totale,
+    NEW.descrizione,
+    NEW.quantita,
+    NEW.prezzo_unitario,
+    NEW.prezzo_totale,
+    NEW.aliquota_iva,
+    NEW.imponibile_importo,
+    NEW.imposta,
+    NEW.esigibilita_iva,
+    NEW.data_riferimento_termini,
+    NEW.data_scadenza_pagamento,
+    NEW.importo_pagamento,
+    'ACQUISTO'
   );
 END;
 
 ----------------------------------------------------------------------------------------------------
 
+-- Prevent duplicate rows in tabella_vendite based on descrizione and numero_fattura
 CREATE TRIGGER prevent_duplicate_vendite
   BEFORE INSERT ON tabella_vendite
 BEGIN
@@ -147,168 +105,77 @@ BEGIN
   END;
 END;
 
-/* Trigger for Vendite:
-   When a new row is inserted into tabella_vendite with operazione not NULL,
-   check if an identical record (comparing non‑editable columns) exists in 
-   tabella_principale. If not, propagate the data into tabella_principale (mark as VENDITO)
-   and update the sales-related summary tables.
-*/
-CREATE TRIGGER insert_vendite
-  AFTER INSERT ON tabella_vendite
-  WHEN (NEW.operazione IS NOT NULL)
+-- When a vendite record is deleted, remove the corresponding entry from tabella_principale,
+-- matching on operazione, descrizione, and numero_fattura with typo = 'VENDUTO'.
+CREATE TRIGGER delete_vendite_operazione
+  AFTER DELETE ON tabella_vendite
 BEGIN
-  -----------------------------------------------------------------------------------------------
-  -- Propagate into tabella_principale (mark as VENDITO) only if an identical record is not found.
-  -----------------------------------------------------------------------------------------------
-  INSERT INTO tabella_principale (
+  DELETE FROM tabella_principale
+  WHERE operazione = OLD.operazione
+    AND descrizione = OLD.descrizione
+    AND numero_fattura = OLD.numero_fattura
+    AND typo = 'VENDUTO';
+END;
+
+-- When the column "operazione" is updated on tabella_vendite,
+-- first purge the outdated corresponding record in tabella_principale
+-- (matching on operazione, descrizione, and numero_fattura, with typo = 'VENDUTO'),
+-- then import/update the new vendite record with marker 'VENDUTO'.
+CREATE TRIGGER update_vendite_operazione
+  AFTER UPDATE ON tabella_vendite
+  WHEN COALESCE(OLD.operazione, 0) <> COALESCE(NEW.operazione, 0)
+BEGIN
+  -- Purge the old record
+  DELETE FROM tabella_principale
+  WHERE operazione = OLD.operazione
+    AND descrizione = OLD.descrizione
+    AND numero_fattura = OLD.numero_fattura
+    AND typo = 'VENDUTO';
+
+  -- Import/update the new record into tabella_principale
+  INSERT OR REPLACE INTO tabella_principale (
     operazione,
-    prestatore_denominazione, prestatore_indirizzo,
-    committente_denominazione, committente_indirizzo,
-    numero_fattura, giorno_data, importo_totale,
-    descrizione, quantita, prezzo_unitario, prezzo_totale, aliquota_iva,
-    imponibile_importo, imposta, esigibilita_iva,
-    data_riferimento_termini, data_scadenza_pagamento, importo_pagamento,
+    prestatore_denominazione,
+    prestatore_indirizzo,
+    committente_denominazione,
+    committente_indirizzo,
+    numero_fattura,
+    giorno_data,
+    importo_totale,
+    descrizione,
+    quantita,
+    prezzo_unitario,
+    prezzo_totale,
+    aliquota_iva,
+    imponibile_importo,
+    imposta,
+    esigibilita_iva,
+    data_riferimento_termini,
+    data_scadenza_pagamento,
+    importo_pagamento,
     typo
   )
-  SELECT
-    NEW.operazione,
-    NEW.prestatore_denominazione, NEW.prestatore_indirizzo,
-    NEW.committente_denominazione, NEW.committente_indirizzo,
-    NEW.numero_fattura, NEW.giorno_data, NEW.importo_totale,
-    NEW.descrizione, NEW.quantita, NEW.prezzo_unitario, NEW.prezzo_totale, NEW.aliquota_iva,
-    NEW.imponibile_importo, NEW.imposta, NEW.esigibilita_iva,
-    NEW.data_riferimento_termini, NEW.data_scadenza_pagamento, NEW.importo_pagamento,
-    'VENDITO'
-  WHERE NOT EXISTS (
-      SELECT 1 FROM tabella_principale
-      WHERE 
-            prestatore_denominazione       = NEW.prestatore_denominazione 
-        AND prestatore_indirizzo           = NEW.prestatore_indirizzo
-        AND committente_denominazione      = NEW.committente_denominazione
-        AND committente_indirizzo          = NEW.committente_indirizzo
-        AND numero_fattura                 = NEW.numero_fattura
-        AND giorno_data                    = NEW.giorno_data
-        AND importo_totale                 = NEW.importo_totale
-        AND descrizione                    = NEW.descrizione
-        AND quantita                       = NEW.quantita
-        AND prezzo_unitario                = NEW.prezzo_unitario
-        AND prezzo_totale                  = NEW.prezzo_totale
-        AND aliquota_iva                   = NEW.aliquota_iva
-        AND imponibile_importo             = NEW.imponibile_importo
-        AND imposta                        = NEW.imposta
-        AND esigibilita_iva                = NEW.esigibilita_iva
-        AND data_riferimento_termini       = NEW.data_riferimento_termini
-        AND data_scadenza_pagamento        = NEW.data_scadenza_pagamento
-        AND importo_pagamento              = NEW.importo_pagamento
-  );
-  
-  -----------------------------------------------------------------------------------------------
-  -- Update tabella_sommario using vendite data (for sales aggregates)
-  -----------------------------------------------------------------------------------------------
-  INSERT OR REPLACE INTO tabella_sommario (
-    numero,
-    somma_mc_acquisto,
-    somma_eur_acquisto,
-    somma_eur_acquisto_no_iva,
-    somma_mc_vendita,
-    somma_mc_vendita_pefc,
-    somma_eur_vendita,
-    somma_eur_vendita_no_iva
-  )
   VALUES (
     NEW.operazione,
-    NULL, NULL, NULL,  -- purchase aggregates remain NULL
-    ( SELECT SUM(quantita) FROM tabella_vendite WHERE operazione = NEW.operazione ),
-    ( SELECT SUM(quantita) FROM tabella_vendite 
-      WHERE operazione = NEW.operazione AND pefc = 'si' ),
-    ( SELECT SUM(importo_totale) FROM tabella_vendite WHERE operazione = NEW.operazione ),
-    ( SELECT SUM(prezzo_totale) FROM tabella_vendite WHERE operazione = NEW.operazione )
-  );
-  
-  -----------------------------------------------------------------------------------------------
-  -- Update monthly aggregations for vendite
-  -----------------------------------------------------------------------------------------------
-  INSERT OR REPLACE INTO tabella_mensile (
-    mese_anno,
-    somma_mc_acquisto,
-    somma_eur_acquisto,
-    somma_eur_acquisto_no_iva,
-    somma_mc_vendita,
-    somma_mc_vendita_pefc,
-    somma_eur_vendita,
-    somma_eur_vendita_no_iva
-  )
-  VALUES (
-    ( SELECT SUBSTR(giorno_data, 1, 7)
-      FROM tabella_vendite
-      WHERE operazione = NEW.operazione ),
-    NULL, NULL, NULL,  -- purchase aggregates remain NULL
-    ( SELECT SUM(quantita) FROM tabella_vendite
-      WHERE SUBSTR(giorno_data, 1, 7) =
-            ( SELECT SUBSTR(giorno_data, 1, 7)
-              FROM tabella_vendite WHERE operazione = NEW.operazione )
-    ),
-    ( SELECT SUM(quantita) FROM tabella_vendite
-      WHERE SUBSTR(giorno_data, 1, 7) =
-            ( SELECT SUBSTR(giorno_data, 1, 7)
-              FROM tabella_vendite WHERE operazione = NEW.operazione )
-      AND pefc = 'si'
-    ),
-    ( SELECT SUM(importo_totale) FROM tabella_vendite
-      WHERE SUBSTR(giorno_data, 1, 7) =
-            ( SELECT SUBSTR(giorno_data, 1, 7)
-              FROM tabella_vendite WHERE operazione = NEW.operazione )
-    ),
-    ( SELECT SUM(prezzo_totale) FROM tabella_vendite
-      WHERE SUBSTR(giorno_data, 1, 7) =
-            ( SELECT SUBSTR(giorno_data, 1, 7)
-              FROM tabella_vendite WHERE operazione = NEW.operazione )
-    )
-  );
-  
-  -----------------------------------------------------------------------------------------------
-  -- Update annual aggregations for vendite
-  -----------------------------------------------------------------------------------------------
-  INSERT OR REPLACE INTO tabella_annuale (
-    anno,
-    somma_mc_acquisto,
-    somma_eur_acquisto,
-    somma_eur_acquisto_no_iva,
-    somma_mc_vendita,
-    somma_mc_vendita_pefc,
-    somma_eur_vendita,
-    somma_eur_vendita_no_iva
-  )
-  VALUES (
-    ( SELECT SUBSTR(giorno_data, 1, 4)
-      FROM tabella_vendite
-      WHERE operazione = NEW.operazione ),
-    NULL, NULL, NULL,  -- purchase aggregates remain NULL
-    ( SELECT SUM(quantita) FROM tabella_vendite
-      WHERE operazione = NEW.operazione
-      AND SUBSTR(giorno_data, 1, 4) =
-          ( SELECT SUBSTR(giorno_data, 1, 4)
-            FROM tabella_vendite WHERE operazione = NEW.operazione )
-    ),
-    ( SELECT SUM(quantita) FROM tabella_vendite
-      WHERE operazione = NEW.operazione
-      AND SUBSTR(giorno_data, 1, 4) =
-          ( SELECT SUBSTR(giorno_data, 1, 4)
-            FROM tabella_vendite WHERE operazione = NEW.operazione )
-      AND pefc = 'si'
-    ),
-    ( SELECT SUM(importo_totale) FROM tabella_vendite
-      WHERE operazione = NEW.operazione
-      AND SUBSTR(giorno_data, 1, 4) =
-          ( SELECT SUBSTR(giorno_data, 1, 4)
-            FROM tabella_vendite WHERE operazione = NEW.operazione )
-    ),
-    ( SELECT SUM(prezzo_totale) FROM tabella_vendite
-      WHERE operazione = NEW.operazione
-      AND SUBSTR(giorno_data, 1, 4) =
-          ( SELECT SUBSTR(giorno_data, 1, 4)
-            FROM tabella_vendite WHERE operazione = NEW.operazione )
-    )
+    NEW.prestatore_denominazione,
+    NEW.prestatore_indirizzo,
+    NEW.committente_denominazione,
+    NEW.committente_indirizzo,
+    NEW.numero_fattura,
+    NEW.giorno_data,
+    NEW.importo_totale,
+    NEW.descrizione,
+    NEW.quantita,
+    NEW.prezzo_unitario,
+    NEW.prezzo_totale,
+    NEW.aliquota_iva,
+    NEW.imponibile_importo,
+    NEW.imposta,
+    NEW.esigibilita_iva,
+    NEW.data_riferimento_termini,
+    NEW.data_scadenza_pagamento,
+    NEW.importo_pagamento,
+    'VENDUTO'
   );
 END;
 
