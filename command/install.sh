@@ -32,13 +32,13 @@ diesel migration run
 ####################################################################################################
 
 # Link database
-ln -s $HOME/DSLegno/dallasanta.db $HOME
+ln -sf $HOME/DSLegno/dallasanta.db $HOME
 
 # Link launcher
-ln -s $HOME/DSLegno/command/launch.command $HOME/Desktop
+ln -sf $HOME/DSLegno/command/launch.command $HOME/Desktop
 
 # Link update
-ln -s $HOME/DSLegno/command/update.command $HOME/Desktop
+ln -sf $HOME/DSLegno/command/update.command $HOME/Desktop
 
 ####################################################################################################
 
