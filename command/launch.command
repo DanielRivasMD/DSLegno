@@ -1,7 +1,7 @@
 #!/bin/bash
 ####################################################################################################
 
-echo "Sourcing /Users/fabrizio/DSLegno/fattura-watchers.sh..."
-source /Users/fabrizio/DSLegno/fattura-watchers.sh
+echo "Sourcing /Users/fabrizio/DSLegno/command/fattura-watchers.sh..."
+source /Users/fabrizio/DSLegno/command/fattura-watchers.sh
 
 ####################################################################################################

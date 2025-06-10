@@ -35,7 +35,7 @@ diesel migration run
 ln -s $HOME/DSLegno/dallasanta.db $HOME
 
 # Link launcher
-ln -s $HOME/DSLegno/launch.command $HOME/Desktop
+ln -s $HOME/DSLegno/command/launch.command $HOME/Desktop
 
 ####################################################################################################
 
@@ -51,7 +51,7 @@ done
 
 # # TODO: still bugged out
 # # Create a soft link of $HOME/DSLegno/com.fabrizio.fattura-watchers.plist to /Users/fabrizio/Library/LaunchAgents/com.fabrizio.fattura-watchers.plist
-# TARGET="$HOME/DSLegno/com.fabrizio.fattura-watchers.plist"
+# TARGET="$HOME/DSLegno/command/com.fabrizio.fattura-watchers.plist"
 # LINK="/Users/fabrizio/Library/LaunchAgents/com.fabrizio.fattura-watchers.plist"
 
 # # Ensure the LaunchAgents directory exists

@@ -14,7 +14,7 @@
     <!-- Command to execute: the shell script to run -->
     <key>ProgramArguments</key>
     <array>
-      <string>/Users/fabrizio/DSLegno/fattura-watchers.sh</string>
+      <string>/Users/fabrizio/DSLegno/command/fattura-watchers.sh</string>
     </array>
 
     <!-- Start the job as soon as you log in -->
