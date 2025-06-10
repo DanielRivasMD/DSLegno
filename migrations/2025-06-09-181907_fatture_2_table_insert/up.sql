@@ -30,7 +30,7 @@ END;
 -- When the column "operazione" is updated (from NULL to an integer or from one integer to another),
 -- first purge the old record in tabella_principale (using the key combination: operazione, descrizione, and numero_fattura)
 -- and then import/update the new acquisti record (with 'ACQUISTO').
-CREATE TRIGGER update_acquisti_operazione
+CREATE TRIGGER insert_acquisti_operazione
   AFTER UPDATE ON tabella_acquisti
   WHEN COALESCE(OLD.operazione, 0) <> COALESCE(NEW.operazione, 0)
 BEGIN
@@ -121,7 +121,7 @@ END;
 -- first purge the outdated corresponding record in tabella_principale
 -- (matching on operazione, descrizione, and numero_fattura, with typo = 'VENDUTO'),
 -- then import/update the new vendite record with marker 'VENDUTO'.
-CREATE TRIGGER update_vendite_operazione
+CREATE TRIGGER insert_vendite_operazione
   AFTER UPDATE ON tabella_vendite
   WHEN COALESCE(OLD.operazione, 0) <> COALESCE(NEW.operazione, 0)
 BEGIN
