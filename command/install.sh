@@ -6,6 +6,13 @@
 
 ####################################################################################################
 
+# Write paths to profile
+echo 'export PATH="/opt/homebrew/bin:$PATH"' >> $HOME/.zshrc
+echo 'export PATH="$HOME/.cargo/bin:$PATH"' >> $HOME/.zshrc
+source $HOME/.zshrc
+
+####################################################################################################
+
 # Reload the shell environment so that brew is available in the current session
 eval "$(/opt/homebrew/bin/brew shellenv)"
 
