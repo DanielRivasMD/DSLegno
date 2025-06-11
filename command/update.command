@@ -6,6 +6,11 @@ cd "$HOME/DSLegno/"
 
 ####################################################################################################
 
+# Fetch latest git commit
+git pull
+
+####################################################################################################
+
 # Backup database
 cp "$HOME/DSLegno/dallasanta.db" "$HOME/DSLegno/backup_dallasanta.db"
 
