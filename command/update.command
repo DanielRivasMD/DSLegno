@@ -47,4 +47,4 @@ curl -L "$DOWNLOAD_URL" -o "$HOME/bin/fattura"
 chmod +x "$HOME/bin/fattura"
 echo "Downloaded and installed fattura to $HOME/bin/fattura"
 
-##################################################################################################### Optional: Pause at the end so you can see any messages before the Terminal window closes.
+####################################################################################################
