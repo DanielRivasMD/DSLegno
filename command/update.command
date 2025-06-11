@@ -14,8 +14,8 @@ git pull
 # Backup database
 cp "$HOME/DSLegno/dallasanta.db" "$HOME/DSLegno/backup_dallasanta.db"
 
-mkdir -p "$HOME/Library/Mobile\ Documents/com~apple~CloudDocs/DSLegno"
-cp "$HOME/DSLegno/dallasanta.db" "$HOME/Library/Mobile\ Documents/com~apple~CloudDocs/DSLegno/backup_dallasanta.db"
+mkdir -p "$HOME/Library/Mobile Documents/com~apple~CloudDocs/DSLegno"
+cp "$HOME/DSLegno/dallasanta.db" "$HOME/Library/Mobile Documents/com~apple~CloudDocs/DSLegno/backup_dallasanta.db"
 
 ####################################################################################################
 
