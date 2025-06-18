@@ -1,7 +1,6 @@
 ----------------------------------------------------------------------------------------------------
 
 PRAGMA foreign_keys = OFF;
-BEGIN TRANSACTION;
 
 -- 1) Revert tabella_acquisti to original schema
 CREATE TABLE tabella_acquisti_old (
@@ -153,7 +152,6 @@ FROM tabella_vendite;
 DROP TABLE tabella_vendite;
 ALTER TABLE tabella_vendite_old RENAME TO tabella_vendite;
 
-COMMIT;
 PRAGMA foreign_keys = ON;
 
 ----------------------------------------------------------------------------------------------------

@@ -3,7 +3,6 @@
 -----------------------------------------------------------------------------  
 
 PRAGMA foreign_keys = OFF;
-BEGIN TRANSACTION;
 
 -----------------------------------------------------------------------------  
 -- 1) tabella_acquisti → add attiva TEXT DEFAULT 'si', reorder columns
@@ -167,7 +166,6 @@ FROM tabella_vendite;
 DROP TABLE tabella_vendite;
 ALTER TABLE tabella_vendite_new RENAME TO tabella_vendite;
 
-COMMIT;
 PRAGMA foreign_keys = ON;
 
 ----------------------------------------------------------------------------------------------------
