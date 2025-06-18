@@ -19,11 +19,6 @@ cp "$HOME/DSLegno/dallasanta.db" "$HOME/Library/Mobile Documents/com~apple~Cloud
 
 ####################################################################################################
 
-# Set up database
-diesel migration run
-
-####################################################################################################
-
 # Download the latest release executable ("fattura") from GitHub (DanielRivasMD/DSLegno)
 #
 # This section fetches the latest release from the GitHub API, filters for an asset named "fattura",
@@ -46,5 +41,10 @@ curl -L "$DOWNLOAD_URL" -o "$HOME/bin/fattura"
 # Make sure the downloaded file is executable
 chmod +x "$HOME/bin/fattura"
 echo "Downloaded and installed fattura to $HOME/bin/fattura"
+
+####################################################################################################
+
+# Set up database
+diesel migration run
 
 ####################################################################################################
