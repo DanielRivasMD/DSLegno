@@ -5,6 +5,7 @@ use anyhow::Result as anyResult;
 use diesel::insert_into;
 use diesel::prelude::*;
 use diesel::sqlite::SqliteConnection;
+use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -12,6 +13,21 @@ use diesel::sqlite::SqliteConnection;
 use crate::custom::fattura::*;
 use crate::custom::schema::tabella_acquisti::dsl::*;
 use crate::custom::schema::tabella_vendite::dsl::*;
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+fn establish_test_connection() -> SqliteConnection {
+    SqliteConnection::establish(":memory:").unwrap()
+}
+
+pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!();
+
+fn setup_test_db() -> SqliteConnection {
+    let mut conn = establish_test_connection();
+    conn.run_pending_migrations(MIGRATIONS).unwrap();
+    conn
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
