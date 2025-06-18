@@ -1,7 +1,6 @@
 ----------------------------------------------------------------------------------------------------
 
 PRAGMA foreign_keys = OFF;
-BEGIN;
 
 -- 1) Drop all newly created triggers (keep prevent_duplicate_ & delete_lotto)
 DROP TRIGGER IF EXISTS insert_acquisti_lotto;
@@ -443,7 +442,6 @@ BEGIN
 END;
 
 
-COMMIT;
 PRAGMA foreign_keys = ON;
 
 ----------------------------------------------------------------------------------------------------
