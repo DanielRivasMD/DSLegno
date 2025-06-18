@@ -32,9 +32,13 @@ clap = { version = "4.4.3", features = ["derive"] }
 colored = "2.1.0"
 derive-new = "0.7.0"
 diesel = { version = "2.2.0", features = ["sqlite", "returning_clauses_for_sqlite_3_35"] }
+diesel_migrations = { version = "2.2.0", features = ["sqlite"] }
 dotenvy = "0.15"
 thiserror = "1.0.64"
 xml = "0.8.20"
+
+
+[dev-dependencies]
 
 
 [profile.dev]
