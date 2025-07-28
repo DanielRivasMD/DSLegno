@@ -1,0 +1,13 @@
+- user feedback
+
+==================================================
+src/custom/tag.rs
+  line 8      TODO   add variants to capture address
+src/ds_legno.rs
+  line 16     TODO   add error handlers
+src/utils/sql.rs
+  line 63     TODO   cli arg?
+src/utils/xml_parser.rs
+  line 71     TODO   update data tagger & extractor
+  line 131    TODO   better implementation for adding elements
+==================================================
